@@ -1,0 +1,70 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "PHP_Server",
+            "type": "shell",
+            "command": "php -S 127.0.0.1:8000 -t '${fileDirname}'",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "isBackground": true,
+            "problemMatcher": [
+                {
+                    "pattern": {
+                        "regexp": "_____"
+                    },
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": "PHP",
+                        "endsPattern": "started"
+                    }
+                }
+            ]
+        },
+        {
+            "label": "Five_Server",
+            "type": "shell",
+            "command": "npx -y five-server@latest --port=5500 --open=http://localhost:8000/${fileBasename}",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "isBackground": true,
+            "problemMatcher": [
+                {
+                    "pattern": {
+                        "regexp": "_____"
+                    },
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": "Five Server",
+                        "endsPattern": "localhost:"
+                    }
+                }
+            ]
+        },
+        {
+            "label": "RunServers",
+            "dependsOn": [
+                "PHP_Server",
+                "Five_Server"
+            ]
+        },
+        {
+            "label": "Terminate All Tasks",
+            "command": "echo ${input:terminate}",
+            "type": "shell",
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "terminate",
+            "type": "command",
+            "command": "workbench.action.tasks.terminate",
+            "args": "terminateAll"
+        }
+    ]
+}
