@@ -1,4 +1,5 @@
 <?php
+require_once '../../../includes/config/constants.php';
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         require_once './db_excel.php';

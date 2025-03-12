@@ -15,7 +15,10 @@
 </head>
 
 <body style="display: block;">
-    <?php require_once INCLUDES_DIR . '/templates/header.php'; ?>
+    <?php
+    require_once INCLUDES_DIR . '/templates/header.php';
+    get_header("Homepage");
+    ?>
 
     <main class="container content marco">
         <div class="row">
