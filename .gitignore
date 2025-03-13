@@ -19,7 +19,6 @@ out/
 
 # IDE and editor files
 .idea/
-.vscode/
 *.swp
 *.swo
 .DS_Store
@@ -48,3 +47,8 @@ temp/
 # Composer
 .composer/
 composer.lock
+
+# XLSX
+public/assets/xls/*
+public/assets/xlsx/*
+public/modules/AFI/uploads/
