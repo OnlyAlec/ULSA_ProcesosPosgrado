@@ -384,6 +384,10 @@ function createExcel($students, $programCount)
     }
 
     //* Save File
+    if (!file_exists(XLSX_DIR)) {
+        mkdir(XLSX_DIR, 0777, true);
+    }
+
     $timestamp = date('Y-m-d_H-i-s');
     $outputFile = XLSX_DIR . "/filtered_students_{$timestamp}.xlsx";
     $writer = new PhpOffice\PhpSpreadsheet\Writer\Xlsx($newSpreadsheet);
