@@ -1,0 +1,7 @@
+{
+    "AFI": {
+        "name": "Avisos de Fechas Importantes",
+        "description": "Detalles de llenado de avisos de fechas importantes",
+        "icon": "fas fa-calendar-alt"
+    }
+}
