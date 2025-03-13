@@ -42,7 +42,7 @@ try {
                 if (!is_dir($uploadDir))
                     mkdir($uploadDir, 0777, true);
 
-                if (!move_uploaded_file($fileTmpPath1, "$uploadDir$fileName1") && !move_uploaded_file($fileTmpPath2, "$uploadDir$fileName2"))
+                if (!move_uploaded_file($fileTmpPath1, "$uploadDir$fileName1") || !move_uploaded_file($fileTmpPath2, "$uploadDir$fileName2"))
                     throw new RuntimeException('Error uploading file.');
 
                 $res = process_multiple_excels($uploadDir, $fileName1, $fileName2);

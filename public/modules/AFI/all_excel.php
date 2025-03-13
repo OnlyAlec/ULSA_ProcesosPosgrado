@@ -18,7 +18,7 @@ function process_multiple_excels($uploadDir, $filePath1, $filePath2)
 
     try {
         $studentsForms    = processExcel("$uploadDir$filePath1");
-        $studentsAll      = processAllStudentsExcel("$uploadDir$filePath2");
+        $studentsAll      = processAlumniExcel("$uploadDir$filePath2");
         $filteredStudents = compareStudents($studentsForms, $studentsAll);
         $programCount     = getProgramCount($studentsAll, $filteredStudents);
         $outputFile       = createExcel($filteredStudents, $programCount);
@@ -48,7 +48,7 @@ function process_multiple_excels($uploadDir, $filePath1, $filePath2)
     }
 }
 
-function processAllStudentsExcel($filePath)
+function processAlumniExcel($filePath)
 {
     $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
     $reader->setReadDataOnly(true);
@@ -61,7 +61,7 @@ function processAllStudentsExcel($filePath)
         $headerMap[strtolower(trim($cell->getValue()))] = $cell->getColumn();
     }
 
-    if (!_validateExcel($headerMap))
+    if (!_validateAlumniExcel($headerMap))
         throw new RuntimeException('Archivo con estructura invalida.');
 
     //^ Obtener datos y pasar a clase
@@ -71,20 +71,23 @@ function processAllStudentsExcel($filePath)
     $nombreColumn    = $headerMap["nombre"];
     $apellidoPColumn = $headerMap["apellido paterno"];
     $apellidoMColumn = $headerMap["apellido materno"];
+    $emailColumn     = $headerMap["correo"]; 
 
     $students = [];
     $dataRows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
     array_shift($dataRows);
     foreach ($dataRows as $row) {
         try {
-            $students[] = new Student(
+            $student = new Student(
                 strtolower(trim($row[$nombreColumn])),
                 strtolower(trim($row[$apellidoMColumn])),
                 strtolower(trim($row[$apellidoPColumn])),
                 $row[$claveColumn],
                 $row[$tipoColumn],
-                $row[$areaColumn]
+                $row[$areaColumn],
             );
+            $student->setEmail($row[$emailColumn]);
+            $students[] = $student;
         } catch (InvalidArgumentException $e) {
             ErrorList::add($e->getMessage());
             continue;
@@ -92,4 +95,23 @@ function processAllStudentsExcel($filePath)
     }
 
     return $students;
+}
+
+function _validateAlumniExcel($headerMap)
+{
+    $requiredHeaders = [
+        "clave ulsa",
+        "apellido paterno",
+        "apellido materno",
+        "nombre",
+        "tipo de programa",
+        "Área de programa"
+    ];
+
+    foreach ($requiredHeaders as $header) {
+        if (!isset($headerMap[$header])) {
+            throw new RuntimeException("Columna requerida no encontrada: $header");
+        }
+    }
+    return true;
 }
