@@ -79,9 +79,8 @@
             ?>
         </div>
 
-    </main><!-- ./container -->
-
-    <?php require_once INCLUDES_DIR . '/templates/footer.php'; ?>
+    </main>
+    <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
     <script src="<?= ASSETS_PATH ?>/js/jquery.min.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/bootstrap/popper.min.js"></script>

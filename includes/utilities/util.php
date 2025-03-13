@@ -113,24 +113,22 @@ function getIniciales($materia)
     return strtoupper($ret);
 }
 // ------- Temportal Helpers -------
-define('APP_ROOT', '/kashi-app');
-
-function getAssetUrl($path)
+/**
+ * Converts a file system path to a URL path
+ * @param string $filePath The file system path to convert
+ * @return string The URL path
+ */
+function filePathToUrl($filePath)
 {
-    // Get the document root and script path
-    $docRoot = $_SERVER['DOCUMENT_ROOT'];
-    $scriptPath = $_SERVER['SCRIPT_FILENAME'];
+    $filePath = realpath($filePath);
+    if (!file_exists($filePath))
+        return "#";
 
-    // Calculate the app root directory
-    $appRoot = APP_ROOT; // Hard-coded app root path
+    $docRoot = realpath($_SERVER['DOCUMENT_ROOT']);
 
-    // Calculate relative path from current script to app root
-    $currentDir = dirname($scriptPath);
-    $relativePath = str_replace($docRoot . $appRoot, '', $currentDir);
-    $depth = substr_count($relativePath, '/');
-
-    // Build path prefix (../ for each directory level)
-    $prefix = $depth > 0 ? str_repeat('../', $depth) : './';
-
-    return $prefix . ltrim($path, '/');
+    if (strpos($filePath, $docRoot) === 0) {
+        $relativePath = str_replace('\\', '/', substr($filePath, strlen($docRoot)));
+        return BASE_URL . $relativePath;
+    }
+    return "#";
 }

@@ -1,5 +1,7 @@
 <?php
 require_once '../../../includes/config/constants.php';
+ob_start();
+
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         require_once './db_excel.php';
@@ -13,6 +15,7 @@ try {
                 throw new RuntimeException('Error uploading file.');
 
             $fileTmpPath = $_FILES['excelFile']['tmp_name'];
+            $fileName = str_replace(' ', '_', htmlspecialchars($_FILES['excelFile']['name'], ENT_QUOTES, 'UTF-8'));
             $ext = strtolower(pathinfo($_FILES['excelFile']['name'], PATHINFO_EXTENSION));
 
             if (!in_array($ext, $allowedExtensions))
@@ -21,11 +24,10 @@ try {
             if (!is_dir($uploadDir))
                 mkdir($uploadDir, 0777, true);
 
-            if (!move_uploaded_file($fileTmpPath, $uploadDir))
+            if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName"))
                 throw new RuntimeException('Error uploading file.');
 
-            $res = process_excel_db($uploadDir, $fileTmpPath);
-
+            $res = init_process("$uploadDir$fileName");
         } else if (isset($_FILES['excelForms']) && isset($_FILES['excelAlumni'])) {
             $fileTmpPath1 = $_FILES['excelForms']['tmp_name'];
             $fileTmpPath2 = $_FILES['excelAlumni']['tmp_name'];
@@ -44,15 +46,21 @@ try {
                 throw new RuntimeException('Invalid file type.');
         }
 
-        return json_encode($res);
+        header('Content-Type: application/json');
+        echo json_encode($res);
+        exit;
     }
-} catch (\RuntimeException $e) {
+} catch (RuntimeException $e) {
     $response = [
         'success' => false,
         'message' => $e->getMessage(),
     ];
-    return json_encode($response);
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit;
 }
+ob_end_flush();
 ?>
 <!DOCTYPE html>
 
@@ -67,39 +75,70 @@ get_head("AFI");
     ?>
 
     <main class="container content marco">
-        <h1>Excel y base de datos:</h1>
-        <p>Al usar este método, solamente sera requerido el excel que obtiene de <b>Microsoft Forms</b>.</p>
-        <form action="" method="post" enctype="multipart/form-data" class="mt-4">
-            <div class="mb-3">
-                <label for="excelFile" class="form-label">Subir archivo Excel de Microsoft Forms:</label>
-                <input type="file" class="form-control form-control-lg" id="excelFile" name="excelFile"
-                    accept=".xls,.xlsx" required>
-                <div id="emailHelp" class="form-text">Los datos se guardaran en la base de datos.</div>
+        <div>
+            <h1>Excel y base de datos:</h1>
+            <p>Al usar este método, solamente sera requerido el excel que obtiene de <b>Microsoft Forms</b>.</p>
+            <form action="" method="post" enctype="multipart/form-data" class="mt-4">
+                <div class="mb-3">
+                    <label for="excelFile" class="form-label">Subir archivo Excel de Microsoft Forms:</label>
+                    <input type="file" class="form-control form-control-lg" id="excelFile" name="excelFile"
+                        accept=".xls,.xlsx" required>
+                    <div id="emailHelp" class="form-text">Los datos se guardaran en la base de datos.</div>
+                </div>
+                <button type="submit" class="btn btn-primary">Obtener alumnos faltantes</button>
+            </form>
+            <br>
+            <hr>
+            <br>
+            <h1>Unicamente excel's:</h1>
+            <p>Al usar este método, son requeridos <b>2 archivos excel</b>: el que obtiene de <b>Microsoft Forms</b> y
+                el de
+                la <b>lista de alumnos completa</b>.</p>
+            <form action="" method="post" enctype="multipart/form-data" class="mt-4">
+                <div class="mb-3">
+                    <label for="excelForms" class="form-label">Subir archivo Excel de Microsoft Forms:</label>
+                    <input type="file" class="form-control form-control-lg" id="excelForms" name="excelForms"
+                        accept=".xls,.xlsx" required>
+                </div>
+                <div class="mb-3">
+                    <label for="excelAlumni" class="form-label">Subir archivo Excel de alumonos:</label>
+                    <input type="file" class="form-control form-control-lg" id="excelAlumni" name="excelAlumni"
+                        accept=".xls,.xlsx" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Obtener alumnos faltantes</button>
+            </form>
+        </div>
+        <div style="display:none">
+            <br>
+            <hr>
+            <br>
+            <h1>Alumnos faltantes</h1>
+            <div>
+                <h3>
+                    Total de registros en BD:
+                    <p id="totalDB"></p>
+                </h3>
+                <h3>
+                    Listado de estudiantes filtrados:
+                    <p id="totalFiltered"></p>
+                </h3>
             </div>
-            <button type="submit" class="btn btn-primary">Obtener alumnos faltantes</button>
-        </form>
-        <br>
-        <hr>
-        <br>
-        <h1>Unicamente excel's:</h1>
-        <p>Al usar este método, son requeridos <b>2 archivos excel</b>: el que obtiene de <b>Microsoft Forms</b> y el de
-            la <b>lista de alumnos completa</b>.</p>
-        <form action="" method="post" enctype="multipart/form-data" class="mt-4">
-            <div class="mb-3">
-                <label for="excelForms" class="form-label">Subir archivo Excel de Microsoft Forms:</label>
-                <input type="file" class="form-control form-control-lg" id="excelForms" name="excelForms"
-                    accept=".xls,.xlsx" required>
-            </div>
-            <div class="mb-3">
-                <label for="excelAlumni" class="form-label">Subir archivo Excel de alumonos:</label>
-                <input type="file" class="form-control form-control-lg" id="excelAlumni" name="excelAlumni"
-                    accept=".xls,.xlsx" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Obtener alumnos faltantes</button>
-        </form>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Nombre Completo</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col">Área</th>
+                        <th scope="col">Correo</th>
+                    </tr>
+                </thead>
+                <tbody id="missingStudents">
+                </tbody>
+            </table>
+        </div>
     </main>
 
-    <?php require_once INCLUDES_DIR . '/templates/footer.php'; ?>
+    <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
     <script src="<?= ASSETS_PATH ?>/js/jquery.min.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/bootstrap/popper.min.js"></script>
