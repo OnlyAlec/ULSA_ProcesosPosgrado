@@ -127,7 +127,7 @@ get_head("AFI");
                     <p id="totalFiltered"></p>
                 </h3>
             </div>
-            <table class="table">
+            <table id="tableStudents" class="table">
                 <thead>
                     <tr>
                         <th scope="col">Nombre Completo</th>
@@ -139,11 +139,20 @@ get_head("AFI");
                 <tbody id="missingStudents">
                 </tbody>
             </table>
+
+            <div id="graphContainer">
+                <h1 id="maestriaTitle">Gráfica para Maestrías</h1>
+                <div id="maestriaGraph"></div>
+                <h1 id="especialidadTitle">Gráfica para Especialidades</h1>
+                <div id="especialidadGraph"></div>
+            </div>
+            
         </div>
     </main>
 
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/jquery.min.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/bootstrap/popper.min.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/bootstrap/bootstrap.min.js"></script>
