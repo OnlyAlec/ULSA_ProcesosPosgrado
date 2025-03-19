@@ -355,31 +355,31 @@ function createExcel($students, $programCount)
     $sheet2 = $newSpreadsheet->createSheet();
     $sheet2->setTitle('Conteos por Programa');
     $sheet2->setCellValue('A1', 'Programa');
-    $sheet2->setCellValue('A2', 'Conteo Parcial');
-    $sheet2->setCellValue('A3', 'Conteo Total');
-    $sheet2->setCellValue('A4', 'Porcentaje');
+    $sheet2->setCellValue('B1', 'Conteo Parcial');
+    $sheet2->setCellValue('C1', 'Conteo Total');
+    $sheet2->setCellValue('D1', 'Porcentaje');
 
     //* Format
-    $sheet2->getStyle('A1:A4')->getFont()->setBold(true);
+    $sheet2->getStyle('A1:D1')->getFont()->setBold(true);
 
-    $colIndex = 2;
+    $rowIndex = 2;
     foreach ($programCount['programs'] as $program) {
-        $columnLetter = Coordinate::stringFromColumnIndex($colIndex);
-        $sheet2->setCellValue("{$columnLetter}1", $program);
+        
+        $sheet2->setCellValue("A{$rowIndex}", $program);
 
         $partial = $programCount['filtered'][$program] ?? 0;
         $total = $programCount['total'][$program] ?? 0;
         $percentage = ($total > 0) ? ($partial / $total) * 100 : 0;
 
-        $sheet2->setCellValue("{$columnLetter}2", $partial);
-        $sheet2->setCellValue("{$columnLetter}3", $total);
-        $sheet2->setCellValue("{$columnLetter}4", round($percentage, 2) . '%');
+        $sheet2->setCellValue("B{$rowIndex}", $partial);
+        $sheet2->setCellValue("C{$rowIndex}", $total);
+        $sheet2->setCellValue("D{$rowIndex}", round($percentage, 2) . '%');
 
-        $colIndex++;
+        $rowIndex++;
     }
 
     //* Format
-    for ($i = 1; $i <= $colIndex; $i++) {
+    for ($i = 1; $i <= 4; $i++) {
         $sheet2->getColumnDimensionByColumn($i)->setAutoSize(true);
     }
 

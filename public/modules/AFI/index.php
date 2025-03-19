@@ -31,6 +31,10 @@ try {
         } else if (isset($_FILES['excelForms']) && isset($_FILES['excelAlumni'])) {
             $fileTmpPath1 = $_FILES['excelForms']['tmp_name'];
             $fileTmpPath2 = $_FILES['excelAlumni']['tmp_name'];
+
+            $fileName1 = str_replace(' ', '_', htmlspecialchars($_FILES['excelForms']['name'], ENT_QUOTES, 'UTF-8'));
+            $fileName2 = str_replace(' ', '_', htmlspecialchars($_FILES['excelAlumni']['name'], ENT_QUOTES, 'UTF-8'));
+
             $ext1 = strtolower(pathinfo($_FILES['excelForms']['name'], PATHINFO_EXTENSION));
             $ext2 = strtolower(pathinfo($_FILES['excelAlumni']['name'], PATHINFO_EXTENSION));
 
@@ -38,10 +42,10 @@ try {
                 if (!is_dir($uploadDir))
                     mkdir($uploadDir, 0777, true);
 
-                if (!move_uploaded_file($fileTmpPath1, $uploadDir) && !move_uploaded_file($fileTmpPath2, $uploadDir))
+                if (!move_uploaded_file($fileTmpPath1, "$uploadDir$fileName1") || !move_uploaded_file($fileTmpPath2, "$uploadDir$fileName2"))
                     throw new RuntimeException('Error uploading file.');
 
-                $res = process_multiple_excels($uploadDir, $fileTmpPath1, $fileTmpPath2);
+                $res = process_multiple_excels($uploadDir, $fileName1, $fileName2);
             } else
                 throw new RuntimeException('Invalid file type.');
         }
@@ -90,7 +94,7 @@ get_head("AFI");
             <br>
             <hr>
             <br>
-            <h1>Unicamente excel's:</h1>
+            <h1>Únicamente excel's:</h1>
             <p>Al usar este método, son requeridos <b>2 archivos excel</b>: el que obtiene de <b>Microsoft Forms</b> y
                 el de
                 la <b>lista de alumnos completa</b>.</p>
@@ -101,7 +105,7 @@ get_head("AFI");
                         accept=".xls,.xlsx" required>
                 </div>
                 <div class="mb-3">
-                    <label for="excelAlumni" class="form-label">Subir archivo Excel de alumonos:</label>
+                    <label for="excelAlumni" class="form-label">Subir archivo Excel de alumnos:</label>
                     <input type="file" class="form-control form-control-lg" id="excelAlumni" name="excelAlumni"
                         accept=".xls,.xlsx" required>
                 </div>
