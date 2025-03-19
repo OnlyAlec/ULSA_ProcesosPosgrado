@@ -40,13 +40,19 @@ $(document).ready(function () {
                                     <i class="fas fa-download"></i> Descargar Excel
                                 </a>
                             </div>`;
-                            tableContainer.append(downloadLink);
+                            $("#tableStudents").after(downloadLink);
                         }
 
                         if (response.data.totalDB && response.data.totalFiltered) {
                             $('#totalDB').text(response.data.totalDB)
                             $('#totalFiltered').text(response.data.totalFiltered)
                         }
+
+                        /*Generate graphs*/
+                        if(response.data.graphData){
+                            generateCharts(response.data.graphData);
+                        }
+
                     } else {
                         // No students found
                         $('#missingStudents').append('<tr><td colspan="4" class="text-center">No se encontraron alumnos faltantes</td></tr>');
@@ -72,3 +78,60 @@ $(document).ready(function () {
         pos.before(newDiv);
     }
 });
+
+function generateCharts (graphData) {
+    const especialidadLabels = Object.keys(graphData.especialidad); 
+    const especialidadValues = Object.values(graphData.especialidad);
+
+    const maestriaLabels = Object.keys(graphData.maestria);
+    const maestriaValues = Object.values(graphData.maestria);
+
+    $('#especialidadGraph').remove(); 
+    $('#maestriaGraph').remove();
+    $('#especialidadTitle').after('<canvas id="especialidadGraph"></canvas>'); 
+    $('#maestriaTitle').after('<canvas id="maestriaGraph"></canvas>');
+
+    /* --> Especialidades */
+    new Chart(document.getElementById("especialidadGraph"), {
+        type: "bar",
+        data: {
+            labels: especialidadLabels,
+            datasets: [{
+                label: "Alumnos sin firmar",
+                data: especialidadValues,
+                backgroundColor: "rgba(255, 99, 132, 0.5)",
+                borderColor: "rgba(255, 99, 132, 1)",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { 
+                x: { title: { display: true, text: "Programas" }, }, 
+                y: { beginAtZero: true, title: { display: true, text: "Cantidad de alumnos sin firmar" } } 
+            }
+        }
+    });
+
+    /* --> Maestrías */
+    new Chart(document.getElementById("maestriaGraph"), {
+        type: "bar",
+        data: {
+            labels: maestriaLabels,
+            datasets: [{
+                label: "Alumnos sin firmar",
+                data: maestriaValues,
+                backgroundColor: "rgba(54, 162, 235, 0.5)",
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { 
+                x: { title: { display: true, text: "Programas" } }, 
+                y: { beginAtZero: true, title: { display: true, text: "Cantidad de alumnos sin firmar" } } 
+            }
+        }
+    });
+}
