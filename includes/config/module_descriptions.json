@@ -3,5 +3,10 @@
         "name": "Avisos de Fechas Importantes",
         "description": "Detalles de llenado de avisos de fechas importantes",
         "icon": "fas fa-calendar-alt"
+    },
+    "SED": {
+        "name": "Seguimiento de Evaluación Docente",
+        "description": "Gestión de alumnos que han contestado la evaluación docente",
+        "icon": "fas fa-calendar-alt"
     }
 }
