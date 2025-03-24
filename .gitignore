@@ -52,3 +52,4 @@ composer.lock
 public/assets/xls/*
 public/assets/xlsx/*
 public/modules/AFI/uploads/
+public/modules/SED/uploads/

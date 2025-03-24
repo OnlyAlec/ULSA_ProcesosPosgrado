@@ -7,6 +7,6 @@
     "SED": {
         "name": "Seguimiento de Evaluación Docente",
         "description": "Gestión de alumnos que han contestado la evaluación docente",
-        "icon": "fas fa-calendar-alt"
+        "icon": "fas fa-clipboard"
     }
 }
