@@ -13,7 +13,7 @@ jobs:
       - name: Run PHP CS Fixer
         uses: docker://oskarstark/php-cs-fixer-ga
         with:
-          args: --allow-risky=yes
+          args: fix --allow-risky=yes --config=.php-cs-fixer.dist.php .
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v2.3.0
@@ -34,7 +34,7 @@ jobs:
         run: yarn add prettier --dev --exact
 
       - name: Run Prettier CSS
-        run: prettier --write 'public/assets/**/*.{css,js}'
+        run: yarn exec prettier --check --write 'public/assets/**/*.{css,js}'
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v2.3.0
