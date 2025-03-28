@@ -3,24 +3,20 @@
 class Student
 {
     private string $firstName;
-    private string $maternalSurname;
-    private string $paternalSurname;
+    private string $lastName;
     private int $ulsaID;
-    private string $typeDesc;
-    private string $area;
+    private string $carrer;
     private string $email;
     private bool $sed;
 
-    public function __construct($firstName, $maternalSurname, $paternalSurname, $ulsaID, $typeDesc, $area)
+    public function __construct($firstName, $lastName, $ulsaID, $carrer)
     {
         $this->firstName = $firstName;
-        $this->maternalSurname = $maternalSurname;
-        $this->paternalSurname = $paternalSurname;
-        $this->typeDesc = $typeDesc;
-        $this->area = $area;
+        $this->lastName = $lastName;
+        $this->carrer = $carrer;
         $validatedId = $this->validateUlsaId($ulsaID);
         if ($validatedId === -1) {
-            throw new InvalidArgumentException("Invalid ULSA ID ($ulsaID) - $firstName $maternalSurname");
+            throw new InvalidArgumentException("Invalid ULSA ID ($ulsaID) - $firstName $lastName");
         }
         $this->ulsaID = $validatedId;
     }
@@ -44,14 +40,9 @@ class Student
         return $this->firstName;
     }
 
-    public function getApm()
+    public function getLastName()
     {
-        return $this->maternalSurname;
-    }
-
-    public function getApp()
-    {
-        return $this->paternalSurname;
+        return $this->lastName;
     }
 
     public function getUlsaId()
@@ -59,19 +50,14 @@ class Student
         return $this->ulsaID;
     }
 
-    public function getTypeDesc()
+    public function getCarrer()
     {
-        return $this->typeDesc;
+        return $this->carrer;
     }
 
     public function setTypeDesc($typeDesc)
     {
         $this->typeDesc = $typeDesc;
-    }
-
-    public function getArea()
-    {
-        return $this->area;
     }
 
     public function setArea($area)

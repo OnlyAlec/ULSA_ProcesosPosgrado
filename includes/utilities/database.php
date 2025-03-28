@@ -28,18 +28,15 @@ function getStudents()
 {
     $studentsDB = [];
     $db = getDatabaseConnection();
-    $query = "SELECT LOWER(paternal_surname) AS paternal_surname, 
-                LOWER(maternal_surname) AS maternal_surname, 
-                LOWER(first_name) AS first_name, 
-                ulsa_id, 
-                LOWER(TRIM(type_desc)) AS type_desc, 
-                LOWER(TRIM(area)) AS area, 
-                ulsa_email, 
-                sed
-              FROM student 
-              JOIN contact ON student.contact_id = contact.id 
-              JOIN name ON student.name_id = name.id 
-              JOIN program ON student.program_id = program.id";
+    $query = "SELECT LOWER(n.last_name) AS last_name, 
+                LOWER(n.first_name) AS first_name, 
+                s.ulsa_id, 
+                LOWER(TRIM(p.career)) AS career, 
+                s.email AS ulsa_email, 
+                s.sed
+              FROM student s
+              JOIN name n ON s.name_id = n.id 
+              JOIN program p ON s.program_id = p.id";
     $stmt = $db->prepare($query);
     $stmt->execute();
 
@@ -47,11 +44,9 @@ function getStudents()
         try {
             $student = new Student(
                 $row['first_name'],
-                $row['maternal_surname'],
-                $row['paternal_surname'],
+                $row['last_name'],
                 $row['ulsa_id'],
-                $row['type_desc'],
-                $row['area'],
+                $row['career'],
             );
             $student->setEmail($row['ulsa_email']);
             $student->setSed($row['sed']);
@@ -69,12 +64,12 @@ function getMastersPrograms(): array
     $programsM = [];
     $db = getDatabaseConnection();
 
-    $query = "SELECT DISTINCT area FROM program WHERE LOWER(type_desc) = 'maestría'";
+    $query = "SELECT DISTINCT career FROM program WHERE LOWER(career) LIKE 'maestría%'";
     $stmt = $db->prepare($query);
     $stmt->execute();
 
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $programsM[] = ucfirst(strtoupper($row['area'])); 
+        $programsM[] = ucfirst(strtoupper($row['career']));
     }
     return $programsM;
 }
@@ -84,12 +79,12 @@ function getSpecialtyPrograms(): array
     $programsS = [];
     $db = getDatabaseConnection();
 
-    $query = "SELECT DISTINCT area FROM program WHERE LOWER(type_desc) = 'especialidad'";
+    $query = "SELECT DISTINCT career FROM program WHERE LOWER(career) LIKE 'especialidad%'";
     $stmt = $db->prepare($query);
     $stmt->execute();
 
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $programsS[] = ucfirst(strtoupper($row['area'])); 
+        $programsS[] = ucfirst(strtoupper($row['career']));
     }
     return $programsS;
 }
