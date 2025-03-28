@@ -65,7 +65,7 @@ get_head("SED");
 <main class="container content marco">
         <div>
             <div class="d-flex justify-content-between align-items-center">
-                <h1 class="mb-2">Carga de concentrado de alumnos en Excel:</h1>
+                <h1 class="mb-2">Carga del concentrado SED en Excel:</h1>
                 <a href="../../index.php" class="btn btn-outline-primary">Regresar</a>
             </div>
             <br>
@@ -73,7 +73,7 @@ get_head("SED");
                 <div class="mb-3">
                     <h4 for="sedExcelFile" class="form-label">Subir archivo Excel:</h4>
                     <input type="file" class="form-control form-control-lg w-100 pb-5 pl-2" id="sedExcelFile" name="sedExcelFile" accept=".xls,.xlsx" required>
-                    <div id="emailHelp" class="form-text d-flex justify-content-end">Los datos se actualizarán en la base de datos.</div>
+                    <div id="emailHelp" class="form-text d-flex justify-content-end">Los valores de Estatus se actualizarán en la base de datos.</div>
                 </div>
                 
                 <div class="d-flex align-items-center">
@@ -84,15 +84,15 @@ get_head("SED");
                 <div class="mb-3">
                     <div class="row align-items-center mb-2">
                         <label class="col-2" for="claveUlsa" class="form-label me-2">Clave Ulsa:</label>
-                        <input type="text" class="col-2 form-control w-auto" id="claveUlsa" name="claveUlsa" placeholder="Columna" maxlength="2">
+                        <input type="text" class="col-2 form-control w-auto" id="claveUlsa" name="claveUlsa" placeholder="Columna" maxlength="1">
                     </div>
                     <div class="row align-items-center mb-2">
                         <label class="col-2" for="nombre" class="form-label me-2">Nombre:</label>
-                        <input type="text" class="col-2 form-control w-auto" id="nombre" name="nombre" placeholder="Columna" maxlength="2">
+                        <input type="text" class="col-2 form-control w-auto" id="nombre" name="nombre" placeholder="Columna" maxlength="1">
                     </div>
                     <div class="row align-items-center">
                         <label class="col-2" for="estatus" class="form-label me-2">Estatus:</label>
-                        <input type="text" class="col-2 form-control w-auto" id="estatus" name="estatus" placeholder="Columna" maxlength="2">
+                        <input type="text" class="col-2 form-control w-auto" id="estatus" name="estatus" placeholder="Columna" maxlength="1">
                     </div>
                 </div>
                 
