@@ -5,15 +5,16 @@ $('#programType').on("change", function () {
     const rows = tbody.find('tr');
     rows.show();
 
+    $(".studentCheckbox").prop("checked", false);
+    $("#confirmChanges").prop("disabled", true);
+    $("#selectedCount").text("0"); 
+    $("#selectAll").prop("checked", false);
+
     $.ajax({
         url: '',
         type: 'POST',
         data: { action: selectedOption },
         success: function (response) {
-            // if (!response.success) {
-            //     displayMessage($('.sectionsAFI'), response.message, 'error');
-            //     return;
-            // }
             if (!Array.isArray(response))
                 response = Object.values(response);
 
@@ -51,13 +52,42 @@ $('#programArea').on("change", function () {
     const table = $('#studentsTable');
     const tbody = table.find('tbody');
     const rows = tbody.find('tr');
+
+    $(".studentCheckbox").prop("checked", false);
+    $("#confirmChanges").prop("disabled", true);
+    $("#selectedCount").text("0"); 
+    $("#selectAll").prop("checked", false);
+
+    let selectedType = $('#programType').val();
+    if (selectedType === 'getMasters') {
+        selectedType = "MAESTRÍA";
+    } else if (selectedType === 'getSpecialty') {
+        selectedType = "ESPECIALIDAD";
+    } else {
+        selectedType = ""; 
+    }
+
     rows.each(function () {
         const row = $(this);
         const area = row.data("carrer").toUpperCase();
-        if (selectedOption === 'Seleccione un área primero' || area === selectedOption.toUpperCase()) {
-            row.show();
-        } else {
-            row.hide();
+
+        const type = area.split(" ")[0].toUpperCase();
+
+        if (selectedOption === '' || selectedOption === 'Seleccione un tipo de programa primero') {
+            if (selectedType != '' && type === selectedType.toUpperCase()) {
+                row.show();
+            }
+            else {
+                row.hide();
+            }
+        }
+        else {
+            if (area === selectedOption.toUpperCase()) {
+                row.show();
+            }
+            else {
+                row.hide();
+            }
         }
     });
 });
@@ -65,15 +95,17 @@ $('#programArea').on("change", function () {
 $(".studentCheckbox").on("change", function () {
     const checked = $(this).is(":checked");
     const row = $(this).closest("tr");
+    
+    const selectedCount = $(".studentCheckbox:checked").length;
+    $("#selectedCount").text(selectedCount);
+    
     if (checked) {
         row.addClass("selected");
         $("#confirmChanges").prop("disabled", false);
-        $("#cancelChanges").prop("disabled", false);
     } else {
         row.removeClass("selected");
-        if ($(".studentCheckbox:checked").length === 0) {
+        if (selectedCount === 0) {
             $("#confirmChanges").prop("disabled", true);
-            $("#cancelChanges").prop("disabled", true);
         }
     }
 });
@@ -82,4 +114,78 @@ $("#selectAll").on("change", function () {
     const checked = $(this).is(":checked");
     $(".studentCheckbox").prop("checked", checked);
     $(".studentCheckbox").trigger("change");
+});
+
+$("#confirmChanges").on("click", function () {
+    let selectedStudents = [];
+
+    $(".studentCheckbox:checked").each(function () {
+        let studentID = $(this).closest("tr").find(".changeSED").data("student-id");
+        if (studentID) 
+            selectedStudents.push(studentID);
+    });
+
+    if (selectedStudents.length === 0) {
+        alert("Selecciona al menos a un estudiante.");
+        return;
+    }
+
+    $.ajax({
+        url: '',
+        type: 'POST',
+        data: { action: "updateSED", studentIDS: selectedStudents },
+        success: function (response) {
+            if (response.success) {
+                alert("EXITO: El estatus SED de los alumnos ha sido actualizado.");
+                
+                $(".studentCheckbox:checked").each(function () {
+                    let btn = $(this).closest("tr").find(".changeSED i");
+                    btn.removeClass("fa-minus-square").addClass("fa-check-square").css("color", "#36b18c");
+                });
+
+                $('#programType').val('');
+                $('#programArea').val('');
+                $("#filterArea").hide();
+
+                $(".studentCheckbox").prop("checked", false);
+                $("tr").removeClass("selected");
+                $("#confirmChanges").prop("disabled", true);
+                $("#selectedCount").text("0"); 
+            }
+            else {
+                alert("ERROR: Error al actualizar el estatus SED de los alumnos.");
+            }
+        },
+        error: function (xhr) {
+            const errorMsg = xhr.responseText || 'Error al procesar la solicitud';
+            displayMessage($('.sectionsAFI'), errorMsg, 'error');
+        }
+    });
+});
+
+$(".changeSED").on("click", function () {
+    let icon = $(this).find("i");
+    let studentID = $(this).data("student-id");
+    let newState = icon.hasClass("fa-minus-square") ? 1 : 0;
+
+    $.ajax({
+        url: '',
+        type: 'POST',
+        data: { action: "updateSingleSED", studentID: studentID, state: newState },
+        success: function (response) {
+            if (response.success) {
+                if (newState) {
+                    icon.removeClass("fa-minus-square").addClass("fa-check-square").css("color", "#36b18c");
+                } else {
+                    icon.removeClass("fa-check-square").addClass("fa-minus-square").css("color", "#dc3545");
+                }
+            } else {
+                alert("ERROR: Error al actualizar el estado SED.");
+            }
+        },
+        error: function (xhr) {
+            const errorMsg = xhr.responseText || 'Error al procesar la solicitud';
+            displayMessage($('.sectionsAFI'), errorMsg, 'error');
+        }
+    });
 });

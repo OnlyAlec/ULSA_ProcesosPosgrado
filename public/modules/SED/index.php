@@ -4,17 +4,82 @@ require_once INCLUDES_DIR . "/utilities/database.php";
 require_once INCLUDES_DIR . "/models/student.php";
 
 ob_start();
-try {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $masters = getMastersPrograms();
-        $specialty = getSpecialtyPrograms();
-        $res = ($_POST['action'] === '') ? array_unique(array_merge($masters, $specialty), SORT_REGULAR) : (($_POST['action'] === 'getMasters') ? $masters : $specialty);
-        header('Content-Type: application/json');
-        echo json_encode($res);
+
+/* AJAX Para actualizar SED 1 Alumno cuando se quiere desmarcar o marcar */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'updateSingleSED') {
+    header('Content-Type: application/json');
+    try {
+        $studentID = $_POST['studentID'] ?? null;
+        $newState = $_POST['state'] ?? null;
+        $db = getDatabaseConnection();
+
+        if (!$studentID || $newState === null) {
+            echo json_encode(["success" => false, "message" => "Datos inválidos."]);
+            exit;
+        }
+
+        if (!$db) {
+            echo json_encode(["success" => false, "message" => "Error de conexión a la base de datos."]);
+            exit;
+        }
+
+        $query = "UPDATE student SET SED = ? WHERE ulsa_id = ?";
+        $stmt = $db->prepare($query);
+        $stmt->execute([$newState, $studentID]);
+
+        echo json_encode(["success" => true, "message" => "Estado SED actualizado correctamente."]);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(["success" => false, "message" => "Error: " . $e->getMessage()]);
         exit;
     }
-} catch (Exception $e) {
-    echo "Error: " . $e->getMessage();
+}
+
+/* AJAX Para actualizar SED N Alumnos al confirmar los cambios */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'updateSED') {
+    header('Content-Type: application/json');
+    try {
+            $students = $_POST['studentIDS'] ?? [];
+            $db = getDatabaseConnection(); 
+
+            if (!is_array($students) || empty($students)) {
+                echo json_encode(["success" => false, "message" => "No se enviaron alumnos."]);
+                exit;
+            }
+            if (!$db) {
+                echo json_encode(["success" => false, "message" => "Error de conexión a la base de datos."]);
+                exit;
+            }
+
+            $query = "UPDATE student SET SED = TRUE WHERE ulsa_id = ?";
+            $stmt = $db->prepare($query);
+
+            foreach ($students as $id) {
+                $stmt->execute([$id]);
+            }
+
+            echo json_encode(["success" => true, "message" => "Estado SED actualizado correctamente."]);
+            exit;
+    } catch (Exception $e) {
+        echo json_encode(["success" => false, "message" => "Error: " . $e->getMessage()]);
+        exit;
+    }
+}
+
+/* AJAX Para traer los programas */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+    try {   
+            $masters = getMastersPrograms();
+            $specialty = getSpecialtyPrograms();
+            
+            $res = ($_POST['action'] === '') ? array_unique(array_merge($masters, $specialty), SORT_REGULAR) : (($_POST['action'] === 'getMasters') ? $masters : $specialty);
+            
+            echo json_encode($res);
+            exit;
+    } catch (Exception $e) {
+        echo "Error: " . $e->getMessage();
+    }
 }
 ?>
 
@@ -30,7 +95,7 @@ get_head("SED");
     get_header("Seguimiento de Evaluación Docente");
     ?>
     <main class="container content marco">
-        <h1 class="text-center">Lista de alumnos:</h1>
+        <h1 class="text-center">Lista de alumnos</h1>
         <div class="row justify-content-end">
             <div class="col-10">
                 <label for="programType">Seleccionar Tipo de Programa:</label>
@@ -55,7 +120,6 @@ get_head("SED");
             </div>
         </div>
 
-        <!-- Tabla de Alumnos -->
         <table class="table table-bordered mt-4" id="studentsTable">
             <thead>
                 <tr>
@@ -73,8 +137,7 @@ get_head("SED");
                     <tr data-carrer="<?= $student->getCarrer() ?>">
                         <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
                         <td><?= htmlspecialchars($student->getUlsaId()) ?></td>
-                        <td><?= htmlspecialchars($student->getName()) . " " . htmlspecialchars($student->getLastName()) ?>
-                        </td>
+                        <td><?= htmlspecialchars($student->getName()) . " " . htmlspecialchars($student->getLastName()) ?></td>
                         <td><?= htmlspecialchars($student->getEmail()) ?></td>
                         <td>
                             <button class="changeSED border-0" data-student-id="<?= $student->getUlsaId() ?>">
@@ -86,9 +149,16 @@ get_head("SED");
             </tbody>
         </table>
 
-        <!-- Botones de Acción -->
-        <button id="confirmChanges" class="btn btn-success w-100" disabled>Confirmar Cambios</button>
+        <div class="d-flex justify-content-between">
+            <button id="confirmChanges" class="btn btn-success w-50" disabled>Confirmar Cambios</button>
+            <button id="generateReport" class="btn btn-danger">Generar Reporte</button>
+        </div>
+
+        <div id="selectedCountContainer">
+            <p style="margin-top:15px; font-size: 20px; font-weight: bold;">Alumnos seleccionados: <span id="selectedCount">0</span></p>
+        </div>
     </main>
+
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
     <script src="<?= ASSETS_PATH ?>/js/jquery.min.js"></script>
