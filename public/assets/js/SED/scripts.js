@@ -16,7 +16,10 @@ $(document).ready(function () {
                 form.find('button').prop('disabled', true);
             },
             success: function (response) {
-                displayMessage(form, "Archivo procesado correctamente");
+                if(response.success) {
+                    displayMessage(form, "Archivo procesado correctamente");
+                    window.location.href = "table.php";
+                }
             },
             error: function (xhr) {
                 const errorMsg = xhr.responseText || 'Error al procesar la solicitud';
