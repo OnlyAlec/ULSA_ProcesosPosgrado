@@ -1,101 +1,10 @@
 <?php
-use \PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
-require_once __DIR__ . '/../../../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
-require_once INCLUDES_DIR . "/utilities/database.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
 require_once INCLUDES_DIR . "/utilities/handleErrors.php";
-
-class Student
-{
-    private string $firstName;
-    private string $maternalSurname;
-    private string $paternalSurname;
-    private int $ulsaID;
-    private string $typeDesc;
-    private string $area;
-    private string $email;
-
-    public function __construct($firstName, $maternalSurname, $paternalSurname, $ulsaID, $typeDesc, $area)
-    {
-        $this->firstName = $firstName;
-        $this->maternalSurname = $maternalSurname;
-        $this->paternalSurname = $paternalSurname;
-        $this->typeDesc = $typeDesc;
-        $this->area = $area;
-        $validatedId = $this->validateUlsaId($ulsaID);
-        if ($validatedId === -1) {
-            throw new InvalidArgumentException("Invalid ULSA ID ($ulsaID) - $firstName $maternalSurname");
-        }
-        $this->ulsaID = $validatedId;
-    }
-
-    private function normalizeUlsaId($ulsaId)
-    {
-        return preg_replace('/^al(\d{6})$/i', '$1', $ulsaId);
-    }
-
-    private function validateUlsaId($ulsa_id)
-    {
-        $ulsa_id = $this->normalizeUlsaId($ulsa_id);
-
-        if (strlen($ulsa_id) == 6)
-            return (int) $ulsa_id;
-        return -1;
-    }
-
-    public function getName()
-    {
-        return $this->firstName;
-    }
-
-    public function getApm()
-    {
-        return $this->maternalSurname;
-    }
-
-    public function getApp()
-    {
-        return $this->paternalSurname;
-    }
-
-    public function getUlsaId()
-    {
-        return $this->ulsaID;
-    }
-
-    public function getTypeDesc()
-    {
-        return $this->typeDesc;
-    }
-
-    public function setTypeDesc($typeDesc)
-    {
-        $this->typeDesc = $typeDesc;
-    }
-
-    public function getArea()
-    {
-        return $this->area;
-    }
-
-    public function setArea($area)
-    {
-        $this->area = $area;
-    }
-
-    public function getEmail()
-    {
-        return $this->email;
-    }
-
-    public function setEmail($email)
-    {
-        $this->email = $email;
-    }
-}
+require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
+require_once INCLUDES_DIR . "/models/student.php";
 
 function init_process($filePath)
 {
@@ -106,8 +15,6 @@ function init_process($filePath)
     $filteredStudents = [];
     $outputFile = null;
     $urloutputFile = null;
-
-    /*¿Esto está bien?*/
     $graphData = null;
 
     try {
@@ -116,33 +23,18 @@ function init_process($filePath)
         $filteredStudents = compareStudents($studentsExcel, $studentsDB);
         $programCount = getProgramCount($studentsDB, $filteredStudents);
         $outputFile = createExcel($filteredStudents, $programCount);
-
-        /*¿Aquí esta bien la llamada a la función?*/
         $graphData = getGraphData($filteredStudents);
 
         $urloutputFile = filePathToUrl($outputFile);
-        $studentsArray = array_map(fn($student) => [
-            'firstName' => $student->getName(),
-            'maternalSurname' => $student->getApm(),
-            'paternalSurname' => $student->getApp(),
-            'ulsaID' => $student->getUlsaId(),
-            'typeDesc' => $student->getTypeDesc(),
-            'area' => $student->getArea(),
-            'email' => $student->getEmail()
-        ], $filteredStudents);
-        return [
-            'success' => true,
-            'data' => [
-                'students' => $studentsArray,
-                'excel' => $urloutputFile,
-                'totalDB' => count($studentsDB),
-                'totalFiltered' => count($studentsArray),
-                
-                /*¿Esto está bien?*/
-                'graphData' => $graphData
-            ],
-            'errors' => ErrorList::getAll()
-        ];
+        $studentsArray = array_map(fn($student) => $student->getJSON(), $filteredStudents);
+
+        return responseOK([
+            'students' => $studentsArray,
+            'excel' => $urloutputFile,
+            'totalDB' => count($studentsDB),
+            'totalFiltered' => count($studentsArray),
+            'graphData' => $graphData
+        ]);
     } catch (RuntimeException $e) {
         throw new RuntimeException($e->getMessage());
     }
@@ -161,8 +53,9 @@ function processExcel($filePath)
         $headerMap[strtolower(trim($cell->getValue()))] = $cell->getColumn();
     }
 
-    if (!_validateExcel($headerMap))
+    if (!_validateExcel($headerMap)) {
         throw new RuntimeException('Archivo con estructura invalida.');
+    }
 
     //^ Obtener datos y pasar a clase
     $claveColumn = $headerMap["clave ulsa (sin al, sólo las 6 cifras)"];
@@ -179,11 +72,10 @@ function processExcel($filePath)
         try {
             $students[] = new Student(
                 strtolower(trim($row[$nombreColumn])),
-                strtolower(trim($row[$apellidoMColumn])),
-                strtolower(trim($row[$apellidoPColumn])),
+                strtolower(trim($row[$apellidoMColumn])) . ' ' . strtolower(trim($row[$apellidoPColumn])),
                 $row[$claveColumn],
-                $row[$tipoColumn],
-                $row[$areaColumn]
+                $row[$tipoColumn] . ' ' . $row[$areaColumn],
+                "",
             );
         } catch (InvalidArgumentException $e) {
             ErrorList::add($e->getMessage());
@@ -213,56 +105,18 @@ function _validateExcel($headerMap)
     return true;
 }
 
-function getStudents()
-{
-    $studentsDB = [];
-    $db = getDatabaseConnection();
-    $query = "SELECT LOWER(paternal_surname) AS paternal_surname, 
-                LOWER(maternal_surname) AS maternal_surname, 
-                LOWER(first_name) AS first_name, 
-                ulsa_id, 
-                LOWER(TRIM(type_desc)) AS type_desc, 
-                LOWER(TRIM(area)) AS area, 
-                ulsa_email 
-              FROM student 
-              JOIN contact ON student.contact_id = contact.id 
-              JOIN name ON student.name_id = name.id 
-              JOIN program ON student.program_id = program.id";
-    $stmt = $db->prepare($query);
-    $stmt->execute();
-
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        try {
-            $student = new Student(
-                $row['first_name'],
-                $row['maternal_surname'],
-                $row['paternal_surname'],
-                $row['ulsa_id'],
-                $row['type_desc'],
-                $row['area'],
-            );
-            $student->setEmail($row['ulsa_email']);
-            $studentsDB[] = $student;
-        } catch (InvalidArgumentException $e) {
-            ErrorList::add($e->getMessage());
-            continue;
-        }
-    }
-    return $studentsDB;
-}
-
 function getProgramCount($db, $filtered)
 {
     $totalCounts = [];
     $filteredCounts = [];
 
     foreach ($db as $student) {
-        $program = $student->getArea();
+        $program = $student->getCarrer();
         $totalCounts[$program] = ($totalCounts[$program] ?? 0) + 1;
     }
 
     foreach ($filtered as $student) {
-        $program = $student->getArea();
+        $program = $student->getCarrer();
         $filteredCounts[$program] = ($filteredCounts[$program] ?? 0) + 1;
     }
 
@@ -285,8 +139,7 @@ function compareStudents($studentsExcel, $studentsDB)
             $excelById[$excelStudent->getUlsaId()] = true;
         } else {
             $nameKey = implode('|', [
-                $excelStudent->getApp(),
-                $excelStudent->getApm(),
+                $excelStudent->getLastName(),
                 $excelStudent->getName()
             ]);
             $excelByName[$nameKey] = true;
@@ -300,8 +153,7 @@ function compareStudents($studentsExcel, $studentsDB)
 
         if (!$existsInExcel) {
             $nameKey = implode('|', [
-                $student->getApp(),
-                $student->getApm(),
+                $student->getLastName(),
                 $student->getName()
             ]);
             $existsInExcel = isset($excelByName[$nameKey]);
@@ -339,22 +191,20 @@ function createExcel($students, $programCount)
 
     $sheet1->fromArray(
         [$headers],
-        NULL,
+        null,
         'A1'
     );
     $dataRows = [];
     foreach ($students as $student) {
         $dataRows[] = [
-            $student->getApp(),
-            $student->getApm(),
+            $student->getLastName(),
             $student->getName(),
             $student->getUlsaId(),
-            $student->getTypeDesc(),
-            $student->getArea(),
+            $student->getCarrer(),
             $student->getEmail()
         ];
     }
-    $sheet1->fromArray($dataRows, NULL, 'A2');
+    $sheet1->fromArray($dataRows, null, 'A2');
 
     //* Format
     foreach (range('A', 'G') as $col) {
@@ -374,7 +224,7 @@ function createExcel($students, $programCount)
 
     $rowIndex = 2;
     foreach ($programCount['programs'] as $program) {
-        
+
         $sheet2->setCellValue("A{$rowIndex}", $program);
 
         $partial = $programCount['filtered'][$program] ?? 0;
@@ -394,12 +244,9 @@ function createExcel($students, $programCount)
     }
 
     //* Add Graphs
-
     $sheet3 = $newSpreadsheet->createSheet();
     $sheet3->setTitle('Gráficas');
     $sheet2->setCellValue('A1', 'Gráficas de ');
-
-    
 
     //* Save File
     if (!file_exists(XLSX_DIR)) {
@@ -414,34 +261,20 @@ function createExcel($students, $programCount)
     return $outputFile;
 }
 
-
-
-
-/*Funcion: getGraphData
-    - Recibe: La lista de estudiantes filtrada.
-    - Envía: La información a graficar para Chart JS.
-    
-    Descripción: En un array guardamos el número de alumnos que no han firmado por tipo de programa y dentro sus áreas.
-        1. Recorrer la lista de los alumnos.
-        2. Obtener por cada alumno su área y tipo.
-        3. Guardar el alumno en especialidad o en maestría según corresponda.
-        4. Dependiente del área del alumno sumamos un 1.
-        5. Retornar el array con la información final a codificar.*/
-function getGraphData ($filteredStudents) {
+function getGraphData($filteredStudents)
+{
     $data = [
-        'maestria' => [],           // --> Aquí se almacenarán los alumnos de Maestría 
-        'especialidad' => []        // --> Aquí se almacenarán los alumnos de Especialidad 
+        'maestria' => [],
+        'especialidad' => []
     ];
 
     foreach ($filteredStudents as $student) {
-        $area = strtolower($student->getArea()); 
-        $tipo = strtolower($student->getTypeDesc()); 
-       
-        if ($tipo === 'maestría') {
-            $data['maestria'][$area] = ($data['maestria'][$area] ?? 0) + 1;
-        } 
-        elseif ($tipo === 'especialidad') {
-            $data['especialidad'][$area] = ($data['especialidad'][$area] ?? 0) + 1;
+        $carrer = strtolower($student->getCarrer());
+
+        if (str_starts_with($carrer, 'maestría')) {
+            $data['maestria'][$carrer] = ($data['maestria'][$carrer] ?? 0) + 1;
+        } elseif (str_starts_with($carrer, 'especialidad')) {
+            $data['especialidad'][$carrer] = ($data['especialidad'][$carrer] ?? 0) + 1;
         }
     }
 

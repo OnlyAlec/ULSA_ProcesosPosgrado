@@ -1,27 +1,27 @@
 <?php
-use \PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
-require_once __DIR__ . '/../../../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
 require_once INCLUDES_DIR . "/utilities/handleErrors.php";
+require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
+require_once INCLUDES_DIR . "/models/student.php";
 
 function process_multiple_excels($uploadDir, $filePath1, $filePath2)
 {
-   ErrorList::clear();
+    ErrorList::clear();
 
-   $outputFile       = null;
-   $studentsAll      = [];
-   $studentsForms    = [];
-   $urloutputFile    = null;
-   $filteredStudents = [];
+    $outputFile = null;
+    $studentsAll = [];
+    $studentsForms = [];
+    $urloutputFile = null;
+    $filteredStudents = [];
 
     try {
-        $studentsForms    = processExcel("$uploadDir$filePath1");
-        $studentsAll      = processAlumniExcel("$uploadDir$filePath2");
+        $studentsForms = processExcel("$uploadDir$filePath1");
+        $studentsAll = processAlumniExcel("$uploadDir$filePath2");
         $filteredStudents = compareStudents($studentsForms, $studentsAll);
-        $programCount     = getProgramCount($studentsAll, $filteredStudents);
-        $outputFile       = createExcel($filteredStudents, $programCount);
+        $programCount = getProgramCount($studentsAll, $filteredStudents);
+        $outputFile = createExcel($filteredStudents, $programCount);
 
         $urloutputFile = filePathToUrl($outputFile);
         $studentsArray = array_map(fn($student) => [
@@ -33,16 +33,12 @@ function process_multiple_excels($uploadDir, $filePath1, $filePath2)
             'area' => $student->getArea(),
             'email' => $student->getEmail()
         ], $filteredStudents);
-        return [
-            'success' => true,
-            'data' => [
-                'students' => $studentsArray,
-                'excel' => $urloutputFile,
-                'totalDB' => count($studentsAll),
-                'totalFiltered' => count($studentsArray)
-            ],
-            'errors' => ErrorList::getAll()
-        ];
+        return responseOK([
+            'students' => $studentsArray,
+            'excel' => $urloutputFile,
+            'totalDB' => count($studentsAll),
+            'totalFiltered' => count($studentsArray)
+        ]);
     } catch (RuntimeException $e) {
         throw new RuntimeException($e->getMessage());
     }
@@ -61,17 +57,18 @@ function processAlumniExcel($filePath)
         $headerMap[strtolower(trim($cell->getValue()))] = $cell->getColumn();
     }
 
-    if (!_validateAlumniExcel($headerMap))
+    if (!_validateAlumniExcel($headerMap)) {
         throw new RuntimeException('Archivo con estructura invalida.');
+    }
 
     //^ Obtener datos y pasar a clase
-    $tipoColumn      = $headerMap["tipo de programa"];
-    $areaColumn      = $headerMap["Área de programa"];
-    $claveColumn     = $headerMap["clave ulsa"];
-    $nombreColumn    = $headerMap["nombre"];
+    $tipoColumn = $headerMap["tipo de programa"];
+    $areaColumn = $headerMap["Área de programa"];
+    $claveColumn = $headerMap["clave ulsa"];
+    $nombreColumn = $headerMap["nombre"];
     $apellidoPColumn = $headerMap["apellido paterno"];
     $apellidoMColumn = $headerMap["apellido materno"];
-    $emailColumn     = $headerMap["correo"]; 
+    $emailColumn = $headerMap["correo"];
 
     $students = [];
     $dataRows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
@@ -80,11 +77,10 @@ function processAlumniExcel($filePath)
         try {
             $student = new Student(
                 strtolower(trim($row[$nombreColumn])),
-                strtolower(trim($row[$apellidoMColumn])),
-                strtolower(trim($row[$apellidoPColumn])),
+                strtolower(trim($row[$apellidoMColumn])) . ' ' . strtolower(trim($row[$apellidoPColumn])),
                 $row[$claveColumn],
-                $row[$tipoColumn],
-                $row[$areaColumn],
+                $row[$tipoColumn] . ' ' . $row[$areaColumn],
+                "",
             );
             $student->setEmail($row[$emailColumn]);
             $students[] = $student;
