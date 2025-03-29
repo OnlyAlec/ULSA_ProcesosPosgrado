@@ -53,3 +53,6 @@ public/assets/xls/*
 public/assets/xlsx/*
 public/modules/AFI/uploads/
 public/modules/SED/uploads/
+
+# Report (Teaching Evaluation)
+public/modules/SED/reports/

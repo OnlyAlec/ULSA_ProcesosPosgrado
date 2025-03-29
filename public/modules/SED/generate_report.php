@@ -26,7 +26,7 @@ if (isset($_POST['students']) && isset($_POST['filename'])) {
 
 function addNewPage($pdf){
        $pdf->AddPage();
-       $pdf->Image(__DIR__ . '/../../../public/assets/img/logo_lasalle.png', 10, 10, 45, 15.3, 'png');
+       $pdf->Image(PUBLIC_DIR . ASSETS_PATH . '/img/logo_lasalle.png', 10, 10, 45, 15.3, 'png');
        $pdf->SetFont('IndivisaSans', '', 15);
        $pdf->Cell(0, 40, 'Reporte de Evaluaciones Docentes', 0, 1, 'R');  
 }
@@ -80,8 +80,6 @@ function generateReport($students, $filename){
     $pdf->AddFont('IndivisaSerif', '', 'IndivisaDisplaySerif-RegularItalic.php');
     $pdf->AddFont('IndivisaTextSans', '', 'IndivisaTextSans-Regular.php');    
 
-
-
     $studentsByEvaluation = separateStudents($students);
     $percentage = round((count($studentsByEvaluation['EVALUATED'])/ count($students))*100, 2);
 
@@ -114,7 +112,7 @@ function generateReport($students, $filename){
     $outputPath = 'reports/' . $filename . '.pdf';
     $pdf->Output('F', $outputPath);
     echo json_encode(['url' => '/modules/SED/reports/' . $filename . '.pdf']);
-
+    
 }
 
 ?>
