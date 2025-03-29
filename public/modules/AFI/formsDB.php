@@ -1,9 +1,9 @@
 <?php
+//! FIXME: Use new structure
 
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
 require_once INCLUDES_DIR . "/utilities/handleErrors.php";
-require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
 require_once INCLUDES_DIR . "/models/student.php";
 
 function init_process($filePath)
@@ -28,13 +28,13 @@ function init_process($filePath)
         $urloutputFile = filePathToUrl($outputFile);
         $studentsArray = array_map(fn($student) => $student->getJSON(), $filteredStudents);
 
-        return responseOK([
+        return [
             'students' => $studentsArray,
             'excel' => $urloutputFile,
             'totalDB' => count($studentsDB),
             'totalFiltered' => count($studentsArray),
             'graphData' => $graphData
-        ]);
+        ];
     } catch (RuntimeException $e) {
         throw new RuntimeException($e->getMessage());
     }

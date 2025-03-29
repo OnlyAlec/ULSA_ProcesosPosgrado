@@ -1,9 +1,9 @@
 <?php
+//! FIXME: Use new structure
 
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
 require_once INCLUDES_DIR . "/utilities/handleErrors.php";
-require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
 require_once INCLUDES_DIR . "/models/student.php";
 
 function process_multiple_excels($uploadDir, $filePath1, $filePath2)
@@ -33,12 +33,12 @@ function process_multiple_excels($uploadDir, $filePath1, $filePath2)
             'area' => $student->getArea(),
             'email' => $student->getEmail()
         ], $filteredStudents);
-        return responseOK([
+        return [
             'students' => $studentsArray,
             'excel' => $urloutputFile,
             'totalDB' => count($studentsAll),
             'totalFiltered' => count($studentsArray)
-        ]);
+        ];
     } catch (RuntimeException $e) {
         throw new RuntimeException($e->getMessage());
     }
