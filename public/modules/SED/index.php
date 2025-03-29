@@ -4,81 +4,32 @@ require_once INCLUDES_DIR . "/utilities/database.php";
 require_once INCLUDES_DIR . "/models/student.php";
 
 ob_start();
+$studentsDB = getStudents();
 
-/* AJAX Para actualizar SED 1 Alumno cuando se quiere desmarcar o marcar */
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'updateSingleSED') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) { 
+    require_once './update_functions.php';
     header('Content-Type: application/json');
-    try {
+
+    if ($_POST['action'] === 'updateSingleSED') {
         $studentID = $_POST['studentID'] ?? null;
         $newState = $_POST['state'] ?? null;
-        $db = getDatabaseConnection();
 
-        if (!$studentID || $newState === null) {
-            echo json_encode(["success" => false, "message" => "Datos inválidos."]);
-            exit;
-        }
-
-        if (!$db) {
-            echo json_encode(["success" => false, "message" => "Error de conexión a la base de datos."]);
-            exit;
-        }
-
-        $query = "UPDATE student SET SED = ? WHERE ulsa_id = ?";
-        $stmt = $db->prepare($query);
-        $stmt->execute([$newState, $studentID]);
-
-        echo json_encode(["success" => true, "message" => "Estado SED actualizado correctamente."]);
-        exit;
-    } catch (Exception $e) {
-        echo json_encode(["success" => false, "message" => "Error: " . $e->getMessage()]);
+        $response = updateSingleSED($studentID, $newState);
+        echo json_encode($response);
         exit;
     }
-}
 
-/* AJAX Para actualizar SED N Alumnos al confirmar los cambios */
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'updateSED') {
-    header('Content-Type: application/json');
-    try {
-            $students = $_POST['studentIDS'] ?? [];
-            $db = getDatabaseConnection(); 
-
-            if (!is_array($students) || empty($students)) {
-                echo json_encode(["success" => false, "message" => "No se enviaron alumnos."]);
-                exit;
-            }
-            if (!$db) {
-                echo json_encode(["success" => false, "message" => "Error de conexión a la base de datos."]);
-                exit;
-            }
-
-            $query = "UPDATE student SET SED = TRUE WHERE ulsa_id = ?";
-            $stmt = $db->prepare($query);
-
-            foreach ($students as $id) {
-                $stmt->execute([$id]);
-            }
-
-            echo json_encode(["success" => true, "message" => "Estado SED actualizado correctamente."]);
-            exit;
-    } catch (Exception $e) {
-        echo json_encode(["success" => false, "message" => "Error: " . $e->getMessage()]);
+    if ($_POST['action'] === 'updateSED') {
+        $studentIDs = $_POST['studentIDS'] ?? [];
+        $response = updateSelectedSED($studentIDs);
+        echo json_encode($response);
         exit;
     }
-}
 
-/* AJAX Para traer los programas */
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json');
-    try {   
-            $masters = getMastersPrograms();
-            $specialty = getSpecialtyPrograms();
-            
-            $res = ($_POST['action'] === '') ? array_unique(array_merge($masters, $specialty), SORT_REGULAR) : (($_POST['action'] === 'getMasters') ? $masters : $specialty);
-            
-            echo json_encode($res);
-            exit;
-    } catch (Exception $e) {
-        echo "Error: " . $e->getMessage();
+    if ($_POST['action'] === 'getMasters' || $_POST['action'] === 'getSpecialty' || $_POST['action'] === '') {
+        $response = getPrograms($_POST['action']);
+        echo json_encode($response);
+        exit;
     }
 }
 ?>
