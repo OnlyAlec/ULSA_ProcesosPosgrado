@@ -1,84 +1,93 @@
 <?php
 require_once '../../../includes/config/constants.php';
 require_once INCLUDES_DIR . "/utilities/database.php";
+require_once INCLUDES_DIR . '/models/student.php';
+require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
 ob_start();
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        require_once './db_excel.php';
-        require_once './all_excel.php';
-
-        $allowedExtensions = ['xls', 'xlsx'];
-        $uploadDir = __DIR__ . '/uploads/';
-
-        if (isset($_FILES['excelFile'])) {
-            if ($_FILES['excelFile']['error'] !== UPLOAD_ERR_OK) {
-                throw new RuntimeException('Error uploading file.');
-            }
-
-            $fileTmpPath = $_FILES['excelFile']['tmp_name'];
-            $fileName = str_replace(' ', '_', htmlspecialchars($_FILES['excelFile']['name'], ENT_QUOTES, 'UTF-8'));
-            $ext = strtolower(pathinfo($_FILES['excelFile']['name'], PATHINFO_EXTENSION));
-
-            if (!in_array($ext, $allowedExtensions)) {
-                throw new RuntimeException('Invalid file type.');
-            }
-
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-
-            if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName")) {
-                throw new RuntimeException('Error uploading file.');
-            }
-
-            $res = init_process("$uploadDir$fileName");
-        } elseif (isset($_FILES['excelForms']) && isset($_FILES['excelAlumni'])) {
-            $fileTmpPath1 = $_FILES['excelForms']['tmp_name'];
-            $fileTmpPath2 = $_FILES['excelAlumni']['tmp_name'];
-
-            $fileName1 = str_replace(' ', '_', htmlspecialchars($_FILES['excelForms']['name'], ENT_QUOTES, 'UTF-8'));
-            $fileName2 = str_replace(' ', '_', htmlspecialchars($_FILES['excelAlumni']['name'], ENT_QUOTES, 'UTF-8'));
-
-            $ext1 = strtolower(pathinfo($_FILES['excelForms']['name'], PATHINFO_EXTENSION));
-            $ext2 = strtolower(pathinfo($_FILES['excelAlumni']['name'], PATHINFO_EXTENSION));
-
-            if (in_array($ext1, $allowedExtensions) && in_array($ext2, $allowedExtensions)) {
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
-
-                if (!move_uploaded_file($fileTmpPath1, "$uploadDir$fileName1") || !move_uploaded_file($fileTmpPath2, "$uploadDir$fileName2")) {
-                    throw new RuntimeException('Error uploading file.');
-                }
-
-                $res = process_multiple_excels($uploadDir, $fileName1, $fileName2);
-            } else {
-                throw new RuntimeException('Invalid file type.');
-            }
-        } elseif (isset($_POST['action']) && $_POST['action'] === 'showMissingStudentsAFI') {
-            require_once './gestor.php';
-            $res = showMissingStudentsAFI();
-        } elseif (isset($_POST['action']) && $_POST['action'] === 'updateStatusAFI') {
-            // TODO: Updated
-        } elseif (isset($_POST['action']) && $_POST['action'] === 'sendEmailAFI') {
-            // TODO: Implementation of Brevo
-        }
-
-        // FIXME: Pass to response header
         header('Content-Type: application/json');
-        echo json_encode($res);
+
+        if (isset($_POST['action'])) {
+            switch ($_POST['action']) {
+                case 'getTableStudents':
+                    $res = array_values(array_map(fn($student) => $student->getJSON(), getStudents()));
+                    break;
+                case 'getMissing':
+                    require_once './gestorStudents.php';
+                    $res = showStudentsAFIByStatus('missing');
+                    break;
+                case 'getConfirm':
+                    require_once './gestorStudents.php';
+                    $res = showStudentsAFIByStatus('confirm');
+                    break;
+                // TODO: Implement in JS
+                case 'setStatus':
+                    require_once './gestorStudents.php';
+                    $res = changeStatusAFI($_POST['ulsaID']);
+                    break;
+                case 'sendEmail':
+                    // TODO: Implementation of Brevo
+                    break;
+                case 'setConfigDate':
+                    updateConfig($_POST['type'], $_POST['date']);
+                    break;
+                default:
+                    throw new RuntimeException('Not valid action!');
+            }
+        } elseif (count($_FILES) > 0) {
+            require_once './formsDB.php.php';
+            require_once './formsMultiple.php';
+            $allowedExtensions = ['xls', 'xlsx'];
+            $uploadDir = __DIR__ . '/uploads/';
+
+            if (isset($_FILES['excelFile'])) {
+                if ($_FILES['excelFile']['error'] !== UPLOAD_ERR_OK)
+                    throw new RuntimeException('Error uploading file.');
+
+                $fileTmpPath = $_FILES['excelFile']['tmp_name'];
+                $fileName = str_replace(' ', '_', htmlspecialchars($_FILES['excelFile']['name'], ENT_QUOTES, 'UTF-8'));
+                $ext = strtolower(pathinfo($_FILES['excelFile']['name'], PATHINFO_EXTENSION));
+
+                if (!in_array($ext, $allowedExtensions))
+                    throw new RuntimeException('Invalid file type.');
+
+                if (!is_dir($uploadDir))
+                    mkdir($uploadDir, 0777, true);
+
+                if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName"))
+                    throw new RuntimeException('Error uploading file.');
+
+                $res = init_process("$uploadDir$fileName");
+            } elseif (isset($_FILES['excelForms']) && isset($_FILES['excelAlumni'])) {
+                $fileTmpPath1 = $_FILES['excelForms']['tmp_name'];
+                $fileTmpPath2 = $_FILES['excelAlumni']['tmp_name'];
+
+                $fileName1 = str_replace(' ', '_', htmlspecialchars($_FILES['excelForms']['name'], ENT_QUOTES, 'UTF-8'));
+                $fileName2 = str_replace(' ', '_', htmlspecialchars($_FILES['excelAlumni']['name'], ENT_QUOTES, 'UTF-8'));
+
+                $ext1 = strtolower(pathinfo($_FILES['excelForms']['name'], PATHINFO_EXTENSION));
+                $ext2 = strtolower(pathinfo($_FILES['excelAlumni']['name'], PATHINFO_EXTENSION));
+
+                if (in_array($ext1, $allowedExtensions) && in_array($ext2, $allowedExtensions)) {
+                    if (!is_dir($uploadDir))
+                        mkdir($uploadDir, 0777, true);
+
+                    if (!move_uploaded_file($fileTmpPath1, "$uploadDir$fileName1") || !move_uploaded_file($fileTmpPath2, "$uploadDir$fileName2"))
+                        throw new RuntimeException('Error uploading file.');
+
+                    $res = process_multiple_excels($uploadDir, $fileName1, $fileName2);
+                } else {
+                    throw new RuntimeException('Invalid file type.');
+                }
+            }
+        }
+        echo responseOK($res);
         exit;
     }
 } catch (RuntimeException $e) {
-    // FIXME: Use method
-    $response = [
-        'success' => false,
-        'message' => $e->getMessage(),
-    ];
-    http_response_code(500);
-    header('Content-Type: application/json');
-    echo json_encode($response);
+    echo responseInternalError($e->getMessage());
     exit;
 }
 ob_end_flush();
@@ -245,7 +254,6 @@ get_head("AFI");
                 <div id="especialidadGraph"></div>
             </div>
         </div>
-
         <!-- Gestión -->
         <div id="gestor" class="sectionAFI" style="display:none;">
             <h3>Gestión de confirmación de Alumnos:</h3>
@@ -259,7 +267,7 @@ get_head("AFI");
                 <b>recordatorio por correo electrónico</b>.
             </p>
             <div class="row my-3">
-                <div class="col">
+                <div class="col-6 mb-2">
                     <label for="selectMaster">Filtrar por maestría:</label> <br>
                     <select name="filter" id="selectMasterConfirm" class="custom-select">
                         <option selected value="all"></option>
@@ -270,7 +278,7 @@ get_head("AFI");
                         } ?>
                     </select>
                 </div>
-                <div class="col">
+                <div class="col-6 mb-2">
                     <label for="selectSpecialty">Filtrar por especialidad:</label>
                     <select name="filter" id="selectSpecialtyConfirm" class="custom-select">
                         <option selected value="all"></option>
@@ -280,6 +288,18 @@ get_head("AFI");
                             echo "<option value='$special'>$special</option>";
                         } ?>
                     </select>
+                </div>
+                <div class="col-12  mb-2">
+                    <button id="onlyMissing" type="button" class="btn btn-danger w-100" data-toggle="button"
+                        aria-pressed="false" autocomplete="off">
+                        Solamente faltantes
+                    </button>
+                </div>
+                <div class="col-12">
+                    <button id="onlyConfirm" type="button" class="btn btn-success w-100 data-toggle=" button"
+                        aria-pressed="false" autocomplete="off">
+                        Solamente confirmados
+                    </button>
                 </div>
             </div>
             <table id="tableStudentsConfirm" class="table">
@@ -296,17 +316,71 @@ get_head("AFI");
                 </tbody>
             </table>
         </div>
+        <!-- Config -->
+        <div id="config" class="sectionAFI" style="display:none;">
+            <h3>Configuración de fechas:</h3>
+            <p>
+                A continuación se podrá configurar las fechas de cada cuatrimestre para el inicio del proceso, cuando
+                llegue el dia indicado se
+                <b>reiniciaran los indicadores de los alumnos</b>.
+            </p>
+            <div class="col-md-12 bg-info rounded p-4 mb-3">
+                <div class="row justify-content-around">
+                    <div class="col-md-10">
+                        <h3>Primer cuatrimestre:</h3>
+                        <form>
+                            <input class="form-control" type="text" id="dateCuadOne" placeholder="Selecciona una fecha"
+                                data-set="<?= getConfig("dateFirstAFI") ?? '' ?>">
+                        </form>
+                    </div>
+                    <button class="col-md-1 btn btn-success text-white">
+                        <i class="fas fa-save fa-2x"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-12 bg-info rounded p-4 mb-3">
+                <div class="row justify-content-around">
+                    <div class="col-md-10">
+                        <h3>Segundo cuatrimestre:</h3>
+                        <form>
+                            <input class="form-control" type="text" id="dateCuadTwo" placeholder="Selecciona una fecha"
+                                data-set="<?= getConfig("dateSecondAFI") ?? '' ?>">
+                        </form>
+                    </div>
+                    <button class="col-md-1 btn btn-success text-white">
+                        <i class="fas fa-save fa-2x"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-12 bg-info rounded p-4 mb-3">
+                <div class="row justify-content-around">
+                    <div class="col-md-10">
+                        <h3>Tercer cuatrimestre:</h3>
+                        <form>
+                            <input class="form-control" type="text" id="dateCuadThree"
+                                placeholder="Selecciona una fecha" data-set="<?= getConfig("dateThirdAFI") ?? '' ?>">
+                        </form>
+                    </div>
+                    <button class="col-md-1 btn btn-success text-white">
+                        <i class="fas fa-save fa-2x"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/jquery.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/bootstrap/popper.min.js"></script>
+    <script src="<?= ASSETS_PATH ?>/js/jquery-ui.js"></script>
+    <script src="<?= ASSETS_PATH ?>/js/datepicker-es.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/bootstrap/bootstrap.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/util.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/sidebarmenu.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/AFI/scripts.js"></script>
+    <script src="<?= ASSETS_PATH ?>/js/AFI/forms.js"></script>
+    <script src="<?= ASSETS_PATH ?>/js/AFI/gestor.js"></script>
+    <script src="<?= ASSETS_PATH ?>/js/AFI/settings.js"></script>
 </body>
 
 </html>
