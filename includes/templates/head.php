@@ -10,7 +10,7 @@ function get_head($title)
         <link rel="stylesheet" href="' . ASSETS_PATH . '/css/indivisa.css" type="text/css">
         <link rel="stylesheet" href="' . ASSETS_PATH . '/css/style.css" type="text/css">
         <link rel="stylesheet" href="' . ASSETS_PATH . '/css/fa_all.css" type="text/css">
-
+        
         <script src="' . ASSETS_PATH . '/js/util.js"></script>
     </head>';
 }
