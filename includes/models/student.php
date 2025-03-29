@@ -55,16 +55,6 @@ class Student
         return $this->carrer;
     }
 
-    public function setTypeDesc($typeDesc)
-    {
-        $this->typeDesc = $typeDesc;
-    }
-
-    public function setArea($area)
-    {
-        $this->area = $area;
-    }
-
     public function getEmail()
     {
         return $this->email;

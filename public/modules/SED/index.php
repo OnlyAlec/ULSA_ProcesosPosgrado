@@ -151,7 +151,7 @@ get_head("SED");
 
         <div class="d-flex justify-content-between">
             <button id="confirmChanges" class="btn btn-success w-50" disabled>Confirmar Cambios</button>
-            <button id="generateReport" class="btn btn-danger">Generar Reporte</button>
+            <button id="generateReport" class="btn btn-danger" data-filename="reporte_evaluaciones">Generar Reporte</button>
         </div>
 
         <div id="selectedCountContainer">

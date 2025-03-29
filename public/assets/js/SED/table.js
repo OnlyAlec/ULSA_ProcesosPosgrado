@@ -189,3 +189,44 @@ $(".changeSED").on("click", function () {
         }
     });
 });
+
+$("#generateReport").on("click", function () {
+    let allStudents = [];
+    let filename = $(this).data('filename');
+
+    $('#studentsTable tbody tr').each(function () {
+        let studentID = $(this).find('td').eq(1).text(); // Clave ULSA
+        let fullName = $(this).find('td').eq(2).text(); // Nombre Completo
+        let email = $(this).find('td').eq(3).text(); // Correo
+        let sedStatus = $(this).find('.changeSED i').hasClass('fa-check-square') ? true : false; // Estatus SED
+        let carrer = $(this).data('carrer'); // Carrera (programa de maestría o especialidad)
+    
+        fullName = fullName.replace(/(?:^|\s)\S/g, match => match.toUpperCase());
+
+        let student = {
+            id: studentID,
+            fullName: fullName,
+            email: email,
+            sedStatus: sedStatus,
+            carrer: carrer
+        };
+    
+        allStudents.push(student);
+    });
+
+    $.ajax({
+        url: 'generate_report.php', 
+        type: 'POST',
+        data: { students: JSON.stringify(allStudents), filename: filename },
+        success: function(response) {
+            const result = JSON.parse(response);
+            const fileUrl = result.url;
+
+            window.open(fileUrl, '_blank');
+        },
+        error: function (xhr) {
+            const errorMsg = xhr.responseText || 'Error al procesar la solicitud';
+            displayMessage($('.sectionsSED'), errorMsg, 'error');
+        }        
+    });
+});
