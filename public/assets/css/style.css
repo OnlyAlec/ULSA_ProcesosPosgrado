@@ -176,7 +176,7 @@ footer .footerTop .logotipo h3 span { display: block; }
 footer .footerTop .menuFooter h3 { font-size: 12px; font-family: 'indivisa-text'; color: #fff !important;}
 footer .footerTop .menuFooter ul { overflow: hidden;}
 footer ul { list-style: none; padding: 0; margin: 0; }
-footer .footerTop .menuFooter ul>li {zoom: 1; float: left; clear: none; text-align: inherit; width: 16%; margin-left: 0; margin-right: 3%;}
+footer .footerTop .menuFooter ul>li {*zoom: 1; float: left; clear: none; text-align: inherit; width: 16%; margin-left: 0; margin-right: 3%;}
 footer .footerTop .menuFooter ul>li ul li a{font-size:10px;}
 footer ul>li { display: inline-block; vertical-align: top;}
 .footerMore { position: relative; display: none; padding: 5px 0; }

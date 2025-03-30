@@ -1,5 +1,4 @@
 <?php
-
 function get_header($title)
 {
     echo '<div class="overlay"></div><!-- Dark Overlay element -->
