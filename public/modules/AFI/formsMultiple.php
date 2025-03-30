@@ -1,4 +1,5 @@
 <?php
+
 //! FIXME: Use new structure
 
 require_once VENDOR_DIR . "/autoload.php";
@@ -24,7 +25,7 @@ function process_multiple_excels($uploadDir, $filePath1, $filePath2)
         $outputFile = createExcel($filteredStudents, $programCount);
 
         $urloutputFile = filePathToUrl($outputFile);
-        $studentsArray = array_map(fn($student) => [
+        $studentsArray = array_map(fn ($student) => [
             'firstName' => $student->getName(),
             'maternalSurname' => $student->getApm(),
             'paternalSurname' => $student->getApp(),

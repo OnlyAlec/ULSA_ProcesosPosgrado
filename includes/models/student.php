@@ -31,8 +31,9 @@ class StudentBase
     {
         $ulsa_id = $this->normalizeUlsaId($ulsa_id);
 
-        if (strlen($ulsa_id) == 6)
+        if (strlen($ulsa_id) == 6) {
             return (int) $ulsa_id;
+        }
         return -1;
     }
 

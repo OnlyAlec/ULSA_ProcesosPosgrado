@@ -1,4 +1,5 @@
 <?php
+
 function get_head($title)
 {
     echo '<head>

@@ -1,4 +1,5 @@
 <?php
+
 require_once VENDOR_DIR . "/autoload.php";
 
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
@@ -81,8 +82,9 @@ function getStudentFromUlsaID($ID)
 
     $res = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($res === false)
+    if ($res === false) {
         return null;
+    }
 
     try {
         $student = new Student(

@@ -1,4 +1,5 @@
 <?php
+
 define('BASE_DIR', __DIR__ . '/../..');
 define('PUBLIC_DIR', BASE_DIR . '/public');
 define('INCLUDES_DIR', BASE_DIR . '/includes');

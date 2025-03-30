@@ -12,7 +12,7 @@ try {
         if (isset($_POST['action'])) {
             switch ($_POST['action']) {
                 case 'getTableStudents':
-                    $res = array_values(array_map(fn($student) => $student->getJSON(), getStudents()));
+                    $res = array_values(array_map(fn ($student) => $student->getJSON(), getStudents()));
                     break;
                 case 'getMissing':
                     //? Not in use
@@ -44,21 +44,25 @@ try {
             $uploadDir = __DIR__ . '/uploads/';
 
             if (isset($_FILES['excelFile'])) {
-                if ($_FILES['excelFile']['error'] !== UPLOAD_ERR_OK)
+                if ($_FILES['excelFile']['error'] !== UPLOAD_ERR_OK) {
                     throw new RuntimeException('Error uploading file.');
+                }
 
                 $fileTmpPath = $_FILES['excelFile']['tmp_name'];
                 $fileName = str_replace(' ', '_', htmlspecialchars($_FILES['excelFile']['name'], ENT_QUOTES, 'UTF-8'));
                 $ext = strtolower(pathinfo($_FILES['excelFile']['name'], PATHINFO_EXTENSION));
 
-                if (!in_array($ext, $allowedExtensions))
+                if (!in_array($ext, $allowedExtensions)) {
                     throw new RuntimeException('Invalid file type.');
+                }
 
-                if (!is_dir($uploadDir))
+                if (!is_dir($uploadDir)) {
                     mkdir($uploadDir, 0777, true);
+                }
 
-                if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName"))
+                if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName")) {
                     throw new RuntimeException('Error uploading file.');
+                }
 
                 $res = init_process("$uploadDir$fileName");
             } elseif (isset($_FILES['excelForms']) && isset($_FILES['excelAlumni'])) {
@@ -72,11 +76,13 @@ try {
                 $ext2 = strtolower(pathinfo($_FILES['excelAlumni']['name'], PATHINFO_EXTENSION));
 
                 if (in_array($ext1, $allowedExtensions) && in_array($ext2, $allowedExtensions)) {
-                    if (!is_dir($uploadDir))
+                    if (!is_dir($uploadDir)) {
                         mkdir($uploadDir, 0777, true);
+                    }
 
-                    if (!move_uploaded_file($fileTmpPath1, "$uploadDir$fileName1") || !move_uploaded_file($fileTmpPath2, "$uploadDir$fileName2"))
+                    if (!move_uploaded_file($fileTmpPath1, "$uploadDir$fileName1") || !move_uploaded_file($fileTmpPath2, "$uploadDir$fileName2")) {
                         throw new RuntimeException('Error uploading file.');
+                    }
 
                     $res = process_multiple_excels($uploadDir, $fileName1, $fileName2);
                 } else {
@@ -102,8 +108,8 @@ get_head("AFI");
 
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-    get_header("Avisos de Fechas Importantes");
-    ?>
+get_header("Avisos de Fechas Importantes");
+?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
@@ -217,10 +223,10 @@ get_head("AFI");
                     <select name="filter" id="selectMaster" class="custom-select">
                         <option selected value="all"></option>
                         <?php
-                        foreach (getMastersPrograms() as $master) {
-                            $master = ucfirst(strtolower($master));
-                            echo "<option value='$master'>$master</option>";
-                        } ?>
+                    foreach (getMastersPrograms() as $master) {
+                        $master = ucfirst(strtolower($master));
+                        echo "<option value='$master'>$master</option>";
+                    } ?>
                     </select>
                 </div>
                 <div class="col">
@@ -228,10 +234,10 @@ get_head("AFI");
                     <select name="filter" id="selectSpecialty" class="custom-select">
                         <option selected value="all"></option>
                         <?php
-                        foreach (getSpecialtyPrograms() as $special) {
-                            $special = ucfirst(strtolower($special));
-                            echo "<option value='$special'>$special</option>";
-                        } ?>
+                    foreach (getSpecialtyPrograms() as $special) {
+                        $special = ucfirst(strtolower($special));
+                        echo "<option value='$special'>$special</option>";
+                    } ?>
                     </select>
                 </div>
             </div>
@@ -273,10 +279,10 @@ get_head("AFI");
                     <select name="filter" id="selectMasterConfirm" class="custom-select">
                         <option selected value="all"></option>
                         <?php
-                        foreach (getMastersPrograms() as $master) {
-                            $master = ucfirst(strtolower($master));
-                            echo "<option value='$master'>$master</option>";
-                        } ?>
+                    foreach (getMastersPrograms() as $master) {
+                        $master = ucfirst(strtolower($master));
+                        echo "<option value='$master'>$master</option>";
+                    } ?>
                     </select>
                 </div>
                 <div class="col-6 mb-2">
@@ -284,10 +290,10 @@ get_head("AFI");
                     <select name="filter" id="selectSpecialtyConfirm" class="custom-select">
                         <option selected value="all"></option>
                         <?php
-                        foreach (getSpecialtyPrograms() as $special) {
-                            $special = ucfirst(strtolower($special));
-                            echo "<option value='$special'>$special</option>";
-                        } ?>
+                    foreach (getSpecialtyPrograms() as $special) {
+                        $special = ucfirst(strtolower($special));
+                        echo "<option value='$special'>$special</option>";
+                    } ?>
                     </select>
                 </div>
                 <div class="col-12  mb-2">
