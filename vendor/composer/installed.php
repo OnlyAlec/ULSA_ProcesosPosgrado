@@ -82,6 +82,15 @@
             'aliases' => array(),
             'dev_requirement' => true,
         ),
+        'fpdf/fpdf' => array(
+            'pretty_version' => '1.86.0',
+            'version' => '1.86.0.0',
+            'reference' => 'd2a0cbd9e4b5557b9c6c29ddc8eb2b36d8761e00',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../fpdf/fpdf',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'graham-campbell/result-type' => array(
             'pretty_version' => 'v1.1.3',
             'version' => '1.1.3.0',

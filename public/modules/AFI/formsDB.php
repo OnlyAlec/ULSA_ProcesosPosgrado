@@ -27,7 +27,7 @@ function init_process($filePath)
         $graphData = getGraphData($filteredStudents);
 
         $urloutputFile = filePathToUrl($outputFile);
-        $studentsArray = array_map(fn ($student) => $student->getJSON(), $filteredStudents);
+        $studentsArray = array_map(fn($student) => $student->getJSON(), $filteredStudents);
 
         return [
             'students' => $studentsArray,
