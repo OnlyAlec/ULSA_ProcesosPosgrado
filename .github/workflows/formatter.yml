@@ -3,43 +3,51 @@ name: Code Style
 on: [push]
 
 jobs:
-  php-cs-fixer:
-    runs-on: ubuntu-latest
+    php-cs-fixer:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
 
-      - name: Run PHP CS Fixer
-        uses: docker://oskarstark/php-cs-fixer-ga
-        with:
-          args: fix --allow-risky=yes --config=.php-cs-fixer.dist.php .
+            - name: Run PHP CS Fixer
+              uses: docker://oskarstark/php-cs-fixer-ga
+              with:
+                  args: fix --allow-risky=yes --config=.php-cs-fixer.dist.php .
 
-      - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v2.3.0
-        with:
-          commit_message: Fix styling
-          branch: ${{ github.head_ref }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Commit changes
+              uses: stefanzweifel/git-auto-commit-action@v2.3.0
+              with:
+                  commit_message: Fix styling
+                  branch: ${{ github.head_ref }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  prettier:
-    runs-on: ubuntu-latest
+    prettier:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
 
-      - name: Install Prettier with Yarn
-        run: yarn add prettier --dev --exact
+            - name: Install Prettier with Yarn
+              run: yarn add prettier --dev --exact
 
-      - name: Run Prettier CSS
-        run: yarn exec prettier --check --write 'public/assets/**/*.{css,js}'
+            - name: Create Prettier ignore file
+              run: |
+                  echo "public/assets/js/datepicker-es.js" > .prettierignore
+                  echo "public/assets/js/jquery-ui.js" >> .prettierignore
+                  echo "public/assets/js/jquery.min.js" >> .prettierignore
+                  echo "public/assets/js/tinymce/**" >> .prettierignore
+                  echo "public/assets/js/bootstrap/**" >> .prettierignore
 
-      - name: Commit changes
-        uses: stefanzweifel/git-auto-commit-action@v2.3.0
-        with:
-          commit_message: Apply Prettier changes
-          branch: ${{ github.head_ref }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Run Prettier JS
+              run: yarn exec prettier --check --write --ignore-path .prettierignore 'public/assets/js/**/*.js'
+
+            - name: Commit changes
+              uses: stefanzweifel/git-auto-commit-action@v2.3.0
+              with:
+                  commit_message: Apply Prettier changes
+                  branch: ${{ github.head_ref }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
