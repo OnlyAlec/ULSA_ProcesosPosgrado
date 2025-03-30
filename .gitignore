@@ -5,8 +5,6 @@ yarn-debug.log
 yarn-error.log
 package-lock.json
 yarn.lock
-.composer/
-composer.lock
 
 # Environment variables
 .env
@@ -45,7 +43,10 @@ temp/
 # Misc
 .cache/
 .history/
-jsconfig.json
+
+# Composer
+.composer/
+composer.lock
 
 # XLSX
 public/assets/xls/*

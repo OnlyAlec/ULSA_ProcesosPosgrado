@@ -1,10 +1,8 @@
 <?php
-
 require_once '../../../includes/config/constants.php';
 require_once INCLUDES_DIR . "/utilities/database.php";
 
-function updateSingleSED($studentID, $newState)
-{
+function updateSingleSED($studentID, $newState) {
     $db = getDatabaseConnection();
     try {
         if (!$studentID || $newState === null) {
@@ -25,8 +23,7 @@ function updateSingleSED($studentID, $newState)
     }
 }
 
-function updateSelectedSED($studentIDs)
-{
+function updateSelectedSED($studentIDs) {
     $db = getDatabaseConnection();
 
     try {
@@ -51,8 +48,7 @@ function updateSelectedSED($studentIDs)
     }
 }
 
-function getPrograms($action)
-{
+function getPrograms($action) {
     try {
         $masters = getMastersPrograms();
         $specialty = getSpecialtyPrograms();
@@ -68,3 +64,4 @@ function getPrograms($action)
         return ["error" => "Error: " . $e->getMessage()];
     }
 }
+?>

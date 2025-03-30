@@ -1,6 +1,5 @@
 <?php
-
-/*
+/* 
  * Funciones de utilidad
  */
 
@@ -11,9 +10,8 @@ function fechaGuion($fechaTxt)
         $fechaArr = explode("/", $fechaTxt);
         return $fechaArr[2] . "-" . $fechaArr[1] . "-" . $fechaArr[0];
     }
-    if (substr($fechaTxt, 4, 1) == "-" && substr($fechaTxt, 7, 1) == "-") {// aaaa-mm-dd
+    if (substr($fechaTxt, 4, 1) == "-" && substr($fechaTxt, 7, 1) == "-")// aaaa-mm-dd
         return $fechaTxt;
-    }
     return "";
 }
 function fechaSlash($fechaTxt)
@@ -34,32 +32,30 @@ function fechaTexto($fechaTxt, $showYear = true)
     $fechaTxt = trim($fechaTxt);
     if (substr($fechaTxt, 2, 1) == "/" && substr($fechaTxt, 5, 1) == "/") {// dd/mm/aaaa
         $fechaArr = explode("/", $fechaTxt);
-        if ($showYear) {
+        if ($showYear)
             return intval($fechaArr[0]) . " de " . mesNombre($fechaArr[1]) . " de " . $fechaArr[2];
-        } else {
+        else
             return intval($fechaArr[0]) . " de " . mesNombre($fechaArr[1]);
-        }
     }
     if (substr($fechaTxt, 4, 1) == "-" && substr($fechaTxt, 7, 1) == "-") {// aaaa-mm-dd
         $fechaArr = explode("-", $fechaTxt);
-        if ($showYear) {
+        if ($showYear)
             return intval($fechaArr[2]) . " de " . mesNombre($fechaArr[1]) . " de " . $fechaArr[0];
-        } else {
+        else
             return intval($fechaArr[2]) . " de " . mesNombre($fechaArr[1]);
-        }
     }
     return "";
 }
 
 function mesNombre($num)
 {
-    $meses = [1 => "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+    $meses = array(1 => "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre");
     return $meses[intval($num)];
 }
 
 function diaNombre($num)
 {
-    $dias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+    $dias = array("domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado");
     return $dias[intval($num)];
 }
 
@@ -109,11 +105,10 @@ function quitaLetras($words)
 function getIniciales($materia)
 {
     $ret = '';
-    $materia = str_ireplace(["Á", "É", "Í", "Ó", "Ú", "Ñ", "Ä", "Ë", "Ï", "Ö", "Ü", "Â", "Ê", "Î", "Ô", "Û", "Ã"], ["A", "E", "I", "O", "U", "N", "A", "E", "I", "O", "U", "A", "E", "I", "O", "U", "A"], utf8_encode($materia));
+    $materia = str_ireplace(array("Á", "É", "Í", "Ó", "Ú", "Ñ", "Ä", "Ë", "Ï", "Ö", "Ü", "Â", "Ê", "Î", "Ô", "Û", "Ã"), array("A", "E", "I", "O", "U", "N", "A", "E", "I", "O", "U", "A", "E", "I", "O", "U", "A"), utf8_encode($materia));
     foreach (explode(' ', $materia) as $word) {
-        if (ctype_alpha($word[0])) {
+        if (ctype_alpha($word[0]))
             $ret .= $word[0];
-        }
     }
     return strtoupper($ret);
 }
@@ -126,9 +121,8 @@ function getIniciales($materia)
 function filePathToUrl($filePath)
 {
     $filePath = realpath($filePath);
-    if (!file_exists($filePath)) {
+    if (!file_exists($filePath))
         return "#";
-    }
 
     $docRoot = realpath($_SERVER['DOCUMENT_ROOT']);
 

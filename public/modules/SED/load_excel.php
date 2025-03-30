@@ -11,29 +11,25 @@ try {
         $uploadDir = __DIR__ . '/uploads/';
 
         if (isset($_FILES['sedExcelFile'])) {
-            if ($_FILES['sedExcelFile']['error'] !== UPLOAD_ERR_OK) {
+            if ($_FILES['sedExcelFile']['error'] !== UPLOAD_ERR_OK)
                 throw new RuntimeException('Error uploading file.');
-            }
 
             $fileTmpPath = $_FILES['sedExcelFile']['tmp_name'];
             $fileName = str_replace(' ', '_', htmlspecialchars($_FILES['sedExcelFile']['name'], ENT_QUOTES, 'UTF-8'));
             $ext = strtolower(pathinfo($_FILES['sedExcelFile']['name'], PATHINFO_EXTENSION));
 
-            if (!in_array($ext, $allowedExtensions)) {
+            if (!in_array($ext, $allowedExtensions))
                 throw new RuntimeException('Invalid file type.');
-            }
 
             if (!preg_match($regex, $_POST["claveUlsa"]) || !preg_match($regex, $_POST["nombre"]) || !preg_match($regex, $_POST["estatus"])) {
                 throw new RuntimeException('Invalid column index.');
             }
 
-            if (!is_dir($uploadDir)) {
+            if (!is_dir($uploadDir))
                 mkdir($uploadDir, 0777, true);
-            }
 
-            if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName")) {
+            if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName"))
                 throw new RuntimeException('Error uploading file.');
-            }
 
             $res = processExcel("$uploadDir$fileName", $_POST["claveUlsa"], $_POST["nombre"], $_POST["estatus"]);
         }
@@ -63,8 +59,8 @@ get_head("SED");
 
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header("Seguimiento de Evaluación Docente");
-?>
+    get_header("Seguimiento de Evaluación Docente");
+    ?>
 
     <main class="container content marco">
         <div>

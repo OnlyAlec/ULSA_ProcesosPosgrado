@@ -1,5 +1,4 @@
 <?php
-
 class ErrorList
 {
     private static $errors = [];
