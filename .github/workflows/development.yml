@@ -10,12 +10,22 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Desplegar vía SSH
+      - name: Deploy to Server
         uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "./"
-          target: "/usr/share/nginx/html/kashi-app"
+          target: ${{ secrets.SSH_PATH }}
           rm: true
+
+      - name: Set Permissions
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            chmod -R 775 ${{ secrets.SSH_PATH }}
+            chown -R alec:alec ${{ secrets.SSH_PATH }}
