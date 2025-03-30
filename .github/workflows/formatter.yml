@@ -1,0 +1,45 @@
+name: Code Style
+
+on: [push]
+
+jobs:
+  php-cs-fixer:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run PHP CS Fixer
+        uses: docker://oskarstark/php-cs-fixer-ga
+        with:
+          args: fix --allow-risky=yes --config=.php-cs-fixer.dist.php .
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v2.3.0
+        with:
+          commit_message: Fix styling
+          branch: ${{ github.head_ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  prettier:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Prettier with Yarn
+        run: yarn add prettier --dev --exact
+
+      - name: Run Prettier CSS
+        run: yarn exec prettier --check --write 'public/assets/**/*.{css,js}'
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v2.3.0
+        with:
+          commit_message: Apply Prettier changes
+          branch: ${{ github.head_ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
