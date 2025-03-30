@@ -1,4 +1,5 @@
 <?php
+
 require_once VENDOR_DIR . "/autoload.php";
 
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
@@ -33,7 +34,8 @@ function getStudents()
                 s.ulsa_id, 
                 LOWER(TRIM(p.career)) AS career, 
                 s.email AS ulsa_email, 
-                s.sed
+                s.sed,
+                s.afi
               FROM student s
               JOIN name n ON s.name_id = n.id 
               JOIN program p ON s.program_id = p.id";
@@ -47,9 +49,10 @@ function getStudents()
                 $row['last_name'],
                 $row['ulsa_id'],
                 $row['career'],
+                $row['ulsa_email']
             );
-            $student->setEmail($row['ulsa_email']);
             $student->setSed($row['sed']);
+            $student->setAfi($row['afi']);
             $studentsDB[] = $student;
         } catch (InvalidArgumentException $e) {
             ErrorList::add($e->getMessage());
@@ -57,6 +60,47 @@ function getStudents()
         }
     }
     return $studentsDB;
+}
+
+function getStudentFromUlsaID($ID)
+{
+    $db = getDatabaseConnection();
+    $query = "SELECT LOWER(n.last_name) AS last_name,
+                LOWER(n.first_name) AS first_name,
+                s.ulsa_id,
+                LOWER(TRIM(p.career)) AS career,
+                s.email AS ulsa_email,
+                s.sed,
+                s.afi
+              FROM student s
+              JOIN name n ON s.name_id = n.id
+              JOIN program p ON s.program_id = p.id
+              WHERE s.ulsa_id = :ulsa_id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':ulsa_id', $ID);
+    $stmt->execute();
+
+    $res = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($res === false) {
+        return null;
+    }
+
+    try {
+        $student = new Student(
+            $res['first_name'],
+            $res['last_name'],
+            $res['ulsa_id'],
+            $res['career'],
+            $res['ulsa_email']
+        );
+        $student->setSed($res['sed']);
+        $student->setAfi($res['afi']);
+        return $student;
+    } catch (InvalidArgumentException $e) {
+        ErrorList::add($e->getMessage());
+        return null;
+    }
 }
 
 function getMastersPrograms(): array
@@ -87,4 +131,74 @@ function getSpecialtyPrograms(): array
         $programsS[] = ucfirst(strtoupper($row['career']));
     }
     return $programsS;
+}
+
+function getConfig(string $type)
+{
+    $db = getDatabaseConnection();
+
+    $query = "SELECT data FROM configs WHERE type LIKE '$type%'";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+
+    $res = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $res['data'] ?? "";
+}
+
+//^ UPDATES
+function updateStudentField(Student $student, $field, $value)
+{
+    try {
+        $db = getDatabaseConnection();
+        $id = $student->getUlsaId();
+        $value = (int) $value;
+
+        $query = "UPDATE student
+                  SET $field = :value
+                  WHERE ulsa_id = :ulsa_id";
+
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':value', $value);
+        $stmt->bindParam(':ulsa_id', $id);
+
+        $stmt->execute();
+
+        return $stmt->rowCount();
+    } catch (PDOException $e) {
+        echo "Error de conexión! ";
+        print_r($e->getMessage());
+        exit();
+    }
+}
+
+function updateConfig(string $type, $value)
+{
+    try {
+        $db = getDatabaseConnection();
+
+        $querySelect = "SELECT * FROM configs
+                        WHERE type LIKE :type";
+        $queryUpdate = "UPDATE configs
+                        SET data = :value
+                        WHERE type LIKE :type";
+        $queryInsert = "INSERT INTO configs (type, data)
+                        VALUES (:type, :value)";
+
+        $stmt = $db->prepare($querySelect);
+        $stmt->bindParam(':type', $type);
+        $stmt->execute();
+
+        $stmt = ($stmt->rowCount() === 0) ? $db->prepare($queryInsert) : $db->prepare($queryUpdate);
+        $stmt->bindParam(':value', $value);
+        $stmt->bindParam(':type', $type);
+        $stmt->execute();
+
+        return $stmt->rowCount();
+    } catch (PDOException $e) {
+        error_log("Database error in updateConfig: " . $e->getMessage());
+        throw new Exception("Failed to update configuration");
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        throw $e;
+    }
 }
