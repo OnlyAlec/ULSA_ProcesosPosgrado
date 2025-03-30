@@ -1,10 +1,7 @@
 <?php
 
-//! FIXME: Use new structure
-
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
-require_once INCLUDES_DIR . "/utilities/handleErrors.php";
 require_once INCLUDES_DIR . "/models/student.php";
 
 function process_multiple_excels($uploadDir, $filePath1, $filePath2)
@@ -14,31 +11,22 @@ function process_multiple_excels($uploadDir, $filePath1, $filePath2)
     $outputFile = null;
     $studentsAll = [];
     $studentsForms = [];
-    $urloutputFile = null;
-    $filteredStudents = [];
+    $missingStudents = [];
 
     try {
         $studentsForms = processExcel("$uploadDir$filePath1");
         $studentsAll = processAlumniExcel("$uploadDir$filePath2");
-        $filteredStudents = compareStudents($studentsForms, $studentsAll);
-        $programCount = getProgramCount($studentsAll, $filteredStudents);
-        $outputFile = createExcel($filteredStudents, $programCount);
+        $missingStudents = filterMissingStudents($studentsForms, $studentsAll);
+        $programCount = getProgramCount($studentsAll, $missingStudents);
+        $outputFile = createExcel($missingStudents, $programCount);
+        $studentsArray = array_map(fn ($student) => $student->getJSON(), $missingStudents);
 
-        $urloutputFile = filePathToUrl($outputFile);
-        $studentsArray = array_map(fn ($student) => [
-            'firstName' => $student->getName(),
-            'maternalSurname' => $student->getApm(),
-            'paternalSurname' => $student->getApp(),
-            'ulsaID' => $student->getUlsaId(),
-            'typeDesc' => $student->getTypeDesc(),
-            'area' => $student->getArea(),
-            'email' => $student->getEmail()
-        ], $filteredStudents);
         return [
             'students' => $studentsArray,
-            'excel' => $urloutputFile,
+            'excel' => filePathToUrl($outputFile),
             'totalDB' => count($studentsAll),
-            'totalFiltered' => count($studentsArray)
+            'totalFiltered' => count($studentsArray),
+            'graphData' => getGraphData($missingStudents)
         ];
     } catch (RuntimeException $e) {
         throw new RuntimeException($e->getMessage());
@@ -78,9 +66,9 @@ function processAlumniExcel($filePath)
         try {
             $student = new Student(
                 strtolower(trim($row[$nombreColumn])),
-                strtolower(trim($row[$apellidoMColumn])) . ' ' . strtolower(trim($row[$apellidoPColumn])),
+                strtolower(trim($row[$apellidoMColumn]) . ' ' . trim($row[$apellidoPColumn])),
                 $row[$claveColumn],
-                $row[$tipoColumn] . ' ' . $row[$areaColumn],
+                strtolower($row[$tipoColumn] . ' ' . $row[$areaColumn]),
                 "",
             );
             $student->setEmail($row[$emailColumn]);

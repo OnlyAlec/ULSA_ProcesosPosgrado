@@ -38,7 +38,7 @@ try {
                     throw new RuntimeException('Not valid action!');
             }
         } elseif (count($_FILES) > 0) {
-            require_once './formsDB.php.php';
+            require_once './formsDB.php';
             require_once './formsMultiple.php';
             $allowedExtensions = ['xls', 'xlsx'];
             $uploadDir = __DIR__ . '/uploads/';
@@ -155,12 +155,13 @@ get_header("Avisos de Fechas Importantes");
                     <div class="mb-3">
                         <input type="file" class="form-control form-control-lg pb-5" id="excelFile" name="excelFile"
                             accept=".xls,.xlsx" required>
-                        <div id="emailHelp" class="form-text">Los alumnos confirmados se guardaran en la base de datos.
+                        <div id="emailHelp" class="form-text d-flex justify-content-end">
+                            Los datos se actualizarán en la base de datos.
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-file-import mr-2"></i>
-                        <span>Importar confirmaciones</span>
+                        <span>Importar datos</span>
                     </button>
                 </form>
             </div>
@@ -180,9 +181,12 @@ get_header("Avisos de Fechas Importantes");
                         <input type="file" class="form-control form-control-lg pb-5" id="excelAlumni" name="excelAlumni"
                             accept=".xls,.xlsx" required>
                     </div>
+                    <div id="emailHelp" class="form-text d-flex justify-content-end">
+                        Los datos no modificaran la base de datos.
+                    </div>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-file-import mr-2"></i>
-                        <span>Importar confirmaciones</span>
+                        <span>Importar datos</span>
                     </button>
                 </form>
             </div>

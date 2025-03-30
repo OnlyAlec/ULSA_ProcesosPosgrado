@@ -8,6 +8,8 @@ $(function () {
         const form = $(this);
         // @ts-ignore
         const formData = new FormData(this);
+        const tableContainer = $("#forms-result");
+        const tableBody = $("#tableStudents").find("tbody");
 
         $.ajax({
             url: "",
@@ -16,7 +18,9 @@ $(function () {
             processData: false,
             contentType: false,
             beforeSend: function () {
+                tableContainer.hide();
                 $(".alert").remove();
+                tableBody.empty();
                 form.find("button").prop("disabled", true);
             },
             success: function (response) {
@@ -25,23 +29,18 @@ $(function () {
                     return;
                 }
 
-                displayMessage(form, "Archivos procesados correctamente");
-                $("#missingStudents").empty();
-
+                displayMessage(form, "Archivo procesado correctamente");
                 if (response.data && response.data.students && response.data.students.length > 0) {
-                    const tableContainer = $('div[style="display:none"]');
                     // @ts-ignore
                     response.data.students.forEach((student) => {
-                        const fullName = `${student.firstName} ${student.lastName}`;
                         const row = `<tr>
                                 <td>${student.ulsaID}</td>
-                                <td>${fullName}</td>
+                                <td>${student.firstName} ${student.lastName}</td>
                                 <td>${student.carrer}</td>
                                 <td>${student.email}</td>
                             </tr>`;
-                        $("#missingStudents").append(row);
+                        tableBody.append(row);
                     });
-                    tableContainer.show();
                     if (response.data.excel) {
                         const downloadLink = $("#downloadExcel");
                         downloadLink.attr("href", response.data.excel);
@@ -54,12 +53,11 @@ $(function () {
                     if (response.data.graphData) {
                         generateCharts(response.data.graphData);
                     }
-                } else {
-                    // No students found
-                    $("#missingStudents").append(
+                } else 
+                    tableBody.append(
                         '<tr><td colspan="4" class="text-center">No se encontraron alumnos faltantes</td></tr>'
                     );
-                }
+                tableContainer.show();
             },
             error: function (xhr) {
                 const errorMsg = xhr.responseText || "Error al procesar la solicitud";
@@ -72,19 +70,19 @@ $(function () {
     });
 
     $("#selectMaster, #selectSpecialty").on("change", function () {
-        // @ts-ignore
-        const selectedOption = $(this).val().toUpperCase();
+        const selectedOption = String($(this).val())?.toUpperCase();
         if (this.id === "selectMaster") {
             $("#selectSpecialty").val("all");
         } else {
             $("#selectMaster").val("all");
         }
-        // @ts-ignore
-        filterTable(selectedOption, "tableStudents");
+        filterTableByCarrer(selectedOption, "tableStudents");
     });
 });
 
-// @ts-ignore
+/**
+ * @param {{ especialidad: { [s: string]: any; } | ArrayLike<any>; maestria: { [s: string]: any; } | ArrayLike<any>; }} graphData
+ */
 function generateCharts(graphData) {
     const especialidadLabels = Object.keys(graphData.especialidad);
     const especialidadValues = Object.values(graphData.especialidad);

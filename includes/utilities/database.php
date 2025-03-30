@@ -146,11 +146,10 @@ function getConfig(string $type)
 }
 
 //^ UPDATES
-function updateStudentField(Student $student, $field, $value)
+function updateStudentFieldBoolean($id, $field, $value)
 {
     try {
         $db = getDatabaseConnection();
-        $id = $student->getUlsaId();
         $value = (int) $value;
 
         $query = "UPDATE student

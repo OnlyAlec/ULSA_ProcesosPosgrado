@@ -1,10 +1,7 @@
 <?php
 
-//! FIXME: Use new structure
-
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
-require_once INCLUDES_DIR . "/utilities/handleErrors.php";
 require_once INCLUDES_DIR . "/models/student.php";
 
 function init_process($filePath)
@@ -13,28 +10,24 @@ function init_process($filePath)
 
     $studentsExcel = [];
     $studentsDB = [];
-    $filteredStudents = [];
+    $missingStudents = [];
     $outputFile = null;
-    $urloutputFile = null;
-    $graphData = null;
 
     try {
-        $studentsExcel = processExcel($filePath);
         $studentsDB = getStudents();
-        $filteredStudents = compareStudents($studentsExcel, $studentsDB);
-        $programCount = getProgramCount($studentsDB, $filteredStudents);
-        $outputFile = createExcel($filteredStudents, $programCount);
-        $graphData = getGraphData($filteredStudents);
-
-        $urloutputFile = filePathToUrl($outputFile);
-        $studentsArray = array_map(fn ($student) => $student->getJSON(), $filteredStudents);
+        $studentsExcel = processExcel($filePath);
+        $missingStudents = filterMissingStudents($studentsExcel, $studentsDB);
+        $programCount = getProgramCount($studentsDB, $missingStudents);
+        $outputFile = createExcel($missingStudents, $programCount);
+        $studentsArray = array_map(fn ($student) => $student->getJSON(), $missingStudents);
+        _updateInDB($studentsExcel, $missingStudents);
 
         return [
             'students' => $studentsArray,
-            'excel' => $urloutputFile,
+            'excel' => filePathToUrl($outputFile),
             'totalDB' => count($studentsDB),
             'totalFiltered' => count($studentsArray),
-            'graphData' => $graphData
+            'graphData' => getGraphData($missingStudents)
         ];
     } catch (RuntimeException $e) {
         throw new RuntimeException($e->getMessage());
@@ -73,9 +66,9 @@ function processExcel($filePath)
         try {
             $students[] = new Student(
                 strtolower(trim($row[$nombreColumn])),
-                strtolower(trim($row[$apellidoMColumn])) . ' ' . strtolower(trim($row[$apellidoPColumn])),
+                strtolower(trim($row[$apellidoMColumn]) . ' ' . trim($row[$apellidoPColumn])),
                 $row[$claveColumn],
-                $row[$tipoColumn] . ' ' . $row[$areaColumn],
+                strtolower($row[$tipoColumn] . ' ' . $row[$areaColumn]),
                 "",
             );
         } catch (InvalidArgumentException $e) {
@@ -131,7 +124,7 @@ function getProgramCount($db, $filtered)
     ];
 }
 
-function compareStudents($studentsExcel, $studentsDB)
+function filterMissingStudents($studentsExcel, $studentsDB)
 {
     $excelById = [];
     $excelByName = [];
@@ -173,18 +166,16 @@ function createExcel($students, $programCount)
     $newSpreadsheet = new PhpOffice\PhpSpreadsheet\Spreadsheet();
     $sheet1 = $newSpreadsheet->getActiveSheet();
     $headers = [
-        "Apellido Paterno",
-        "Apellido Materno",
+        "Apellidos",
         "Nombre(s)",
         "Clave Ulsa",
-        "Tipo de Programa",
-        "Área",
+        "Programa",
         "Correo institucional"
     ];
 
     //* Format
     $sheet1->setTitle('Estudiantes sin confirmar AFI');
-    foreach (range('A', 'G') as $index => $col) {
+    foreach (range('A', 'E') as $index => $col) {
         $cell = "{$col}1";
         $sheet1->setCellValue($cell, $headers[$index]);
         $sheet1->getStyle($cell)->getFont()->setBold(true);
@@ -208,7 +199,7 @@ function createExcel($students, $programCount)
     $sheet1->fromArray($dataRows, null, 'A2');
 
     //* Format
-    foreach (range('A', 'G') as $col) {
+    foreach (range('A', 'E') as $col) {
         $sheet1->getColumnDimension($col)->setAutoSize(true);
     }
 
@@ -280,4 +271,15 @@ function getGraphData($filteredStudents)
     }
 
     return $data;
+}
+
+function _updateInDB($studentsConfirm, $studentsNotConfirm)
+{
+    foreach ($studentsNotConfirm as $student) {
+        updateStudentFieldBoolean($student->getUlsaId(), 'afi', false);
+    }
+
+    foreach ($studentsConfirm as $student) {
+        updateStudentFieldBoolean($student->getUlsaId(), 'afi', true);
+    }
 }

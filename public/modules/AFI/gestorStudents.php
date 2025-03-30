@@ -14,7 +14,7 @@ function changeStatusAFI($ulsaID)
     $student = getStudentFromUlsaID($ulsaID);
     $newStatus = !$student->getAfi();
 
-    if (updateStudentField($student, "afi", $newStatus) == 0) {
+    if (updateStudentFieldBoolean($student->getUlsaId(), "afi", $newStatus) == 0) {
         throw new RuntimeException("Error updating AFI status");
     }
 
