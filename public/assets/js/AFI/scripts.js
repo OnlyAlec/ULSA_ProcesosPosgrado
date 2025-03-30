@@ -1,137 +1,83 @@
-$(document).ready(function () {
-    $('form').submit(function (e) {
-        e.preventDefault();
-        const form = $(this);
-        const formData = new FormData(this);
+window.setupBtns = setupBtns;
+window.hideSections = hideSections;
+window.displayMessage = displayMessage;
+window.filterTableByCarrer = filterTableByCarrer;
 
-        $.ajax({
-            url: '',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            beforeSend: function () {
-                $('.alert').remove();
-                form.find('button').prop('disabled', true);
-            },
-            success: function (response) {
-                displayMessage(form, "Archivos procesados correctamente");
-                if (response.success) {
-                    $('#missingStudents').empty();
+/**
+ * @param {string} name
+ */
+function setupBtns(name) {
+    if (name == "" || name == undefined) {
+        throw new Error("Missing name - setupBtns");
+    }
 
-                    if (response.data && response.data.students && response.data.students.length > 0) {
-                        response.data.students.forEach(student => {
-                            const fullName = `${student.firstName} ${student.paternalSurname} ${student.maternalSurname}`;
-                            const row = `<tr>
-                                <td>${fullName}</td>
-                                <td>${student.typeDesc}</td>
-                                <td>${student.area}</td>
-                                <td>${student.email}</td>
-                            </tr>`;
-                            $('#missingStudents').append(row);
-                        });
+    $("#" + name).on("click", function () {
+        $(".alert").remove();
+        $(".sectionsAFI button").removeClass("btn-primary").addClass("btn-outline-primary");
+        $(this).removeClass("btn-outline-primary").addClass("btn-primary");
+        const div = name.split("-").slice(1).join("-");
+        if (name.split("-").length <= 2) hideSections();
+        else hideSections(true);
+        $("#" + div).show();
+    });
+}
 
-                        const tableContainer = $('div[style="display:none"]');
-                        tableContainer.show();
+function hideSections(subsection = false) {
+    const className = subsection ? ".subSectionAFI" : ".sectionAFI";
+    $(className).each(function () {
+        $(this).hide();
+    });
+}
 
-                        if (response.data.excel) {
-                            const downloadLink = `<div class="mt-3">
-                                <a href="${response.data.excel}" class="btn btn-success" download>
-                                    <i class="fas fa-download"></i> Descargar Excel
-                                </a>
-                            </div>`;
-                            $("#tableStudents").after(downloadLink);
-                        }
+/**
+ * @param {JQuery<HTMLElement>} pos
+ * @param {string} message
+ */
+function displayMessage(pos, message, type = "success") {
+    const newDiv = document.createElement("div");
+    newDiv.className = type == "success" ? "alert alert-success my-3" : "alert alert-danger my-3";
+    newDiv.innerHTML = message;
+    pos.before(newDiv);
+}
 
-                        if (response.data.totalDB && response.data.totalFiltered) {
-                            $('#totalDB').text(response.data.totalDB)
-                            $('#totalFiltered').text(response.data.totalFiltered)
-                        }
+/**
+ * @param {string | undefined} name
+ */
+function setupBtns(name) {
+    if (name == "" || name == undefined) {
+        throw new Error("Missing name - setupBtns");
+    }
 
-                        /*Generate graphs*/
-                        if(response.data.graphData){
-                            generateCharts(response.data.graphData);
-                        }
+    $("#" + name).on("click", function () {
+        $(".alert").remove();
+        $(".sectionsAFI button").removeClass("btn-primary").addClass("btn-outline-primary");
+        $(this).removeClass("btn-outline-primary").addClass("btn-primary");
+        const div = name.split("-").slice(1).join("-");
+        if (name.split("-").length <= 2) hideSections();
+        else hideSections(true);
+        $("#" + div).show();
+    });
+}
 
-                    } else {
-                        // No students found
-                        $('#missingStudents').append('<tr><td colspan="4" class="text-center">No se encontraron alumnos faltantes</td></tr>');
-                    }
-                } else {
-                    displayMessage(form, response.message, 'error');
-                }
-            },
-            error: function (xhr) {
-                const errorMsg = xhr.responseText || 'Error al procesar la solicitud';
-                displayMessage(form, errorMsg, 'error');
-            },
-            complete: function () {
-                form.find('button').prop('disabled', false);
+/**
+ * @param {string} filter
+ * @param {string} tableName
+ */
+function filterTableByCarrer(filter, tableName) {
+    const table = document.getElementById(tableName);
+    const rows = table?.getElementsByTagName("tr");
+
+    if (filter === "ALL") {
+        if (rows) Array.from(rows).forEach((row) => (row.style.display = ""));
+        return;
+    }
+
+    if (rows)
+        Array.from(rows).forEach((row) => {
+            const cell = row.getElementsByTagName("td")[2];
+            if (cell) {
+                const txtValue = cell.textContent || cell.innerText;
+                row.style.display = txtValue.toUpperCase().includes(filter) ? "" : "none";
             }
         });
-    });
-
-    function displayMessage(pos, message, type = 'success') {
-        const newDiv = document.createElement('div');
-        newDiv.className = type == 'success' ? 'alert alert-success' : 'alert alert-danger';
-        newDiv.innerHTML = message;
-        pos.before(newDiv);
-    }
-});
-
-function generateCharts (graphData) {
-    const especialidadLabels = Object.keys(graphData.especialidad); 
-    const especialidadValues = Object.values(graphData.especialidad);
-
-    const maestriaLabels = Object.keys(graphData.maestria);
-    const maestriaValues = Object.values(graphData.maestria);
-
-    $('#especialidadGraph').remove(); 
-    $('#maestriaGraph').remove();
-    $('#especialidadTitle').after('<canvas id="especialidadGraph"></canvas>'); 
-    $('#maestriaTitle').after('<canvas id="maestriaGraph"></canvas>');
-
-    /* --> Especialidades */
-    new Chart(document.getElementById("especialidadGraph"), {
-        type: "bar",
-        data: {
-            labels: especialidadLabels,
-            datasets: [{
-                label: "Alumnos sin firmar",
-                data: especialidadValues,
-                backgroundColor: "rgba(255, 99, 132, 0.5)",
-                borderColor: "rgba(255, 99, 132, 1)",
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: { 
-                x: { title: { display: true, text: "Programas" }, }, 
-                y: { beginAtZero: true, title: { display: true, text: "Cantidad de alumnos sin firmar" } } 
-            }
-        }
-    });
-
-    /* --> Maestrías */
-    new Chart(document.getElementById("maestriaGraph"), {
-        type: "bar",
-        data: {
-            labels: maestriaLabels,
-            datasets: [{
-                label: "Alumnos sin firmar",
-                data: maestriaValues,
-                backgroundColor: "rgba(54, 162, 235, 0.5)",
-                borderColor: "rgba(54, 162, 235, 1)",
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: { 
-                x: { title: { display: true, text: "Programas" } }, 
-                y: { beginAtZero: true, title: { display: true, text: "Cantidad de alumnos sin firmar" } } 
-            }
-        }
-    });
 }

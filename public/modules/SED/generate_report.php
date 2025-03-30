@@ -1,6 +1,6 @@
 <?php
 
-use \Fpdf\fpdf;
+use Fpdf\fpdf;
 
 require_once __DIR__ . '/../../../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
@@ -24,41 +24,44 @@ if (isset($_POST['students']) && isset($_POST['filename'])) {
     generateReport($students, $filename);
 }
 
-function addNewPage($pdf){
-       $pdf->AddPage();
-       $pdf->Image(PUBLIC_DIR . ASSETS_PATH . '/img/logo_lasalle.png', 10, 10, 45, 15.3, 'png');
-       $pdf->SetFont('IndivisaSans', '', 15);
-       $pdf->Cell(0, 40, 'Reporte de Evaluaciones Docentes', 0, 1, 'R');  
+function addNewPage($pdf)
+{
+    $pdf->AddPage();
+    $pdf->Image(PUBLIC_DIR . ASSETS_PATH . '/img/logo_lasalle.png', 10, 10, 45, 15.3, 'png');
+    $pdf->SetFont('IndivisaSans', '', 15);
+    $pdf->Cell(0, 40, 'Reporte de Evaluaciones Docentes', 0, 1, 'R');
 }
 
-function addTable($pdf, $titleTable, $students){
+function addTable($pdf, $titleTable, $students)
+{
     $pdf->Ln(5);
 
     $pdf->SetFont('IndivisaSans', '', 12);
-    
+
     // Encabezado de la tabla
     $pdf->SetFillColor(200, 220, 255);
     $pdf->Cell(190, 10, mb_convert_encoding($titleTable, 'ISO-8859-1', 'UTF-8'), 1, 1, 'C', true);
 
     // Columnas de la tabla
     $pdf->SetFillColor(230, 230, 230);
-    $pdf->Cell(130, 10, 'Nombre del Estudiante', 1, 0, 'C', true); 
-    $pdf->Cell(60, 10, 'Clave ULSA', 1, 1, 'C', true); 
+    $pdf->Cell(130, 10, 'Nombre del Estudiante', 1, 0, 'C', true);
+    $pdf->Cell(60, 10, 'Clave ULSA', 1, 1, 'C', true);
 
     // Contenido de la tabla
     foreach ($students as $student) {
         if ($pdf->GetY() + 10 > 260) {
             addNewPage($pdf); // Añadir una página si se acerca al final
         }
-        
+
         $pdf->SetFont('IndivisaTextSans', '', 10);
         $pdf->Cell(130, 10, mb_convert_encoding($student->fullName, 'ISO-8859-1', 'UTF-8'), 1, 0, 'L');
         $pdf->Cell(60, 10, $student->id, 1, 1, 'C');
     }
-    $pdf->Ln(5); 
+    $pdf->Ln(5);
 }
 
-function separateStudents($students){
+function separateStudents($students)
+{
     $studentsEvaluation = [
         'EVALUATED' => [],
         'NOT_EVALUATED' => []
@@ -73,22 +76,23 @@ function separateStudents($students){
     return $studentsEvaluation;
 }
 
-function generateReport($students, $filename){
+function generateReport($students, $filename)
+{
     $pdf = new Fpdf();
 
     $pdf->AddFont('IndivisaSans', '', 'IndivisaDisplaySans-Regular.php');
     $pdf->AddFont('IndivisaSerif', '', 'IndivisaDisplaySerif-RegularItalic.php');
-    $pdf->AddFont('IndivisaTextSans', '', 'IndivisaTextSans-Regular.php');    
+    $pdf->AddFont('IndivisaTextSans', '', 'IndivisaTextSans-Regular.php');
 
     $studentsByEvaluation = separateStudents($students);
-    $percentage = round((count($studentsByEvaluation['EVALUATED'])/ count($students))*100, 2);
+    $percentage = round((count($studentsByEvaluation['EVALUATED']) / count($students)) * 100, 2);
 
     if (!empty($studentsByEvaluation['EVALUATED'])) {
         addNewPage($pdf);
         $pdf->SetFont('IndivisaSans', '', 14);
         $pdf->Cell(0, 10, mb_convert_encoding('Alumnos que realizaron la Evaluación Docente', 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
         $pdf->Ln(5);
-        
+
         foreach ($studentsByEvaluation['EVALUATED'] as $programName => $programStudents) {
             addTable($pdf, $programName, $programStudents);
         }
@@ -99,7 +103,7 @@ function generateReport($students, $filename){
         $pdf->SetFont('IndivisaSans', '', 14);
         $pdf->Cell(0, 10, mb_convert_encoding('Alumnos que no han realizado la Evaluación Docente', 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
         $pdf->Ln(5);
-        
+
         foreach ($studentsByEvaluation['NOT_EVALUATED'] as $programName => $programStudents) {
             addTable($pdf, $programName, $programStudents);
         }
@@ -112,7 +116,5 @@ function generateReport($students, $filename){
     $outputPath = 'reports/' . $filename . '.pdf';
     $pdf->Output('F', $outputPath);
     echo json_encode(['url' => '/modules/SED/reports/' . $filename . '.pdf']);
-    
-}
 
-?>
+}
