@@ -140,7 +140,7 @@ function getConfig(string $type)
     $stmt->execute();
 
     $res = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $res['data'];
+    return $res['data'] ?? "";
 }
 
 //^ UPDATES
@@ -171,14 +171,32 @@ function updateStudentField(Student $student, $field, $value)
 
 function updateConfig(string $type, $value)
 {
-    $db = getDatabaseConnection();
+    try {
+        $db = getDatabaseConnection();
 
-    $query = "UPDATE configs
-              SET data = :value
-              WHERE type LIKE '$type%'";
+        $querySelect = "SELECT * FROM configs
+                        WHERE type LIKE :type";
+        $queryUpdate = "UPDATE configs
+                        SET data = :value
+                        WHERE type LIKE :type";
+        $queryInsert = "INSERT INTO configs (type, data)
+                        VALUES (:type, :value)";
 
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(':value', $value);
-    $stmt->execute();
-    return $stmt->rowCount();
+        $stmt = $db->prepare($querySelect);
+        $stmt->bindParam(':type', $type);
+        $stmt->execute();
+
+        $stmt = ($stmt->rowCount() === 0) ? $db->prepare($queryInsert) : $db->prepare($queryUpdate);
+        $stmt->bindParam(':value', $value);
+        $stmt->bindParam(':type', $type);
+        $stmt->execute();
+
+        return $stmt->rowCount();
+    } catch (PDOException $e) {
+        error_log("Database error in updateConfig: " . $e->getMessage());
+        throw new Exception("Failed to update configuration");
+    } catch (Exception $e) {
+        error_log($e->getMessage());
+        throw $e;
+    }
 }

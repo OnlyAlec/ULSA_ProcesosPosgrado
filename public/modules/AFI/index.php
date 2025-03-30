@@ -15,14 +15,15 @@ try {
                     $res = array_values(array_map(fn($student) => $student->getJSON(), getStudents()));
                     break;
                 case 'getMissing':
+                    //? Not in use
                     require_once './gestorStudents.php';
                     $res = showStudentsAFIByStatus('missing');
                     break;
                 case 'getConfirm':
+                    //? Not in use
                     require_once './gestorStudents.php';
                     $res = showStudentsAFIByStatus('confirm');
                     break;
-                // TODO: Implement in JS
                 case 'setStatus':
                     require_once './gestorStudents.php';
                     $res = changeStatusAFI($_POST['ulsaID']);
@@ -31,7 +32,7 @@ try {
                     // TODO: Implementation of Brevo
                     break;
                 case 'setConfigDate':
-                    updateConfig($_POST['type'], $_POST['date']);
+                    $res = updateConfig($_POST['type'], $_POST['date']);
                     break;
                 default:
                     throw new RuntimeException('Not valid action!');
@@ -144,7 +145,7 @@ get_head("AFI");
                 </button>
             </div>
             <div id="forms-msf" class="subSectionAFI mb-5" style="display: none;">
-                <form action="" method="post" enctype="multipart/form-data" class="mt-4">
+                <form action="" method="post" enctype="multipart/form-data" class="mt-4 formsForm">
                     <div class="mb-3">
                         <input type="file" class="form-control form-control-lg pb-5" id="excelFile" name="excelFile"
                             accept=".xls,.xlsx" required>
@@ -158,7 +159,7 @@ get_head("AFI");
                 </form>
             </div>
             <div id="forms-lst" class="subSectionAFI mb-5" style="display: none;">
-                <form action="" method="post" enctype="multipart/form-data" class="mt-4">
+                <form action="" method="post" enctype="multipart/form-data" class="mt-4 formsForm">
                     <div class="mb-3">
                         <label for="excelForms" class="form-label">
                             <b>Excel de Microsoft Forms:</b>
@@ -243,7 +244,7 @@ get_head("AFI");
                         <th scope="col">Correo</th>
                     </tr>
                 </thead>
-                <tbody id="missingStudents">
+                <tbody>
                 </tbody>
             </table>
 
@@ -290,14 +291,12 @@ get_head("AFI");
                     </select>
                 </div>
                 <div class="col-12  mb-2">
-                    <button id="onlyMissing" type="button" class="btn btn-danger w-100" data-toggle="button"
-                        aria-pressed="false" autocomplete="off">
+                    <button id="onlyMissing" type="button" class="btn btn-danger w-100">
                         Solamente faltantes
                     </button>
                 </div>
                 <div class="col-12">
-                    <button id="onlyConfirm" type="button" class="btn btn-success w-100 data-toggle=" button"
-                        aria-pressed="false" autocomplete="off">
+                    <button id="onlyConfirm" type="button" class="btn btn-success w-100">
                         Solamente confirmados
                     </button>
                 </div>
@@ -312,7 +311,7 @@ get_head("AFI");
                         <th scope="col">Acciones</th>
                     </tr>
                 </thead>
-                <tbody id="missingStudentsConfirm">
+                <tbody>
                 </tbody>
             </table>
         </div>
@@ -325,46 +324,40 @@ get_head("AFI");
                 <b>reiniciaran los indicadores de los alumnos</b>.
             </p>
             <div class="col-md-12 bg-info rounded p-4 mb-3">
-                <div class="row justify-content-around">
+                <form action="" method="post" class="row justify-content-around dateForm" data-type="dateFirstAFI">
                     <div class="col-md-10">
                         <h3>Primer cuatrimestre:</h3>
-                        <form>
-                            <input class="form-control" type="text" id="dateCuadOne" placeholder="Selecciona una fecha"
-                                data-set="<?= getConfig("dateFirstAFI") ?? '' ?>">
-                        </form>
+                        <input class="form-control date" type="text" placeholder="Selecciona una fecha"
+                            data-set="<?= getConfig("dateFirstAFI") ?? '' ?>">
                     </div>
-                    <button class="col-md-1 btn btn-success text-white">
+                    <button type="submit" class="col-md-1 btn btn-success text-white">
                         <i class="fas fa-save fa-2x"></i>
                     </button>
-                </div>
+                </form>
             </div>
             <div class="col-md-12 bg-info rounded p-4 mb-3">
-                <div class="row justify-content-around">
+                <form action="" method="post" class="row justify-content-around dateForm" data-type="dateSecondAFI">
                     <div class="col-md-10">
                         <h3>Segundo cuatrimestre:</h3>
-                        <form>
-                            <input class="form-control" type="text" id="dateCuadTwo" placeholder="Selecciona una fecha"
-                                data-set="<?= getConfig("dateSecondAFI") ?? '' ?>">
-                        </form>
+                        <input class="form-control date" type="text" placeholder="Selecciona una fecha"
+                            data-set="<?= getConfig("dateSecondAFI") ?? '' ?>">
                     </div>
-                    <button class="col-md-1 btn btn-success text-white">
+                    <button type="submit" class="col-md-1 btn btn-success text-white">
                         <i class="fas fa-save fa-2x"></i>
                     </button>
-                </div>
+                </form>
             </div>
             <div class="col-md-12 bg-info rounded p-4 mb-3">
-                <div class="row justify-content-around">
+                <form action="" method="post" class="row justify-content-around dateForm" data-type="dateThirdAFI">
                     <div class="col-md-10">
                         <h3>Tercer cuatrimestre:</h3>
-                        <form>
-                            <input class="form-control" type="text" id="dateCuadThree"
-                                placeholder="Selecciona una fecha" data-set="<?= getConfig("dateThirdAFI") ?? '' ?>">
-                        </form>
+                        <input class="form-control date" type="text" placeholder="Selecciona una fecha"
+                            data-set="<?= getConfig("dateThirdAFI") ?? '' ?>">
                     </div>
-                    <button class="col-md-1 btn btn-success text-white">
+                    <button type="submit" class="col-md-1 btn btn-success text-white">
                         <i class="fas fa-save fa-2x"></i>
                     </button>
-                </div>
+                </form>
             </div>
         </div>
     </main>
