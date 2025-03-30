@@ -26,8 +26,11 @@ jobs:
                   path: ~/.composer/cache
                   key: php-cs-fixer-${{ hashFiles('.php-cs-fixer.dist.php') }}
 
+            - name: Install PHP CS Fixer
+              run: composer global require friendsofphp/php-cs-fixer --no-progress
+
             - name: Run PHP CS Fixer
-              run: composer global exec php-cs-fixer -- fix --allow-risky=yes --config=.php-cs-fixer.dist.php --verbose
+              run: $HOME/.composer/vendor/bin/php-cs-fixer fix --allow-risky=yes --config=.php-cs-fixer.dist.php --verbose
 
             - name: Commit changes
               uses: stefanzweifel/git-auto-commit-action@v5.0.0
