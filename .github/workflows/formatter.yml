@@ -64,7 +64,7 @@ jobs:
                   EOF
 
             - name: Run Prettier JS/HTML/CSS/JSON formatting
-              run: yarn exec prettier --write --ignore-path .prettierignore '**/*.{js,html,css,json}'
+              run: yarn exec prettier --write --ignore-path .prettierignore --config .prettierrc '**/*.{js,html,css,json}'
 
             - name: Commit changes
               uses: stefanzweifel/git-auto-commit-action@v5.0.0
