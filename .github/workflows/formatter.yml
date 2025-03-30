@@ -6,6 +6,9 @@ jobs:
     php-cs-fixer:
         runs-on: ubuntu-latest
 
+        permissions:
+            contents: write
+
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -24,7 +27,7 @@ jobs:
                   key: php-cs-fixer-${{ hashFiles('.php-cs-fixer.dist.php') }}
 
             - name: Run PHP CS Fixer
-              run: composer global exec php-cs-fixer fix --allow-risky=yes --config=.php-cs-fixer.dist.php --verbose
+              run: composer global exec php-cs-fixer fix --config=.php-cs-fixer.dist.php --verbose
 
             - name: Commit changes
               uses: stefanzweifel/git-auto-commit-action@v5.0.0
@@ -36,6 +39,9 @@ jobs:
 
     prettier:
         runs-on: ubuntu-latest
+
+        permissions:
+            contents: write
 
         steps:
             - name: Checkout code
@@ -60,7 +66,7 @@ jobs:
             - name: Commit changes
               uses: stefanzweifel/git-auto-commit-action@v5.0.0
               with:
-                  commit_message: Fix PHP styling
+                  commit_message: Fix Prettier styling
                   branch: ${{ github.head_ref }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
