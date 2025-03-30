@@ -74,12 +74,12 @@ class ComposerStaticInit62e10e6c8df9afc192311b196c75bb33
         ),
         'F' => 
         array (
+            'Fpdf\\' => 5,
             'Fidry\\CpuCoreCounter\\' => 21,
         ),
         'E' => 
         array (
             'Evenement\\' => 10,
-            'Fpdf\\' => 5,
         ),
         'D' => 
         array (
@@ -237,6 +237,10 @@ class ComposerStaticInit62e10e6c8df9afc192311b196c75bb33
         array (
             0 => __DIR__ . '/..' . '/graham-campbell/result-type/src',
         ),
+        'Fpdf\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/fpdf/fpdf/src/Fpdf',
+        ),
         'Fidry\\CpuCoreCounter\\' => 
         array (
             0 => __DIR__ . '/..' . '/fidry/cpu-core-counter/src',
@@ -244,9 +248,6 @@ class ComposerStaticInit62e10e6c8df9afc192311b196c75bb33
         'Evenement\\' => 
         array (
             0 => __DIR__ . '/..' . '/evenement/evenement/src',
-        'Fpdf\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/fpdf/fpdf/src/Fpdf',
         ),
         'Dotenv\\' => 
         array (
