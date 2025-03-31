@@ -43,7 +43,7 @@ $(function () {
                         if (!student.afi)
                             row = row.replace(
                                 "~~~",
-                                `<button class="col btn btn-info btn-sm text-white sendEmail" data-email=${student.email}><i class= "fas fa-paper-plane"></i></button>`
+                                `<button class="col btn btn-info btn-sm text-white sendEmail" data-ulsaID=${student.ulsaID}><i class= "fas fa-paper-plane"></i></button>`
                             );
                         else row = row.replace("~~~", "");
 
@@ -163,16 +163,50 @@ function setupActions() {
             });
         });
 
-    // TODO: Config
     $(".sendEmail")
         .off("click")
         .on("click", function () {
-            const btn = $(this);
-            const email = btn.data("email");
+            const button = $(this);
+            const buttonConfirm = button.parent().find(".statusAFI");
+            const ulsaID = button.data("ulsaid");
+            const divError = $(".sectionsAFI");
+
             $.ajax({
                 url: "",
                 type: "POST",
-                data: { action: "sendEmail", email: email },
+                data: { action: "sendEmail", ulsaID: ulsaID },
+                beforeSend: function () {
+                    $(".alert").remove();
+                    button.prop("disabled", true);
+                    buttonConfirm.prop("disabled", true);
+                },
+                success: function (response) {
+                    if (!response.success || !response.data.delivered) {
+                        displayMessage(
+                            divError,
+                            response.message ?? "No se pudo mandar el correo",
+                            "error"
+                        );
+                        return;
+                    }
+                    displayMessage(
+                        divError,
+                        "Correo enviado correctamente: " + response.data.receipt
+                    );
+                    divError[0].scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                        inline: "nearest",
+                    });
+                },
+                error: function (xhr) {
+                    const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+                    displayMessage(divError, errorMsg, "error");
+                },
+                complete: function () {
+                    button.prop("disabled", false);
+                    buttonConfirm.prop("disabled", false);
+                },
             });
         });
 }

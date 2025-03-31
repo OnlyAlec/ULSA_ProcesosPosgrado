@@ -1,6 +1,7 @@
 <?php
 
 require_once '../../../includes/config/constants.php';
+require_once INCLUDES_DIR . '/utilities/mailer.php';
 
 function showStudentsAFIByStatus($status)
 {
@@ -19,4 +20,11 @@ function changeStatusAFI($ulsaID)
     }
 
     return ["newStatus" => $newStatus];
+}
+
+function sendEmailRemainder(Student $student)
+{
+    $mailer = new Mailer($student, "¡No dejes pasar estas fechas importantes!", "remainderAFI");
+    $mailer->constructEmail();
+    return  $mailer->send();
 }

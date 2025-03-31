@@ -25,6 +25,10 @@ function getDatabaseConnection()
     return $connection;
 }
 
+
+/**
+ * @return Student[]
+ */
 function getStudents()
 {
     $studentsDB = [];
@@ -133,6 +137,50 @@ function getSpecialtyPrograms(): array
     return $programsS;
 }
 
+/**
+ * @return Program[]
+ */
+function getPrograms(): array
+{
+    $programDB = [];
+    $db = getDatabaseConnection();
+
+    $query = "SELECT * FROM program";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $programDB[] = new Program($row['id'], $row['career']);
+    }
+    return $programDB;
+}
+
+function getProgramByID(int $id): Program
+{
+    $db = getDatabaseConnection();
+
+    $query = "SELECT * FROM program WHERE id = :id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->execute();
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return new Program($row['id'], $row['career']);
+}
+
+function getProgramByName(string $name): Program
+{
+    $db = getDatabaseConnection();
+
+    $query = "SELECT * FROM program WHERE career = :name";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':name', $name);
+    $stmt->execute();
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return new Program($row['id'], $row['career']);
+}
+
 function getConfig(string $type)
 {
     $db = getDatabaseConnection();
@@ -144,6 +192,8 @@ function getConfig(string $type)
     $res = $stmt->fetch(PDO::FETCH_ASSOC);
     return $res['data'] ?? "";
 }
+
+//^ INSERTS
 
 //^ UPDATES
 function updateStudentFieldBoolean($id, $field, $value)

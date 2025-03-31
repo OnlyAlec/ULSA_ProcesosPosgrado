@@ -105,12 +105,12 @@ function getProgramCount($db, $filtered)
     $filteredCounts = [];
 
     foreach ($db as $student) {
-        $program = $student->getCarrer();
+        $program = $student->getProgram();
         $totalCounts[$program] = ($totalCounts[$program] ?? 0) + 1;
     }
 
     foreach ($filtered as $student) {
-        $program = $student->getCarrer();
+        $program = $student->getProgram();
         $filteredCounts[$program] = ($filteredCounts[$program] ?? 0) + 1;
     }
 
@@ -192,7 +192,7 @@ function createExcel($students, $programCount)
             $student->getLastName(),
             $student->getName(),
             $student->getUlsaId(),
-            $student->getCarrer(),
+            $student->getProgram(),
             $student->getEmail()
         ];
     }
@@ -261,7 +261,7 @@ function getGraphData($filteredStudents)
     ];
 
     foreach ($filteredStudents as $student) {
-        $carrer = strtolower($student->getCarrer());
+        $carrer = strtolower($student->getProgram());
 
         if (str_starts_with($carrer, 'maestría')) {
             $data['maestria'][$carrer] = ($data['maestria'][$carrer] ?? 0) + 1;

@@ -1,0 +1,6 @@
+<!-- Footer -->
+<mj-section background-color="#001D68">
+  <mj-column>
+    <mj-spacer height="50px" />
+  </mj-column>
+</mj-section>

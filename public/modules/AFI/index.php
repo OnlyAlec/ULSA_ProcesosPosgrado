@@ -1,8 +1,9 @@
 <?php
 require_once '../../../includes/config/constants.php';
 require_once INCLUDES_DIR . "/utilities/database.php";
-require_once INCLUDES_DIR . '/models/student.php';
 require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
+require_once INCLUDES_DIR. "/models/student.php";
+
 ob_start();
 
 try {
@@ -10,26 +11,26 @@ try {
         header('Content-Type: application/json');
 
         if (isset($_POST['action'])) {
+            require_once './gestorStudents.php';
+
             switch ($_POST['action']) {
                 case 'getTableStudents':
                     $res = array_values(array_map(fn ($student) => $student->getJSON(), getStudents()));
                     break;
                 case 'getMissing':
                     //? Not in use
-                    require_once './gestorStudents.php';
                     $res = showStudentsAFIByStatus('missing');
                     break;
                 case 'getConfirm':
                     //? Not in use
-                    require_once './gestorStudents.php';
                     $res = showStudentsAFIByStatus('confirm');
                     break;
                 case 'setStatus':
-                    require_once './gestorStudents.php';
                     $res = changeStatusAFI($_POST['ulsaID']);
                     break;
                 case 'sendEmail':
-                    // TODO: Implementation of Brevo
+                    $student = getStudentFromUlsaID($_POST['ulsaID']);
+                    $res = sendEmailRemainder($student);
                     break;
                 case 'setConfigDate':
                     $res = updateConfig($_POST['type'], $_POST['date']);
