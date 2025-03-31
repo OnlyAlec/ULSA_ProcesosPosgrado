@@ -2,7 +2,9 @@
     "require": {
         "phpoffice/phpspreadsheet": "^4.1",
         "vlucas/phpdotenv": "^5.6",
-        "fpdf/fpdf": "^1.86"
+        "fpdf/fpdf": "^1.86",
+        "getbrevo/brevo-php": "1.x.x",
+        "spatie/mjml-php": "^1.2"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.73"

@@ -1,0 +1,53 @@
+{
+    "name": "spatie/mjml-php",
+    "description": "Convert MJML to HTML using PHP",
+    "keywords": [
+        "spatie",
+        "mjml-php"
+    ],
+    "homepage": "https://github.com/spatie/mjml-php",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Freek Van der Herten",
+            "email": "freek@spatie.be",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "symfony/process": "^6.3.2|^7.0"
+    },
+    "require-dev": {
+        "pestphp/pest": "^2.16",
+        "laravel/pint": "^1.11",
+        "spatie/ray": "^1.37.2"
+    },
+    "suggest": {
+        "spatie/mjml-sidecar": "When you want to run MJML compilation through Sidecar in a Laravel project"
+    },
+    "autoload": {
+        "psr-4": {
+            "Spatie\\Mjml\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Spatie\\Mjml\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "format": "vendor/bin/pint"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
