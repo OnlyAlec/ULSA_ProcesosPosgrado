@@ -121,7 +121,7 @@ function generateReport($students, $filename)
     $pdf->Cell(0, 10, mb_convert_encoding('Total de Alumnos: ' . count($students), 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
     $pdf->Cell(0, 10, mb_convert_encoding('Porcentaje de Cumplimiento: ' . $percentage . '%', 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
 
-    $outputPath = "reports/$filename.pdf";
+    $outputPath = $reportsDir . $filename . '.pdf';
     $pdf->Output('F', $outputPath);
     echo json_encode(['url' => "/modules/SED/reports/$filename.pdf"]);
 
