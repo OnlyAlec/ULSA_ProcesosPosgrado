@@ -1,26 +1,23 @@
 <?php
 
-class Student
+class StudentBase
 {
     private string $firstName;
-    private string $maternalSurname;
-    private string $paternalSurname;
+    private string $lastName;
     private int $ulsaID;
-    private string $typeDesc;
-    private string $area;
+    private string $carrer;
     private string $email;
-    private bool $sed;
 
-    public function __construct($firstName, $maternalSurname, $paternalSurname, $ulsaID, $typeDesc, $area)
+
+    public function __construct($firstName, $lastName, $ulsaID, $carrer, $email)
     {
         $this->firstName = $firstName;
-        $this->maternalSurname = $maternalSurname;
-        $this->paternalSurname = $paternalSurname;
-        $this->typeDesc = $typeDesc;
-        $this->area = $area;
+        $this->lastName = $lastName;
+        $this->carrer = $carrer;
+        $this->email = $email;
         $validatedId = $this->validateUlsaId($ulsaID);
         if ($validatedId === -1) {
-            throw new InvalidArgumentException("Invalid ULSA ID ($ulsaID) - $firstName $maternalSurname");
+            throw new InvalidArgumentException("Invalid ULSA ID ($ulsaID) - $firstName $lastName");
         }
         $this->ulsaID = $validatedId;
     }
@@ -34,9 +31,21 @@ class Student
     {
         $ulsa_id = $this->normalizeUlsaId($ulsa_id);
 
-        if (strlen($ulsa_id) == 6)
+        if (strlen($ulsa_id) == 6) {
             return (int) $ulsa_id;
+        }
         return -1;
+    }
+
+    public function getJSON()
+    {
+        return [
+            'firstName' => $this->getName(),
+            'lastName' => $this->getLastName(),
+            'ulsaID' => $this->getUlsaId(),
+            'carrer' => $this->getCarrer(),
+            'email' => $this->getEmail()
+        ];
     }
 
     public function getName()
@@ -44,14 +53,9 @@ class Student
         return $this->firstName;
     }
 
-    public function getApm()
+    public function getLastName()
     {
-        return $this->maternalSurname;
-    }
-
-    public function getApp()
-    {
-        return $this->paternalSurname;
+        return $this->lastName;
     }
 
     public function getUlsaId()
@@ -59,24 +63,9 @@ class Student
         return $this->ulsaID;
     }
 
-    public function getTypeDesc()
+    public function getCarrer()
     {
-        return $this->typeDesc;
-    }
-
-    public function setTypeDesc($typeDesc)
-    {
-        $this->typeDesc = $typeDesc;
-    }
-
-    public function getArea()
-    {
-        return $this->area;
-    }
-
-    public function setArea($area)
-    {
-        $this->area = $area;
+        return $this->carrer;
     }
 
     public function getEmail()
@@ -88,6 +77,20 @@ class Student
     {
         $this->email = $email;
     }
+}
+
+class Student extends StudentBase
+{
+    private bool $sed;
+    private bool $afi;
+
+    public function getJSON()
+    {
+        $json = parent::getJSON();
+        $json['sed'] = $this->getSed();
+        $json['afi'] = $this->getAfi();
+        return $json;
+    }
 
     public function getSed()
     {
@@ -97,5 +100,15 @@ class Student
     public function setSed($sed)
     {
         $this->sed = $sed;
+    }
+
+    public function getAfi()
+    {
+        return $this->afi;
+    }
+
+    public function setAfi($afi)
+    {
+        $this->afi = $afi;
     }
 }

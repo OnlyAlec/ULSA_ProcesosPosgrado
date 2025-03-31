@@ -1,5 +1,7 @@
 <?php
 require_once '../../../includes/config/constants.php';
+require_once INCLUDES_DIR . "/utilities/database.php";
+require_once INCLUDES_DIR . "/models/student.php";
 ob_start();
 
 try {
@@ -10,7 +12,7 @@ try {
         $regex = '/^[A-Za-z]$/';
         $uploadDir = __DIR__ . '/uploads/';
 
-        if (isset($_FILES['gaExcelFile'])) {
+        if ($_POST["action"] === "registerFromExcel" && isset($_FILES['gaExcelFile'])) {
             if ($_FILES['gaExcelFile']['error'] !== UPLOAD_ERR_OK)
                 throw new RuntimeException('Error uploading file.');
 
@@ -32,7 +34,8 @@ try {
                 throw new RuntimeException('Error uploading file.');
 
             $res = restartDatabaseFromExcel("$uploadDir$fileName", $_POST["claveUlsaCol"], $_POST["nombreCol"], $_POST["apellidosCol"], $_POST["carreraCol"], $_POST["emailCol"]);
-        } else {
+
+        } else if ($_POST["action"] === "registerOneStudent"){
 
             if (!preg_match('/^\d{6}$/', $_POST["claveUlsa"])) {
                 throw new RuntimeException('Clave ULSA inválida. Debe ser un número de 6 dígitos.');
@@ -51,7 +54,16 @@ try {
             }
             
             $res = insertOneStudent($_POST["claveUlsa"], $_POST["nombre"], $_POST["apellidos"],$_POST["carrera"],$_POST["email"]);
+        
+        } else if ($_POST["action"] === "deleteOneStudent"){
+            if (!preg_match('/^\d{6}$/', $_POST["claveUlsaDelete"])) {
+                throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
+            }
 
+            $res = deleteOneStudent($_POST["claveUlsaDelete"]);
+
+        } else if ($_POST["action"] === "deleteAllStudents"){
+            $res = deleteAllStudents();
         }
 
         header('Content-Type: application/json');
@@ -106,6 +118,7 @@ get_head("GA");
                 <h2>Carga de concentrado de alumnos en Excel:</h2>
 
                 <form action="" method="post" enctype="multipart/form-data" class="mt-4">
+                    <input type="hidden" name="action" value="registerFromExcel">
                     <div class="mb-3">
                         <h4 for="gaExcelFile" class="form-label">Subir archivo Excel:</h4>
                         <input type="file" class="form-control form-control-lg w-100 pb-5 pl-2" id="gaExcelFile" name="gaExcelFile" accept=".xls,.xlsx" required>
@@ -159,6 +172,8 @@ get_head("GA");
                 <h2>Registro único de alumno:</h2>
 
                 <form action="" method="post" enctype="multipart/form-data" class="mt-4">
+                    <input type="hidden" name="action" value="registerOneStudent">
+
                     <div class="d-flex align-items-center">
                         <h4>Datos del alumno</h4>
                         <div class="fs-6 text-muted ml-2 mb-1">(no utilizar "al" en la Clave Ulsa )</div>
@@ -205,12 +220,65 @@ get_head("GA");
 
             <div id="section-consultar" class="section d-none">
                 <h2>Consultar Alumnos</h2>
-                <p>Aquí irá la interfaz para consultar alumnos.</p>
+                <table class="table table-bordered mt-4" id="studentsTable">
+                    <thead>
+                        <tr>
+                            <th>Clave ULSA</th>
+                            <th>Nombre Completo</th>
+                            <th>Correo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTable">
+                        <?php
+                        $studentsDB = getStudents();
+                        foreach ($studentsDB as $student): ?>
+                            <tr data-carrer="<?= $student->getCarrer() ?>">
+                                <td><?= htmlspecialchars($student->getUlsaId()) ?></td>
+                                <td><?= htmlspecialchars($student->getName()) . " " . htmlspecialchars($student->getLastName()) ?></td>
+                                <td><?= htmlspecialchars($student->getEmail()) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
 
             <div id="section-eliminar" class="section d-none">
-                <h2>Eliminar Alumnos</h2>
-                <p>Aquí irá la interfaz para eliminar alumnos.</p>
+
+                <h2>Borrado único de alumno:</h2>
+                <form action="" method="post" enctype="multipart/form-data" class="mt-4">
+                    <input type="hidden" name="action" value="deleteOneStudent">
+                    <div class="d-flex align-items-center">
+                        <h4>Clave Ulsa del Alumno</h4>
+                        <div class="fs-6 text-muted ml-2 mb-1">(no utilizar "al" en la Clave Ulsa )</div>
+                    </div>
+                    <br>
+
+                    <div class="mb-3">
+                        <div class="row align-items-center mb-2">
+                            <div class="col-6 d-flex">
+                                <label class="col-4" for="claveUlsaDelete">Clave Ulsa:</label>
+                                <input type="text" class="col-6 form-control w-auto" id="claveUlsaDelete" name="claveUlsaDelete" placeholder="Clave Ulsa" maxlength="6">
+                            </div>
+                    </div>
+
+                    <br>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">Eliminar alumno</button>
+                    </div>
+                </form>
+
+                <br>
+                <hr>
+
+                <h2>Borrado de todos los alumnos</h2>
+                <form action="" method="post" enctype="multipart/form-data" class="mt-4">
+                    <input type="hidden" name="action" value="deleteAllStudents">
+                    <br>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-danger">Eliminar alumnos</button>
+                    </div>
+                </form>
+
             </div>
         </div>
     </main>

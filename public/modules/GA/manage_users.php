@@ -77,6 +77,36 @@ function insertOneStudent($ulsaId, $name, $lastname, $career, $email){
     }
 }
 
+function deleteOneStudent($ulsaId) {
+    ErrorList::clear();
+    try {
+        $db = getDatabaseConnection();
+        $stmt = $db->prepare("DELETE FROM student WHERE ulsa_id = (:ulsaId)");
+        $stmt->execute([':ulsaId' => $ulsaId]);   
+
+        return [
+            'success' => true,
+            'errors' => ErrorList::getAll()
+        ];       
+    } catch (RuntimeException $e) {
+        throw new RuntimeException(message: $e->getMessage());
+    }
+}
+
+function deleteAllStudents() {
+    ErrorList::clear();
+    try {
+        $db = getDatabaseConnection();
+        $db->exec("DELETE FROM student");
+
+        return [
+            'success' => true,
+            'errors' => ErrorList::getAll()
+        ];       
+    } catch (RuntimeException $e) {
+        throw new RuntimeException(message: $e->getMessage());
+    }
+}
 
 function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $careerColumn, $emailColumn) {
     $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
