@@ -80,13 +80,12 @@ function generateReport($students, $filename)
 {
     $pdf = new Fpdf();
     $reportsDir = __DIR__ . '/reports/';
-    if (!is_dir($reportsDir)) {
+    if(!is_dir($reportsDir))
         mkdir($reportsDir, 0777, true);
-    }
 
-    // $pdf->AddFont('IndivisaSans', '', 'IndivisaDisplaySans-Regular.php');
-    // $pdf->AddFont('IndivisaSerif', '', 'IndivisaDisplaySerif-RegularItalic.php');
-    // $pdf->AddFont('IndivisaTextSans', '', 'IndivisaTextSans-Regular.php');
+    $pdf->AddFont('IndivisaSans', '', 'IndivisaDisplaySans-Regular.php');
+    $pdf->AddFont('IndivisaSerif', '', 'IndivisaDisplaySerif-RegularItalic.php');
+    $pdf->AddFont('IndivisaTextSans', '', 'IndivisaTextSans-Regular.php');
 
     $studentsByEvaluation = separateStudents($students);
 
