@@ -21,7 +21,7 @@ jobs:
 
             - name: Backup .env
               run: |
-                  ssh -v -i ~/.ssh/deploy_key \
+                  ssh -i ~/.ssh/deploy_key \
                   -o StrictHostKeyChecking=no \
                   -p ${{ secrets.PORT }} \
                   ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
@@ -40,7 +40,7 @@ jobs:
 
             - name: Restore .env
               run: |
-                  ssh -v -i ~/.ssh/deploy_key \
+                  ssh -i ~/.ssh/deploy_key \
                   -o StrictHostKeyChecking=no \
                   -p ${{ secrets.PORT }} \
                   ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
