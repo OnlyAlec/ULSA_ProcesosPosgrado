@@ -46,7 +46,7 @@ get_head("SED");
     get_header("Seguimiento de Evaluación Docente");
     ?>
     <main class="container content marco">
-        <h1 class="text-center">Lista de alumnos</h1>
+        <h1>Lista de alumnos</h1>
         <div class="row justify-content-end">
             <div class="col-10">
                 <label for="programType">Seleccionar Tipo de Programa:</label>
@@ -63,47 +63,6 @@ get_head("SED");
                 </a>
             </div>
 
-<main class="container content marco">
-        <div>
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="mb-2">Carga del concentrado SED en Excel:</h1>
-                <a href="../../index.php" class="btn btn-outline-primary">Regresar</a>
-            </div>
-            <br>
-            <form action="" method="post" enctype="multipart/form-data" class="mt-4">
-                <div class="mb-3">
-                    <h4 for="sedExcelFile" class="form-label">Subir archivo Excel:</h4>
-                    <input type="file" class="form-control form-control-lg w-100 pb-5 pl-2" id="sedExcelFile" name="sedExcelFile" accept=".xls,.xlsx" required>
-                    <div id="emailHelp" class="form-text d-flex justify-content-end">Los valores de Estatus se actualizarán en la base de datos.</div>
-                </div>
-                
-                <div class="d-flex align-items-center">
-                    <h4>Encabezados</h4>
-                    <div class="fs-6 text-muted ml-2 mb-1">(ej: A, B, C, ...)</div>
-                </div>
-
-                <div class="mb-3">
-                    <div class="row align-items-center mb-2">
-                        <label class="col-2" for="claveUlsa" class="form-label me-2">Clave Ulsa:</label>
-                        <input type="text" class="col-2 form-control w-auto" id="claveUlsa" name="claveUlsa" placeholder="Columna" maxlength="1">
-                    </div>
-                    <div class="row align-items-center mb-2">
-                        <label class="col-2" for="nombre" class="form-label me-2">Nombre:</label>
-                        <input type="text" class="col-2 form-control w-auto" id="nombre" name="nombre" placeholder="Columna" maxlength="1">
-                    </div>
-                    <div class="row align-items-center">
-                        <label class="col-2" for="estatus" class="form-label me-2">Estatus:</label>
-                        <input type="text" class="col-2 form-control w-auto" id="estatus" name="estatus" placeholder="Columna" maxlength="1">
-                    </div>
-                </div>
-                
-                <div class="d-flex justify-content-end">
-                    <button type="submit" class="btn btn-danger">Cargar Excel</button>
-                </div>
-            </form>
-            <br>
-            <hr>
-            <br>
             <div id="filterArea" class="col-12" style="display:none;">
                 <label for="programArea" class="mt-2">Seleccionar Área:</label>
                 <select id="programArea" class="form-control">
