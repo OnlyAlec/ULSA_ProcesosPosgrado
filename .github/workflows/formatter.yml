@@ -53,16 +53,6 @@ jobs:
             - name: Install Prettier with Yarn
               run: yarn add prettier --dev --exact --frozen-lockfile
 
-            - name: Create Prettier ignore file
-              run: |
-                  cat <<EOF > .prettierignore
-                  public/assets/js/datepicker-es.js
-                  public/assets/js/jquery-ui.js
-                  public/assets/js/jquery.min.js
-                  public/assets/js/tinymce/**
-                  public/assets/js/bootstrap/**
-                  EOF
-
             - name: Run Prettier JS/HTML/CSS/JSON formatting
               run: yarn exec prettier --write --ignore-path .prettierignore --config .prettierrc '**/*.{js,html,css,json}'
 
