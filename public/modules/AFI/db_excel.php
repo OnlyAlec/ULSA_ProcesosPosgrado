@@ -16,12 +16,18 @@ function init_process($filePath)
     $outputFile = null;
     $urloutputFile = null;
 
+    /*¿Esto está bien?*/
+    $graphData = null;
+
     try {
         $studentsExcel = processExcel($filePath);
         $studentsDB = getStudents();
         $filteredStudents = compareStudents($studentsExcel, $studentsDB);
         $programCount = getProgramCount($studentsDB, $filteredStudents);
         $outputFile = createExcel($filteredStudents, $programCount);
+
+        /*¿Aquí esta bien la llamada a la función?*/
+        $graphData = getGraphData($filteredStudents);
 
         $urloutputFile = filePathToUrl($outputFile);
         $studentsArray = array_map(fn($student) => [
@@ -39,7 +45,10 @@ function init_process($filePath)
                 'students' => $studentsArray,
                 'excel' => $urloutputFile,
                 'totalDB' => count($studentsDB),
-                'totalFiltered' => count($studentsArray)
+                'totalFiltered' => count($studentsArray),
+                
+                /*¿Esto está bien?*/
+                'graphData' => $graphData
             ],
             'errors' => ErrorList::getAll()
         ];
@@ -293,6 +302,14 @@ function createExcel($students, $programCount)
         $sheet2->getColumnDimensionByColumn($i)->setAutoSize(true);
     }
 
+    //* Add Graphs
+
+    $sheet3 = $newSpreadsheet->createSheet();
+    $sheet3->setTitle('Gráficas');
+    $sheet2->setCellValue('A1', 'Gráficas de ');
+
+    
+
     //* Save File
     if (!file_exists(XLSX_DIR)) {
         mkdir(XLSX_DIR, 0777, true);
@@ -304,4 +321,38 @@ function createExcel($students, $programCount)
     $writer->save($outputFile);
 
     return $outputFile;
+}
+
+
+
+
+/*Funcion: getGraphData
+    - Recibe: La lista de estudiantes filtrada.
+    - Envía: La información a graficar para Chart JS.
+    
+    Descripción: En un array guardamos el número de alumnos que no han firmado por tipo de programa y dentro sus áreas.
+        1. Recorrer la lista de los alumnos.
+        2. Obtener por cada alumno su área y tipo.
+        3. Guardar el alumno en especialidad o en maestría según corresponda.
+        4. Dependiente del área del alumno sumamos un 1.
+        5. Retornar el array con la información final a codificar.*/
+function getGraphData ($filteredStudents) {
+    $data = [
+        'maestria' => [],           // --> Aquí se almacenarán los alumnos de Maestría 
+        'especialidad' => []        // --> Aquí se almacenarán los alumnos de Especialidad 
+    ];
+
+    foreach ($filteredStudents as $student) {
+        $area = strtolower($student->getArea()); 
+        $tipo = strtolower($student->getTypeDesc()); 
+       
+        if ($tipo === 'maestría') {
+            $data['maestria'][$area] = ($data['maestria'][$area] ?? 0) + 1;
+        } 
+        elseif ($tipo === 'especialidad') {
+            $data['especialidad'][$area] = ($data['especialidad'][$area] ?? 0) + 1;
+        }
+    }
+
+    return $data;
 }

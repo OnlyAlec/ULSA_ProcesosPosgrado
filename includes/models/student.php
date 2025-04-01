@@ -8,13 +8,14 @@ class StudentBase
     private string $carrer;
     private string $email;
 
-
     public function __construct($firstName, $lastName, $ulsaID, $carrer, $email)
+
     {
         $this->firstName = $firstName;
         $this->lastName = $lastName;
         $this->carrer = $carrer;
         $this->email = $email;
+
         $validatedId = $this->validateUlsaId($ulsaID);
         if ($validatedId === -1) {
             throw new InvalidArgumentException("Invalid ULSA ID ($ulsaID) - $firstName $lastName");

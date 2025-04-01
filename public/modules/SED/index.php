@@ -1,55 +1,39 @@
 <?php
 require_once '../../../includes/config/constants.php';
+require_once INCLUDES_DIR . "/utilities/database.php";
+require_once INCLUDES_DIR . "/models/student.php";
+
 ob_start();
+$studentsDB = getStudents();
 
-try {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        require_once './update_from_excel.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) { 
+    require_once './update_functions.php';
+    header('Content-Type: application/json');
 
-        $allowedExtensions = ['xls', 'xlsx'];
-        $regex = '/^[A-Za-z]$/';
-        $uploadDir = __DIR__ . '/uploads/';
+    if ($_POST['action'] === 'updateSingleSED') {
+        $studentID = $_POST['studentID'] ?? null;
+        $newState = $_POST['state'] ?? null;
 
-        if (isset($_FILES['sedExcelFile'])) {
-            if ($_FILES['sedExcelFile']['error'] !== UPLOAD_ERR_OK)
-                throw new RuntimeException('Error uploading file.');
-
-            $fileTmpPath = $_FILES['sedExcelFile']['tmp_name'];
-            $fileName = str_replace(' ', '_', htmlspecialchars($_FILES['sedExcelFile']['name'], ENT_QUOTES, 'UTF-8'));
-            $ext = strtolower(pathinfo($_FILES['sedExcelFile']['name'], PATHINFO_EXTENSION));
-
-            if (!in_array($ext, $allowedExtensions))
-                throw new RuntimeException('Invalid file type.');
-
-            if(!preg_match($regex, $_POST["claveUlsa"]) || !preg_match($regex, $_POST["nombre"]) || !preg_match($regex, $_POST["estatus"])){
-                throw new RuntimeException('Invalid column index.');
-            }
-
-            if (!is_dir($uploadDir))
-                mkdir($uploadDir, 0777, true);
-
-            if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName"))
-                throw new RuntimeException('Error uploading file.');
-
-            $res = processExcel("$uploadDir$fileName", $_POST["claveUlsa"], $_POST["nombre"], $_POST["estatus"]);
-        } 
-
-        header('Content-Type: application/json');
-        echo json_encode($res);
+        $response = updateSingleSED($studentID, $newState);
+        echo json_encode($response);
         exit;
     }
-} catch (RuntimeException $e) {
-    $response = [
-        'success' => false,
-        'message' => $e->getMessage(),
-    ];
-    http_response_code(500);
-    header('Content-Type: application/json');
-    echo json_encode($response);
-    exit;
+
+    if ($_POST['action'] === 'updateSED') {
+        $studentIDs = $_POST['studentIDS'] ?? [];
+        $response = updateSelectedSED($studentIDs);
+        echo json_encode($response);
+        exit;
+    }
+
+    if ($_POST['action'] === 'getMasters' || $_POST['action'] === 'getSpecialty' || $_POST['action'] === '') {
+        $response = getPrograms($_POST['action']);
+        echo json_encode($response);
+        exit;
+    }
 }
-ob_end_flush();
 ?>
+
 <!DOCTYPE html>
 
 <?php
@@ -61,6 +45,23 @@ get_head("SED");
     <?php require_once INCLUDES_DIR . '/templates/header.php';
     get_header("Seguimiento de Evaluación Docente");
     ?>
+    <main class="container content marco">
+        <h1 class="text-center">Lista de alumnos</h1>
+        <div class="row justify-content-end">
+            <div class="col-10">
+                <label for="programType">Seleccionar Tipo de Programa:</label>
+                <select id="programType" class="form-control">
+                    <option value="">Todos</option>
+                    <option value="getMasters">Maestría</option>
+                    <option value="getSpecialty">Especialidad</option>
+                </select>
+            </div>
+
+            <div class="col-2">
+                <a href="load_excel.php">
+                    <button type="button" class="btn btn-primary h-100 w-100">Cargar Excel</button>
+                </a>
+            </div>
 
 <main class="container content marco">
         <div>
@@ -103,6 +104,51 @@ get_head("SED");
             <br>
             <hr>
             <br>
+            <div id="filterArea" class="col-12" style="display:none;">
+                <label for="programArea" class="mt-2">Seleccionar Área:</label>
+                <select id="programArea" class="form-control">
+                    <option value="">Seleccione un tipo de programa primero</option>
+                </select>
+            </div>
+        </div>
+
+        <table class="table table-bordered mt-4" id="studentsTable">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAll" style="width: 20px; height: 20px;"></th>
+                    <th>Clave ULSA</th>
+                    <th>Nombre Completo</th>
+                    <th>Correo</th>
+                    <th>Estatus SED</th>
+                </tr>
+            </thead>
+            <tbody id="studentsTable">
+                <?php
+                $studentsDB = getStudents();
+                foreach ($studentsDB as $student): ?>
+                    <tr data-carrer="<?= $student->getCarrer() ?>">
+                        <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
+                        <td><?= htmlspecialchars($student->getUlsaId()) ?></td>
+                        <td><?= htmlspecialchars($student->getName()) . " " . htmlspecialchars($student->getLastName()) ?></td>
+                        <td><?= htmlspecialchars($student->getEmail()) ?></td>
+                        <td>
+                            <button class="changeSED border-0" data-student-id="<?= $student->getUlsaId() ?>">
+                                <?= $student->getSed() ? '<i class="fas fa-check-square fa-2x" style="color:#36b18c"></i>' : '<i class="fas fa-minus-square fa-2x" style="color:rgb(206, 85, 85)"></i>' ?>
+                            </button>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+
+        <div class="d-flex justify-content-between">
+            <button id="confirmChanges" class="btn btn-success w-50" disabled>Confirmar Cambios</button>
+            <button id="generateReport" class="btn btn-danger" data-filename="reporte_evaluaciones">Generar Reporte</button>
+        </div>
+
+        <div id="selectedCountContainer">
+            <p style="margin-top:15px; font-size: 20px; font-weight: bold;">Alumnos seleccionados: <span id="selectedCount">0</span></p>
+        </div>
     </main>
 
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
@@ -113,6 +159,7 @@ get_head("SED");
     <script src="<?= ASSETS_PATH ?>/js/util.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/sidebarmenu.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/SED/scripts.js"></script>
+    <script src="<?= ASSETS_PATH ?>/js/SED/table.js"></script>
 </body>
 
 </html>

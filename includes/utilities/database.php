@@ -52,6 +52,7 @@ function getStudents()
             );
             $student->setSed($row['sed']);
             $student->setAfi($row['afi']);
+
             $studentsDB[] = $student;
         } catch (InvalidArgumentException $e) {
             ErrorList::add($e->getMessage());
@@ -59,4 +60,34 @@ function getStudents()
         }
     }
     return $studentsDB;
+}
+
+function getMastersPrograms(): array
+{
+    $programsM = [];
+    $db = getDatabaseConnection();
+
+    $query = "SELECT DISTINCT career FROM program WHERE LOWER(career) LIKE 'maestría%'";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $programsM[] = ucfirst(strtoupper($row['career']));
+    }
+    return $programsM;
+}
+
+function getSpecialtyPrograms(): array
+{
+    $programsS = [];
+    $db = getDatabaseConnection();
+
+    $query = "SELECT DISTINCT career FROM program WHERE LOWER(career) LIKE 'especialidad%'";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $programsS[] = ucfirst(strtoupper($row['career']));
+    }
+    return $programsS;
 }
