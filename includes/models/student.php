@@ -114,4 +114,14 @@ class Student extends StudentBase
     {
         $this->sed = $sed;
     }
+
+    public function getAfi()
+    {
+        return $this->afi;
+    }
+
+    public function setAfi($afi)
+    {
+        $this->afi = $afi;
+    }
 }
