@@ -1,5 +1,5 @@
 <?php
-require_once '../../../includes/config/constants.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once INCLUDES_DIR . "/utilities/database.php";
 require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
 require_once INCLUDES_DIR . "/models/student.php";
@@ -290,4 +290,3 @@ get_header("Gestión de Alumnos");
 </body>
 
 </html>
-

@@ -2,6 +2,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Only listen for Xdebug",
+            "type": "php",
+            "request": "launch",
+            "port": [
+                9003,
+                9000
+            ]
+        },
+        {
             "name": "Launch currently open script",
             "type": "php",
             "request": "launch",
@@ -16,7 +25,6 @@
                 "XDEBUG_CONFIG": "client_port=${port}"
             }
         },
-
         {
             "name": "Launch Edge",
             "request": "launch",
