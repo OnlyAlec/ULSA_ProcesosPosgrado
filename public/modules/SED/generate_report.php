@@ -2,7 +2,7 @@
 
 use Fpdf\fpdf;
 
-require_once __DIR__ . '/../../../includes/config/constants.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
 
 if (isset($_POST['students']) && isset($_POST['filename'])) {
@@ -113,8 +113,8 @@ function generateReport($students, $filename)
     $pdf->SetFont('IndivisaSans', '', 14);
     $pdf->Cell(0, 10, mb_convert_encoding('Porcentaje de Cumplimiento: ' . $percentage . '%', 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
 
-    $outputPath = 'reports/' . $filename . '.pdf';
+    $outputPath = "reports/$filename.pdf";
     $pdf->Output('F', $outputPath);
-    echo json_encode(['url' => '/modules/SED/reports/' . $filename . '.pdf']);
+    echo json_encode(['url' => "/modules/SED/reports/$filename.pdf"]);
 
 }

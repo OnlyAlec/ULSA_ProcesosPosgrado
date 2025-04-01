@@ -1,8 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../../../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
-require_once INCLUDES_DIR . "/utilities/database.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
 require_once INCLUDES_DIR . "/utilities/handleErrors.php";
 

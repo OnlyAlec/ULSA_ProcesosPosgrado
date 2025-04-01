@@ -1,10 +1,10 @@
 <?php
-require_once '../../../includes/config/constants.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 ob_start();
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        require_once './update_from_excel.php';
+        require_once 'update_from_excel.php';
 
         $allowedExtensions = ['xls', 'xlsx'];
         $regex = '/^[A-Za-z]$/';
