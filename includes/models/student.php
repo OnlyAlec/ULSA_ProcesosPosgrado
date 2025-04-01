@@ -8,7 +8,7 @@ class StudentBase
     private int $ulsaID;
     private string $carrer;
     private string $email;
-
+    private bool $sed;
 
     public function __construct($firstName, $lastName, $ulsaID, $carrer, $email, $id = -1)
     {
@@ -113,20 +113,5 @@ class Student extends StudentBase
     public function setSed($sed)
     {
         $this->sed = $sed;
-    }
-
-    public function getAfi()
-    {
-        return $this->afi;
-    }
-
-    public function setAfi($afi)
-    {
-        $this->afi = $afi;
-    }
-
-    public function getBrevoID()
-    {
-        return $this->brevoID;
     }
 }

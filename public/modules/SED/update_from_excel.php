@@ -1,7 +1,5 @@
 <?php
 
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-
 require_once __DIR__ . '/../../../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
@@ -81,7 +79,7 @@ function loadExcelStudents($filePath, $ulsaIdColumn, $nameColumn, $sedColumn)
             $sedBool = !in_array(strtolower(trim($cellSed)), $falseValues, true);
 
             try {
-                $student = new Student($firstName, $maternalSurname, $paternalSurname, $cellUlsaId, '', '');
+                $student = new Student($firstName, $maternalSurname, $paternalSurname, $cellUlsaId, '');
                 $student->setSed($sedBool);
                 $students[] = $student;
             } catch (InvalidArgumentException $e) {
