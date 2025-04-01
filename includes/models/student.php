@@ -1,19 +1,21 @@
 <?php
 
-class Student
+class StudentBase
 {
     private string $firstName;
     private string $lastName;
     private int $ulsaID;
     private string $carrer;
     private string $email;
-    private bool $sed;
 
-    public function __construct($firstName, $lastName, $ulsaID, $carrer)
+    public function __construct($firstName, $lastName, $ulsaID, $carrer, $email)
+
     {
         $this->firstName = $firstName;
         $this->lastName = $lastName;
         $this->carrer = $carrer;
+        $this->email = $email;
+
         $validatedId = $this->validateUlsaId($ulsaID);
         if ($validatedId === -1) {
             throw new InvalidArgumentException("Invalid ULSA ID ($ulsaID) - $firstName $lastName");
@@ -30,9 +32,21 @@ class Student
     {
         $ulsa_id = $this->normalizeUlsaId($ulsa_id);
 
-        if (strlen($ulsa_id) == 6)
+        if (strlen($ulsa_id) == 6) {
             return (int) $ulsa_id;
+        }
         return -1;
+    }
+
+    public function getJSON()
+    {
+        return [
+            'firstName' => $this->getName(),
+            'lastName' => $this->getLastName(),
+            'ulsaID' => $this->getUlsaId(),
+            'carrer' => $this->getCarrer(),
+            'email' => $this->getEmail()
+        ];
     }
 
     public function getName()
@@ -64,6 +78,20 @@ class Student
     {
         $this->email = $email;
     }
+}
+
+class Student extends StudentBase
+{
+    private bool $sed;
+    private bool $afi;
+
+    public function getJSON()
+    {
+        $json = parent::getJSON();
+        $json['sed'] = $this->getSed();
+        $json['afi'] = $this->getAfi();
+        return $json;
+    }
 
     public function getSed()
     {
@@ -73,5 +101,15 @@ class Student
     public function setSed($sed)
     {
         $this->sed = $sed;
+    }
+
+    public function getAfi()
+    {
+        return $this->afi;
+    }
+
+    public function setAfi($afi)
+    {
+        $this->afi = $afi;
     }
 }

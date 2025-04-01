@@ -46,7 +46,11 @@ get_head("SED");
     get_header("Seguimiento de Evaluación Docente");
     ?>
     <main class="container content marco">
-        <h1 class="text-center">Lista de alumnos</h1>
+        <div class="d-flex justify-content-between align-items-center">
+                <h1 class="mb-2">Lista de alumnos</h1>
+                <a href="../../index.php" class="btn btn-outline-primary">Regresar</a>
+        </div>
+        <br>
         <div class="row justify-content-end">
             <div class="col-10">
                 <label for="programType">Seleccionar Tipo de Programa:</label>
@@ -102,7 +106,7 @@ get_head("SED");
 
         <div class="d-flex justify-content-between">
             <button id="confirmChanges" class="btn btn-success w-50" disabled>Confirmar Cambios</button>
-            <button id="generateReport" class="btn btn-danger" data-filename="reporte_evaluaciones">Generar Reporte</button>
+            <button id="generateReport" class="btn btn-primary" data-filename="reporte_evaluaciones">Generar Reporte</button>
         </div>
 
         <div id="selectedCountContainer">

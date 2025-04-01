@@ -1,12 +1,17 @@
 {
     "AFI": {
         "name": "Avisos de Fechas Importantes",
-        "description": "Detalles de llenado de avisos de fechas importantes",
+        "description": "Detalles de llenado de avisos de fechas importantes.",
         "icon": "fas fa-calendar-alt"
     },
     "SED": {
         "name": "Seguimiento de Evaluación Docente",
-        "description": "Gestión de alumnos que han contestado la evaluación docente",
+        "description": "Gestión de alumnos que han contestado la evaluación docente.",
         "icon": "fas fa-clipboard"
+    },
+    "GA": {
+        "name": "Gestión de Alumnos",
+        "description": "Registro, consulta y eliminación de alumnos. Módulo adicional para la versión beta.",
+        "icon": "fas fa-solid fa-users"
     }
 }

@@ -33,7 +33,8 @@ function getStudents()
                 s.ulsa_id, 
                 LOWER(TRIM(p.career)) AS career, 
                 s.email AS ulsa_email, 
-                s.sed
+                s.sed,
+                s.afi
               FROM student s
               JOIN name n ON s.name_id = n.id 
               JOIN program p ON s.program_id = p.id";
@@ -47,9 +48,11 @@ function getStudents()
                 $row['last_name'],
                 $row['ulsa_id'],
                 $row['career'],
+                $row['ulsa_email']
             );
-            $student->setEmail($row['ulsa_email']);
             $student->setSed($row['sed']);
+            $student->setAfi($row['afi']);
+
             $studentsDB[] = $student;
         } catch (InvalidArgumentException $e) {
             ErrorList::add($e->getMessage());
