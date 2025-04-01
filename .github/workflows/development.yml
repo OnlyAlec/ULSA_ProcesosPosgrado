@@ -11,6 +11,11 @@ jobs:
             - name: Checkout código
               uses: actions/checkout@v4
 
+            - name: Backup .env
+              run: |
+                  ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
+                  "cp ${{ secrets.SSH_PATH }}/.env /tmp/.env-backup"
+
             - name: Deploy to Server
               uses: appleboy/scp-action@v0.1.7
               with:
@@ -20,3 +25,8 @@ jobs:
                   port: ${{ secrets.PORT }}
                   source: "./*"
                   target: ${{ secrets.SSH_PATH }}
+
+            - name: Restore .env
+              run: |
+                  ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
+                    "mv /tmp/.env-backup ${{ secrets.SSH_PATH }}/.env"
