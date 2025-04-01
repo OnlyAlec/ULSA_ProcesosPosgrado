@@ -11,9 +11,21 @@ jobs:
             - name: Checkout código
               uses: actions/checkout@v4
 
+            - name: Save SSH Private Key
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+                  chmod 600 ~/.ssh/deploy_key
+              env:
+                  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+            - name: Add Server to Known Hosts
+              run: |
+                  ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
             - name: Backup .env
               run: |
-                  ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
+                  ssh -i ~/.ssh/deploy_key} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
                   "cp ${{ secrets.SSH_PATH }}/.env /tmp/.env-backup"
 
             - name: Deploy to Server
@@ -25,8 +37,9 @@ jobs:
                   port: ${{ secrets.PORT }}
                   source: "./*"
                   target: ${{ secrets.SSH_PATH }}
+                  rm: true
 
             - name: Restore .env
               run: |
-                  ssh -i ${{ secrets.SSH_PRIVATE_KEY }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
+                  ssh -i ~/.ssh/deploy_key ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
                     "mv /tmp/.env-backup ${{ secrets.SSH_PATH }}/.env"
