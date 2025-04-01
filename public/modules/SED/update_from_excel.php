@@ -7,14 +7,15 @@ require_once INCLUDES_DIR . "/utilities/database.php";
 require_once INCLUDES_DIR . "/utilities/handleErrors.php";
 require_once INCLUDES_DIR . "/models/student.php";
 
-function processExcel($filePath, $ulsaIdColumn, $nameColumn, $sedColumn){
+function processExcel($filePath, $ulsaIdColumn, $nameColumn, $sedColumn)
+{
     ErrorList::clear();
 
     $ulsaIdColumn = strtoupper($ulsaIdColumn);
     $nameColumn   = strtoupper($nameColumn);
     $sedColumn    = strtoupper($sedColumn);
 
-    try{
+    try {
         $excelStudents = loadExcelStudents($filePath, $ulsaIdColumn, $nameColumn, $sedColumn);
         updateStudentSedInDatabase($excelStudents);
         return [
@@ -27,8 +28,9 @@ function processExcel($filePath, $ulsaIdColumn, $nameColumn, $sedColumn){
 }
 
 
-function updateStudentSedInDatabase($students) {
-    try{
+function updateStudentSedInDatabase($students)
+{
+    try {
         $db = getDatabaseConnection();
         $query = "UPDATE student SET SED = :sed WHERE ulsa_id = :ulsa_id";
         $stmt = $db->prepare($query);
@@ -44,7 +46,8 @@ function updateStudentSedInDatabase($students) {
     }
 }
 
-function loadExcelStudents($filePath, $ulsaIdColumn, $nameColumn, $sedColumn) {
+function loadExcelStudents($filePath, $ulsaIdColumn, $nameColumn, $sedColumn)
+{
     $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
     $reader->setReadDataOnly(true);
     $spreadsheet = $reader->load($filePath);

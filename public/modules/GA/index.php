@@ -14,29 +14,33 @@ try {
         $uploadDir = __DIR__ . '/uploads/';
 
         if ($_POST["action"] === "registerFromExcel" && isset($_FILES['gaExcelFile'])) {
-            if ($_FILES['gaExcelFile']['error'] !== UPLOAD_ERR_OK)
+            if ($_FILES['gaExcelFile']['error'] !== UPLOAD_ERR_OK) {
                 throw new RuntimeException('Error uploading file.');
+            }
 
             $fileTmpPath = $_FILES['gaExcelFile']['tmp_name'];
             $fileName = str_replace(' ', '_', htmlspecialchars($_FILES['gaExcelFile']['name'], ENT_QUOTES, 'UTF-8'));
             $ext = strtolower(pathinfo($_FILES['gaExcelFile']['name'], PATHINFO_EXTENSION));
 
-            if (!in_array($ext, $allowedExtensions))
+            if (!in_array($ext, $allowedExtensions)) {
                 throw new RuntimeException('Invalid file type.');
+            }
 
-            if(!preg_match($regex, $_POST["claveUlsaCol"]) || !preg_match($regex, $_POST["nombreCol"]) || !preg_match($regex, $_POST["apellidosCol"]) || !preg_match($regex, $_POST["carreraCol"]) || !preg_match($regex, $_POST["emailCol"])){
+            if (!preg_match($regex, $_POST["claveUlsaCol"]) || !preg_match($regex, $_POST["nombreCol"]) || !preg_match($regex, $_POST["apellidosCol"]) || !preg_match($regex, $_POST["carreraCol"]) || !preg_match($regex, $_POST["emailCol"])) {
                 throw new RuntimeException('Invalid column index.');
             }
 
-            if (!is_dir($uploadDir))
+            if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
+            }
 
-            if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName"))
+            if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName")) {
                 throw new RuntimeException('Error uploading file.');
+            }
 
             $res = restartDatabaseFromExcel("$uploadDir$fileName", $_POST["claveUlsaCol"], $_POST["nombreCol"], $_POST["apellidosCol"], $_POST["carreraCol"], $_POST["emailCol"]);
 
-        } else if ($_POST["action"] === "registerOneStudent"){
+        } elseif ($_POST["action"] === "registerOneStudent") {
 
             if (!preg_match('/^\d{6}$/', $_POST["claveUlsa"])) {
                 throw new RuntimeException('Clave ULSA inválida. Debe ser un número de 6 dígitos.');
@@ -53,19 +57,19 @@ try {
             if (!filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)) {
                 throw new RuntimeException('Correo electrónico inválido.');
             }
-            
-            $res = insertOneStudent($_POST["claveUlsa"], $_POST["nombre"], $_POST["apellidos"],$_POST["carrera"],$_POST["email"]);
-        
-        } else if ($_POST["action"] === "getTableStudents"){
+
+            $res = insertOneStudent($_POST["claveUlsa"], $_POST["nombre"], $_POST["apellidos"], $_POST["carrera"], $_POST["email"]);
+
+        } elseif ($_POST["action"] === "getTableStudents") {
             $res = array_values(array_map(fn ($student) => $student->getJSON(), getStudents()));
-        } else if ($_POST["action"] === "deleteOneStudent"){
+        } elseif ($_POST["action"] === "deleteOneStudent") {
             if (!preg_match('/^\d{6}$/', $_POST["claveUlsaDelete"])) {
                 throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
             }
 
             $res = deleteOneStudent($_POST["claveUlsaDelete"]);
 
-        } else if ($_POST["action"] === "deleteAllStudents"){
+        } elseif ($_POST["action"] === "deleteAllStudents") {
             $res = deleteAllStudents();
         }
 
@@ -100,8 +104,8 @@ get_head("GA");
 
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-    get_header("Gestión de Alumnos");
-    ?>
+get_header("Gestión de Alumnos");
+?>
 
     <main class="container content marco">
         <div>

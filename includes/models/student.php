@@ -2,25 +2,26 @@
 
 class StudentBase
 {
+    private int $id;
     private string $firstName;
     private string $lastName;
     private int $ulsaID;
     private string $carrer;
     private string $email;
+    private bool $sed;
 
-    public function __construct($firstName, $lastName, $ulsaID, $carrer, $email)
-
+    public function __construct($firstName, $lastName, $ulsaID, $carrer, $email, $id = -1)
     {
         $this->firstName = $firstName;
         $this->lastName = $lastName;
         $this->carrer = $carrer;
         $this->email = $email;
-
         $validatedId = $this->validateUlsaId($ulsaID);
         if ($validatedId === -1) {
             throw new InvalidArgumentException("Invalid ULSA ID ($ulsaID) - $firstName $lastName");
         }
         $this->ulsaID = $validatedId;
+        $this->id = $id;
     }
 
     private function normalizeUlsaId($ulsaId)
@@ -44,7 +45,7 @@ class StudentBase
             'firstName' => $this->getName(),
             'lastName' => $this->getLastName(),
             'ulsaID' => $this->getUlsaId(),
-            'carrer' => $this->getCarrer(),
+            'carrer' => $this->getProgram(),
             'email' => $this->getEmail()
         ];
     }
@@ -64,7 +65,7 @@ class StudentBase
         return $this->ulsaID;
     }
 
-    public function getCarrer()
+    public function getProgram()
     {
         return $this->carrer;
     }
@@ -78,12 +79,23 @@ class StudentBase
     {
         $this->email = $email;
     }
+
+    public function getID()
+    {
+        return $this->id;
+    }
+
+    public function setID($id)
+    {
+        $this->id = $id;
+    }
 }
 
 class Student extends StudentBase
 {
     private bool $sed;
     private bool $afi;
+    private bool $brevoID;
 
     public function getJSON()
     {
@@ -101,15 +113,5 @@ class Student extends StudentBase
     public function setSed($sed)
     {
         $this->sed = $sed;
-    }
-
-    public function getAfi()
-    {
-        return $this->afi;
-    }
-
-    public function setAfi($afi)
-    {
-        $this->afi = $afi;
     }
 }

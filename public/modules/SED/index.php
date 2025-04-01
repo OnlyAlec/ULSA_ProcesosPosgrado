@@ -6,7 +6,7 @@ require_once INCLUDES_DIR . "/models/student.php";
 ob_start();
 $studentsDB = getStudents();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) { 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     require_once './update_functions.php';
     header('Content-Type: application/json');
 
@@ -43,8 +43,8 @@ get_head("SED");
 
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-    get_header("Seguimiento de Evaluación Docente");
-    ?>
+get_header("Seguimiento de Evaluación Docente");
+?>
     <main class="container content marco">
         <div class="d-flex justify-content-between align-items-center">
                 <h1 class="mb-2">Lista de alumnos</h1>
@@ -87,8 +87,8 @@ get_head("SED");
             </thead>
             <tbody id="studentsTable">
                 <?php
-                $studentsDB = getStudents();
-                foreach ($studentsDB as $student): ?>
+            $studentsDB = getStudents();
+foreach ($studentsDB as $student): ?>
                     <tr data-carrer="<?= $student->getCarrer() ?>">
                         <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
                         <td><?= htmlspecialchars($student->getUlsaId()) ?></td>
