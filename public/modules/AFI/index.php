@@ -29,8 +29,12 @@ try {
                     $res = changeStatusAFI($_POST['ulsaID']);
                     break;
                 case 'sendEmail':
-                    $student = getStudentFromUlsaID($_POST['ulsaID']);
-                    $res = sendEmailRemainder($student);
+                    $student = getStudentByUlsaID($_POST['ulsaID']);
+                    if ($student) {
+                        $res = sendEmailRemainder($student);
+                    } else {
+                        throw new RuntimeException('Student not found');
+                    }
                     break;
                 case 'setConfigDate':
                     $res = updateConfig($_POST['type'], $_POST['date']);

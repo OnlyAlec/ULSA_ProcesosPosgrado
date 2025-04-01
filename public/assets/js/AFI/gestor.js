@@ -150,8 +150,9 @@ function setupActions() {
                         button
                             .parent()
                             .append(
-                                `<button class="col btn btn-info btn-sm text-white sendEmail" data-email=${response.data.email}><i class= "fas fa-paper-plane"></i></button>`
+                                `<button class="col btn btn-info btn-sm text-white sendEmail" data-ulsaid=${ulsaID}><i class= "fas fa-paper-plane"></i></button>`
                             );
+                    setupActions();
                 },
                 error: function (xhr) {
                     const errorMsg = xhr.responseText || "Error al procesar la solicitud";

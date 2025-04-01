@@ -33,7 +33,8 @@ function getStudents()
 {
     $studentsDB = [];
     $db = getDatabaseConnection();
-    $query = "SELECT LOWER(n.last_name) AS last_name, 
+    $query = "SELECT s.id,
+                LOWER(n.last_name) AS last_name, 
                 LOWER(n.first_name) AS first_name, 
                 s.ulsa_id, 
                 LOWER(TRIM(p.career)) AS career, 
@@ -53,7 +54,8 @@ function getStudents()
                 $row['last_name'],
                 $row['ulsa_id'],
                 $row['career'],
-                $row['ulsa_email']
+                $row['ulsa_email'],
+                $row['id'],
             );
             $student->setSed($row['sed']);
             $student->setAfi($row['afi']);
@@ -66,10 +68,11 @@ function getStudents()
     return $studentsDB;
 }
 
-function getStudentFromUlsaID($ID)
+function getStudentByUlsaID($ID)
 {
     $db = getDatabaseConnection();
-    $query = "SELECT LOWER(n.last_name) AS last_name,
+    $query = "SELECT s.id,
+                LOWER(n.last_name) AS last_name,
                 LOWER(n.first_name) AS first_name,
                 s.ulsa_id,
                 LOWER(TRIM(p.career)) AS career,
@@ -96,7 +99,51 @@ function getStudentFromUlsaID($ID)
             $res['last_name'],
             $res['ulsa_id'],
             $res['career'],
-            $res['ulsa_email']
+            $res['ulsa_email'],
+            $res['id']
+        );
+        $student->setSed($res['sed']);
+        $student->setAfi($res['afi']);
+        return $student;
+    } catch (InvalidArgumentException $e) {
+        ErrorList::add($e->getMessage());
+        return null;
+    }
+}
+
+function getStudentByID($ID)
+{
+    $db = getDatabaseConnection();
+    $query = "SELECT s.id,
+                LOWER(n.last_name) AS last_name,
+                LOWER(n.first_name) AS first_name,
+                s.ulsa_id,
+                LOWER(TRIM(p.career)) AS career,
+                s.email AS ulsa_email,
+                s.sed,
+                s.afi
+              FROM student s
+              JOIN name n ON s.name_id = n.id
+              JOIN program p ON s.program_id = p.id
+              WHERE s.id = :ID";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':ID', $ID);
+    $stmt->execute();
+
+    $res = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($res === false) {
+        return null;
+    }
+
+    try {
+        $student = new Student(
+            $res['first_name'],
+            $res['last_name'],
+            $res['ulsa_id'],
+            $res['career'],
+            $res['ulsa_email'],
+            $res['id']
         );
         $student->setSed($res['sed']);
         $student->setAfi($res['afi']);
@@ -193,7 +240,67 @@ function getConfig(string $type)
     return $res['data'] ?? "";
 }
 
+function getToken(int $studentID)
+{
+    try {
+        $db = getDatabaseConnection();
+
+        $query = "SELECT token
+                  FROM email_token 
+                  WHERE student_id = :studentID;";
+
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':studentID', $studentID);
+        $stmt->execute();
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $res["token"] ?? "";
+    } catch (PDOException $e) {
+        echo "Error de conexión! ";
+        print_r($e->getMessage());
+        exit();
+    }
+}
+
+function getStudentIDByToken(string $token)
+{
+    try {
+        $db = getDatabaseConnection();
+
+        $query = "SELECT student_id
+                  FROM email_token 
+                  WHERE token = :token;";
+
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':token', $token);
+        $stmt->execute();
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $res["student_id"] ?? "";
+    } catch (PDOException $e) {
+        echo "Error de conexión! ";
+        print_r($e->getMessage());
+        exit();
+    }
+}
+
 //^ INSERTS
+function insertToken(int $studentID, string $token)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "INSERT INTO email_token (student_id, token)
+                  VALUES  (:studentID, :token)";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(":studentID", $studentID);
+        $stmt->bindParam(":token", $token);
+        $stmt->execute();
+
+        return $stmt->rowCount();
+    } catch (PDOException $e) {
+        throw new RuntimeException($e->getMessage());
+    }
+}
 
 //^ UPDATES
 function updateStudentFieldBoolean($id, $field, $value)
@@ -249,5 +356,25 @@ function updateConfig(string $type, $value)
     } catch (Exception $e) {
         error_log($e->getMessage());
         throw $e;
+    }
+}
+
+function updateToken(int $studentID, string $token)
+{
+    try {
+        $db = getDatabaseConnection();
+
+        $query = "UPDATE email_token
+                  SET token = :token
+                  WHERE student_id = :studentID;";
+
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':token', $token);
+        $stmt->bindParam(':studentID', $studentID);
+
+        $stmt->execute();
+        return $stmt->rowCount();
+    } catch (PDOException $e) {
+        throw new RuntimeException($e->getMessage());
     }
 }

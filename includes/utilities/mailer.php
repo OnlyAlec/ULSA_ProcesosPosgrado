@@ -49,16 +49,31 @@ class Mailer
         return $htmlObj->html();
     }
 
+    private function saveToken(int $studentID, string $token): bool
+    {
+        $tokenDB = getToken($studentID);
+        if ($tokenDB == $token) {
+            return true;
+        }
+        return ($tokenDB == "") ? insertToken($studentID, $token) : updateToken($studentID, $token);
+    }
+
     public function constructEmail()
     {
         try {
+            $token = bin2hex(random_bytes(32));
+            $save = $this->saveToken($this->contact->getID(), $token);
+            if (!$save) {
+                return false;
+            }
+
             $url = filePathToUrl(MODULES_DIR . "/AFI/confirmation.php");
             $lastNameParts = preg_split('/\s+/', $this->contact->getLastName());
             $formattedLastName = implode(' ', array_map('ucfirst', $lastNameParts));
             $dataReplace = [
                 "program" => ucfirst($this->contact->getProgram()),
                 "name" => ucfirst($this->contact->getName()) . " " . $formattedLastName,
-                "url" => $url
+                "url" => "$url?token=$token",
             ];
             $base = $this->getTemplateHTML();
             $keys = array_map(fn ($key) => "-- ". strtoupper($key). " --", array_keys($dataReplace));

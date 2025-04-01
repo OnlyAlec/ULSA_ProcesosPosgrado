@@ -12,7 +12,7 @@ function showStudentsAFIByStatus($status)
 
 function changeStatusAFI($ulsaID)
 {
-    $student = getStudentFromUlsaID($ulsaID);
+    $student = getStudentByUlsaID($ulsaID);
     $newStatus = !$student->getAfi();
 
     if (updateStudentFieldBoolean($student->getUlsaId(), "afi", $newStatus) == 0) {
