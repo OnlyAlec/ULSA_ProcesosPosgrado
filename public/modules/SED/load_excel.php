@@ -102,7 +102,7 @@ get_head("SED");
                 </div>
 
                 <div class="d-flex justify-content-end">
-                    <button type="submit" class="btn btn-danger">Cargar Excel</button>
+                    <button type="submit" class="btn btn-primary">Cargar Excel</button>
                 </div>
             </form>
             <br>
