@@ -21,7 +21,7 @@ jobs:
 
             - name: Backup .env
               run: |
-                  ssh -i ~/.ssh/deploy_key} -o StrictHostKeyChecking=no \
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
                   ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
                   "cp ${{ secrets.SSH_PATH }}/.env /tmp/.env-backup"
 
