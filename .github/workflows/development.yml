@@ -6,6 +6,7 @@ on:
 jobs:
     deploy:
         runs-on: ubuntu-latest
+        environment: Credentials Dev
         steps:
             - name: Checkout código
               uses: actions/checkout@v4
