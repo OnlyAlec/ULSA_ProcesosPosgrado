@@ -1,6 +1,7 @@
 <?php
 require_once '../../../includes/config/constants.php';
 require_once INCLUDES_DIR . "/utilities/database.php";
+require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
 require_once INCLUDES_DIR . "/models/student.php";
 ob_start();
 
@@ -55,6 +56,8 @@ try {
             
             $res = insertOneStudent($_POST["claveUlsa"], $_POST["nombre"], $_POST["apellidos"],$_POST["carrera"],$_POST["email"]);
         
+        } else if ($_POST["action"] === "getTableStudents"){
+            $res = array_values(array_map(fn ($student) => $student->getJSON(), getStudents()));
         } else if ($_POST["action"] === "deleteOneStudent"){
             if (!preg_match('/^\d{6}$/', $_POST["claveUlsaDelete"])) {
                 throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
@@ -66,8 +69,7 @@ try {
             $res = deleteAllStudents();
         }
 
-        header('Content-Type: application/json');
-        echo json_encode($res);
+        echo responseOK($res);
         exit;
     }
 
@@ -111,12 +113,11 @@ get_head("GA");
             <div class="btn-group d-flex mb-4" role="group" id="button-group">
                 <button class="btn btn-dark flex-grow-1"    id="btn-crear" onclick="showSection('crear')">Registrar Alumnos</button>
                 <button class="btn btn-primary flex-grow-1" id="btn-consultar" onclick="showSection('consultar')">Consultar Alumnos</button>
-                <button class="btn btn-primary flex-grow-1" id="btn-eliminar" onclick="showSection('eliminar')">Eliminar Alumnos</button>
+                <button class="btn btn-primary flex-grow-1" id="btn-eliminar" onclick="showSection('eliminar')" type="submit">Eliminar Alumnos</button>
             </div>
             
             <div id="section-crear" class="section">
                 <h2>Carga de concentrado de alumnos en Excel:</h2>
-
                 <form action="" method="post" enctype="multipart/form-data" class="mt-4">
                     <input type="hidden" name="action" value="registerFromExcel">
                     <div class="mb-3">
@@ -170,7 +171,6 @@ get_head("GA");
                 <hr>
 
                 <h2>Registro único de alumno:</h2>
-
                 <form action="" method="post" enctype="multipart/form-data" class="mt-4">
                     <input type="hidden" name="action" value="registerOneStudent">
 
@@ -215,29 +215,20 @@ get_head("GA");
                         <button type="submit" class="btn btn-primary">Registrar alumno</button>
                     </div>
                 </form>
-
             </div>
 
             <div id="section-consultar" class="section d-none">
                 <h2>Consultar Alumnos</h2>
-                <table class="table table-bordered mt-4" id="studentsTable">
-                    <thead>
+                <table id="tableStudents" class="table">
+                <thead>
                         <tr>
-                            <th>Clave ULSA</th>
-                            <th>Nombre Completo</th>
-                            <th>Correo</th>
+                            <th scope="col">Clave ULSA</th>
+                            <th scope="col">Nombre Completo</th>
+                            <th scope="col">Programa</th>
+                            <th scope="col">Correo</th>
                         </tr>
                     </thead>
-                    <tbody id="studentsTable">
-                        <?php
-                        $studentsDB = getStudents();
-                        foreach ($studentsDB as $student): ?>
-                            <tr data-carrer="<?= $student->getCarrer() ?>">
-                                <td><?= htmlspecialchars($student->getUlsaId()) ?></td>
-                                <td><?= htmlspecialchars($student->getName()) . " " . htmlspecialchars($student->getLastName()) ?></td>
-                                <td><?= htmlspecialchars($student->getEmail()) ?></td>
-                            </tr>
-                        <?php endforeach; ?>
+                    <tbody>
                     </tbody>
                 </table>
             </div>
@@ -280,6 +271,7 @@ get_head("GA");
                 </form>
 
             </div>
+            
         </div>
     </main>
 
