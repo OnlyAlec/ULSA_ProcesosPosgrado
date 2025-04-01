@@ -23,7 +23,8 @@ jobs:
               run: |
                   ssh -v -i ~/.ssh/deploy_key \
                   -o StrictHostKeyChecking=no \
-                  ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
+                  -p ${{ secrets.PORT }} \
+                  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
                   "cp ${{ secrets.SSH_PATH }}/.env /tmp/.env-backup"
 
             - name: Deploy to Server
@@ -41,5 +42,6 @@ jobs:
               run: |
                   ssh -v -i ~/.ssh/deploy_key \
                   -o StrictHostKeyChecking=no \
-                  ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
+                  -p ${{ secrets.PORT }} \
+                  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
                     "mv /tmp/.env-backup ${{ secrets.SSH_PATH }}/.env"
