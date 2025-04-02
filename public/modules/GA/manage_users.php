@@ -76,13 +76,16 @@ function insertOneStudent($ulsaId, $name, $lastname, $career, $email){
         throw new RuntimeException(message: $e->getMessage());
     }
 }
-
 function deleteOneStudent($ulsaId) {
     ErrorList::clear();
     try {
         $db = getDatabaseConnection();
-        $stmt = $db->prepare("DELETE FROM student WHERE ulsa_id = (:ulsaId)");
+        $stmt = $db->prepare("DELETE FROM student WHERE ulsa_id = :ulsaId");
         $stmt->execute([':ulsaId' => $ulsaId]);   
+
+        if ($stmt->rowCount() === 0) {
+            throw new RuntimeException("No se encontró ningún estudiante con el ID proporcionado.");
+        }
 
         return [
             'success' => true,
@@ -93,12 +96,11 @@ function deleteOneStudent($ulsaId) {
     }
 }
 
+
 function deleteAllStudents() {
     ErrorList::clear();
     try {
-        $db = getDatabaseConnection();
-        $db->exec("DELETE FROM student");
-
+        clearDatabaseTables();
         return [
             'success' => true,
             'errors' => ErrorList::getAll()
