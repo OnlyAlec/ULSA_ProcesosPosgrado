@@ -1,0 +1,47 @@
+name: Deploy Dev
+on:
+    push:
+        branches: [development]
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        environment: Credentials Dev
+        steps:
+            - name: Checkout código
+              uses: actions/checkout@v4
+
+            - name: Save SSH Private Key
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+                  chmod 600 ~/.ssh/deploy_key
+              env:
+                  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+            - name: Backup .env
+              run: |
+                  ssh -i ~/.ssh/deploy_key \
+                  -o StrictHostKeyChecking=no \
+                  -p ${{ secrets.PORT }} \
+                  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+                  "cp ${{ secrets.SSH_PATH }}/.env /tmp/.env-backup"
+
+            - name: Deploy to Server
+              uses: appleboy/scp-action@v0.1.7
+              with:
+                  host: ${{ secrets.SSH_HOST }}
+                  username: ${{ secrets.SSH_USER }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  port: ${{ secrets.PORT }}
+                  source: "./*"
+                  target: ${{ secrets.SSH_PATH }}
+                  rm: true
+
+            - name: Restore .env
+              run: |
+                  ssh -i ~/.ssh/deploy_key \
+                  -o StrictHostKeyChecking=no \
+                  -p ${{ secrets.PORT }} \
+                  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+                    "mv /tmp/.env-backup ${{ secrets.SSH_PATH }}/.env"

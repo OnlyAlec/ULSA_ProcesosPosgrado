@@ -5,6 +5,8 @@ yarn-debug.log
 yarn-error.log
 package-lock.json
 yarn.lock
+.composer/
+composer.lock
 
 # Environment variables
 .env
@@ -43,15 +45,12 @@ temp/
 # Misc
 .cache/
 .history/
+jsconfig.json
+.php-cs-fixer.cache
 
-# Composer
-.composer/
-composer.lock
-
-# XLSX
+#  XLSX/PDF
+public/assets/pdf/*
 public/assets/xls/*
 public/assets/xlsx/*
-public/modules/AFI/uploads/
-public/modules/SED/uploads/
-public/modules/GA/uploads/
-public/modules/SED/reports/
+public/modules/**/uploads/
+public/modules/**/reports/

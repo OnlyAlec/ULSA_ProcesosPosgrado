@@ -1,13 +1,12 @@
 <?php
 
-require_once __DIR__ . '/../../../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
-require_once INCLUDES_DIR . "/utilities/database.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
 require_once INCLUDES_DIR . "/utilities/handleErrors.php";
 
 
-function restartDatabaseFromExcel($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $careerColumn, $emailColumn){
+function restartDatabaseFromExcel($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $careerColumn, $emailColumn)
+{
     ErrorList::clear();
 
     $ulsaIdColumn   = strtoupper($ulsaIdColumn);
@@ -15,8 +14,8 @@ function restartDatabaseFromExcel($filePath, $ulsaIdColumn, $nameColumn, $lastna
     $lastnameColumn = strtoupper($lastnameColumn);
     $careerColumn   = strtoupper($careerColumn);
     $emailColumn    = strtoupper($emailColumn);
-    
-    try{
+
+    try {
 
         $data = loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $careerColumn, $emailColumn);
         clearDatabaseTables();
@@ -31,7 +30,8 @@ function restartDatabaseFromExcel($filePath, $ulsaIdColumn, $nameColumn, $lastna
     }
 }
 
-function insertOneStudent($ulsaId, $name, $lastname, $career, $email){
+function insertOneStudent($ulsaId, $name, $lastname, $career, $email)
+{
     ErrorList::clear();
 
     $ulsaId   = trim($ulsaId);
@@ -76,12 +76,14 @@ function insertOneStudent($ulsaId, $name, $lastname, $career, $email){
         throw new RuntimeException(message: $e->getMessage());
     }
 }
-function deleteOneStudent($ulsaId) {
+
+function deleteOneStudent($ulsaId)
+{
     ErrorList::clear();
     try {
         $db = getDatabaseConnection();
-        $stmt = $db->prepare("DELETE FROM student WHERE ulsa_id = :ulsaId");
-        $stmt->execute([':ulsaId' => $ulsaId]);   
+        $stmt = $db->prepare("DELETE FROM student WHERE ulsa_id = (:ulsaId)");
+        $stmt->execute([':ulsaId' => $ulsaId]);
 
         if ($stmt->rowCount() === 0) {
             throw new RuntimeException("No se encontró ningún estudiante con el ID proporcionado.");
@@ -90,27 +92,28 @@ function deleteOneStudent($ulsaId) {
         return [
             'success' => true,
             'errors' => ErrorList::getAll()
-        ];       
+        ];
     } catch (RuntimeException $e) {
         throw new RuntimeException(message: $e->getMessage());
     }
 }
 
-
-function deleteAllStudents() {
+function deleteAllStudents()
+{
     ErrorList::clear();
     try {
         clearDatabaseTables();
         return [
             'success' => true,
             'errors' => ErrorList::getAll()
-        ];       
+        ];
     } catch (RuntimeException $e) {
         throw new RuntimeException(message: $e->getMessage());
     }
 }
 
-function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $careerColumn, $emailColumn) {
+function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $careerColumn, $emailColumn)
+{
     $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
     $reader->setReadDataOnly(true);
     $spreadsheet = $reader->load($filePath);
@@ -124,7 +127,7 @@ function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $
 
     foreach ($sheet->getRowIterator(2) as $row) { // Desde la fila 2 para omitir encabezados
         $rowIndex = $row->getRowIndex();
-        
+
         $ulsaIds[]    = intval(trim($sheet->getCell("{$ulsaIdColumn}{$rowIndex}")->getValue()));
         $firstNames[] = trim($sheet->getCell("{$nameColumn}{$rowIndex}")->getValue());
         $lastNames[]  = trim($sheet->getCell("{$lastnameColumn}{$rowIndex}")->getValue());
@@ -141,7 +144,8 @@ function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $
     ];
 }
 
-function clearDatabaseTables() {
+function clearDatabaseTables()
+{
     try {
         $db = getDatabaseConnection();
         $db->exec("DELETE FROM student");
@@ -152,7 +156,8 @@ function clearDatabaseTables() {
     }
 }
 
-function insertDataIntoDatabase($data) {
+function insertDataIntoDatabase($data)
+{
     try {
         $db = getDatabaseConnection();
 
@@ -188,6 +193,6 @@ function insertDataIntoDatabase($data) {
         }
 
     } catch (PDOException $e) {
-        ErrorList::add( $e->getMessage());
+        ErrorList::add($e->getMessage());
     }
 }
