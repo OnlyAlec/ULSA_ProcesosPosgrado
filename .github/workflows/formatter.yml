@@ -34,6 +34,10 @@ jobs:
             - name: Run PHP CS Fixer
               run: $HOME/.composer/vendor/bin/php-cs-fixer fix --allow-risky=yes --config=.php-cs-fixer.dist.php --verbose
 
+            - name: Remove cache file
+              run: |
+                  if exist .php-cs-fixer.cache del .php-cs-fixer.cache
+
             - name: Commit changes
               uses: stefanzweifel/git-auto-commit-action@v5.0.0
               with:

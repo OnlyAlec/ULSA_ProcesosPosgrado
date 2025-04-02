@@ -46,6 +46,7 @@ temp/
 .cache/
 .history/
 jsconfig.json
+.php-cs-fixer.cache
 
 #  XLSX/PDF
 public/assets/pdf/*
