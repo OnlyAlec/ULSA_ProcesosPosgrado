@@ -86,7 +86,7 @@ function deleteOneStudent($ulsaId)
         $stmt->execute([':ulsaId' => $ulsaId]);
 
         if ($stmt->rowCount() === 0) {
-            throw new RuntimeException("No se encontró ningún estudiante con el ID proporcionado.");
+            throw new RuntimeException("No se encontro ningun estudiante con el ID proporcionado.");
         }
 
         return [
