@@ -1,5 +1,5 @@
 <?php
-require_once '../../../includes/config/constants.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once INCLUDES_DIR . "/utilities/database.php";
 require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
 require_once INCLUDES_DIR . "/models/student.php";
@@ -7,7 +7,7 @@ ob_start();
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        require_once './manage_users.php';
+        require_once 'manage_users.php';
 
         $allowedExtensions = ['xls', 'xlsx'];
         $regex = '/^[A-Za-z]$/';
@@ -110,7 +110,7 @@ get_header("Gestión de Alumnos");
     <main class="container content marco">
         <div>
             <div class="d-flex justify-content-end align-items-center">
-                <a href="../../index.php" class="btn btn-outline-primary">Regresar</a>
+                <a href="$_SERVER['DOCUMENT_ROOT']" class="btn btn-outline-primary">Regresar</a>
             </div>
             <br>
             <br>
@@ -290,4 +290,3 @@ get_header("Gestión de Alumnos");
 </body>
 
 </html>
-

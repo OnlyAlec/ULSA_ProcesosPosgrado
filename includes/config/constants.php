@@ -1,6 +1,6 @@
 <?php
 
-define('BASE_DIR', __DIR__ . '/../..');
+define('BASE_DIR', $_SERVER['DOCUMENT_ROOT'] . '/..');
 define('PUBLIC_DIR', BASE_DIR . '/public');
 define('INCLUDES_DIR', BASE_DIR . '/includes');
 define('MODULES_DIR', BASE_DIR . '/public/modules');

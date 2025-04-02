@@ -1,4 +1,4 @@
-<?php require_once __DIR__ . '/../includes/config/constants.php'; ?>
+<?php require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php'; ?>
 <!DOCTYPE html>
 
 <head>

@@ -12,6 +12,8 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
             - name: Set up PHP
               uses: shivammathur/setup-php@v2
@@ -32,10 +34,14 @@ jobs:
             - name: Run PHP CS Fixer
               run: $HOME/.composer/vendor/bin/php-cs-fixer fix --allow-risky=yes --config=.php-cs-fixer.dist.php --verbose
 
+            - name: Remove cache file
+              run: |
+                  rm -f .php-cs-fixer.cache
+
             - name: Commit changes
               uses: stefanzweifel/git-auto-commit-action@v5.0.0
               with:
-                  commit_message: Fix PHP styling
+                  commit_message: Fix PHP styling 🎨
                   branch: ${{ github.head_ref }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -49,17 +55,12 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
-
-            - name: Install Prettier with Yarn
-              run: yarn add prettier --dev --exact --frozen-lockfile
+              with:
+                  ref: ${{ github.head_ref }}
 
             - name: Run Prettier JS/HTML/CSS/JSON formatting
-              run: yarn exec prettier --write --ignore-path .prettierignore --config .prettierrc '**/*.{js,html,css,json}'
-
-            - name: Commit changes
-              uses: stefanzweifel/git-auto-commit-action@v5.0.0
+              uses: creyD/prettier_action@v4.3
               with:
-                  commit_message: Fix Prettier styling
-                  branch: ${{ github.head_ref }}
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  commit_message: Fix Prettier styling 🎨
+                  prettier_options: --write --ignore-path .prettierignore --config .prettierrc **/*.{js,html,css,json}
+                  github_token: ${{ secrets.GITHUB_TOKEN }}

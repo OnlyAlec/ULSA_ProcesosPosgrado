@@ -1,8 +1,8 @@
 <?php
-require_once '../../../includes/config/constants.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once INCLUDES_DIR . "/utilities/database.php";
 require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
-require_once INCLUDES_DIR. "/models/student.php";
+require_once INCLUDES_DIR . "/models/student.php";
 
 ob_start();
 
@@ -11,7 +11,7 @@ try {
         header('Content-Type: application/json');
 
         if (isset($_POST['action'])) {
-            require_once './gestorStudents.php';
+            require_once 'gestorStudents.php';
 
             switch ($_POST['action']) {
                 case 'getTableStudents':
@@ -43,8 +43,8 @@ try {
                     throw new RuntimeException('Not valid action!');
             }
         } elseif (count($_FILES) > 0) {
-            require_once './formsDB.php';
-            require_once './formsMultiple.php';
+            require_once 'formsDB.php';
+            require_once 'formsMultiple.php';
             $allowedExtensions = ['xls', 'xlsx'];
             $uploadDir = __DIR__ . '/uploads/';
 

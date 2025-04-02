@@ -2,7 +2,6 @@
 
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
-require_once INCLUDES_DIR . "/models/student.php";
 
 function process_multiple_excels($uploadDir, $filePath1, $filePath2)
 {
