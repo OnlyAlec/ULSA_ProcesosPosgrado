@@ -47,10 +47,9 @@ temp/
 .history/
 jsconfig.json
 
-# XLSX
+#  XLSX/PDF
+public/assets/pdf/*
 public/assets/xls/*
 public/assets/xlsx/*
-public/modules/AFI/uploads/
-public/modules/SED/uploads/
-public/modules/GA/uploads/
-public/modules/SED/reports/
+public/modules/**/uploads/
+public/modules/**/reports/
