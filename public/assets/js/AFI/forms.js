@@ -53,7 +53,7 @@ $(function () {
                     if (response.data.graphData) {
                         generateCharts(response.data.graphData);
                     }
-                } else 
+                } else
                     tableBody.append(
                         '<tr><td colspan="4" class="text-center">No se encontraron alumnos faltantes</td></tr>'
                     );
