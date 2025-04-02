@@ -36,7 +36,7 @@ jobs:
 
             - name: Remove cache file
               run: |
-                  if exist .php-cs-fixer.cache del .php-cs-fixer.cache
+                  rm -f .php-cs-fixer.cache
 
             - name: Commit changes
               uses: stefanzweifel/git-auto-commit-action@v5.0.0
