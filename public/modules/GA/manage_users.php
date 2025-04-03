@@ -138,7 +138,7 @@ function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $
         $lastName  = trim($sheet->getCell("{$lastnameColumn}{$rowIndex}")->getValue());
         $career    = trim($sheet->getCell("{$careerColumn}{$rowIndex}")->getValue());
         $email     = trim($sheet->getCell("{$emailColumn}{$rowIndex}")->getValue());
-        
+
         if (!preg_match('/^\d{6}$/', $ulsaId)) {
             ErrorList::add("Fila {$rowIndex}: Clave ULSA invalida.");
             continue;
