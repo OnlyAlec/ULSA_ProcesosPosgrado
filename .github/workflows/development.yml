@@ -27,6 +27,14 @@ jobs:
                   ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
                   "cp ${{ secrets.SSH_PATH }}/.env /tmp/.env-backup"
 
+            - name: Pre-cleanup with sudo
+              run: |
+                  ssh -i ~/.ssh/deploy_key \
+                  -o StrictHostKeyChecking=no \
+                  -p ${{ secrets.PORT }} \
+                  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+                  "sudo rm -rf ${{ secrets.SSH_PATH }}/*"
+
             - name: Deploy to Server
               uses: appleboy/scp-action@v0.1.7
               with:
@@ -36,7 +44,7 @@ jobs:
                   port: ${{ secrets.PORT }}
                   source: "./*"
                   target: ${{ secrets.SSH_PATH }}
-                  rm: true
+                  rm: false
 
             - name: Change ownership to nginx
               run: |
