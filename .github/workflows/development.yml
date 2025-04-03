@@ -52,7 +52,7 @@ jobs:
                   -o StrictHostKeyChecking=no \
                   -p ${{ secrets.PORT }} \
                   ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-                  "sudo -n chown -R nginx:nginx ${{ secrets.SSH_PATH }}"
+                  "sudo /bin/chown -R nginx:nginx ${{ secrets.SSH_PATH }}"
 
             - name: Restore .env
               run: |
