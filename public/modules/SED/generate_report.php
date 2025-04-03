@@ -80,8 +80,9 @@ function generateReport($students, $filename)
 {
     $pdf = new Fpdf();
     $reportsDir = __DIR__ . '/reports/';
-    if(!is_dir($reportsDir))
+    if (!is_dir($reportsDir)) {
         mkdir($reportsDir, 0777, true);
+    }
 
     $pdf->AddFont('IndivisaSans', '', 'IndivisaDisplaySans-Regular.php');
     $pdf->AddFont('IndivisaSerif', '', 'IndivisaDisplaySerif-RegularItalic.php');
@@ -114,7 +115,7 @@ function generateReport($students, $filename)
         }
     }
 
-    $percentage = round(($countEvaluated / count($students))*100, 2);
+    $percentage = round(($countEvaluated / count($students)) * 100, 2);
     addNewPage($pdf);
     $pdf->SetFont('IndivisaSans', '', 14);
     $pdf->Cell(0, 10, mb_convert_encoding('Números de Alumnos que realizaron la evaluación: ' . $countEvaluated, 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
