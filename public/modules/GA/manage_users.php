@@ -18,6 +18,9 @@ function restartDatabaseFromExcel($filePath, $ulsaIdColumn, $nameColumn, $lastna
     try {
 
         $data = loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $careerColumn, $emailColumn);
+        if (empty($data['ulsa_ids'])) {
+            throw new RuntimeException('El archivo Excel no contiene datos válidos.');
+        }
         clearDatabaseTables();
         insertDataIntoDatabase($data);
 
@@ -119,39 +122,65 @@ function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $
     $spreadsheet = $reader->load($filePath);
     $sheet = $spreadsheet->getActiveSheet();
 
-    $ulsaIds = [];
-    $firstNames = [];
-    $lastNames = [];
-    $careers = [];
-    $emails = [];
+    $data = [
+        'ulsa_ids'    => [],
+        'first_names' => [],
+        'last_names'  => [],
+        'careers'     => [],
+        'emails'      => []
+    ];
 
     foreach ($sheet->getRowIterator(2) as $row) { // Desde la fila 2 para omitir encabezados
         $rowIndex = $row->getRowIndex();
 
-        $ulsaIds[]    = intval(trim($sheet->getCell("{$ulsaIdColumn}{$rowIndex}")->getValue()));
-        $firstNames[] = trim($sheet->getCell("{$nameColumn}{$rowIndex}")->getValue());
-        $lastNames[]  = trim($sheet->getCell("{$lastnameColumn}{$rowIndex}")->getValue());
-        $careers[]    = trim($sheet->getCell("{$careerColumn}{$rowIndex}")->getValue());
-        $emails[]     = trim($sheet->getCell("{$emailColumn}{$rowIndex}")->getValue());
+        $ulsaId    = trim($sheet->getCell("{$ulsaIdColumn}{$rowIndex}")->getValue());
+        $firstName = trim($sheet->getCell("{$nameColumn}{$rowIndex}")->getValue());
+        $lastName  = trim($sheet->getCell("{$lastnameColumn}{$rowIndex}")->getValue());
+        $career    = trim($sheet->getCell("{$careerColumn}{$rowIndex}")->getValue());
+        $email     = trim($sheet->getCell("{$emailColumn}{$rowIndex}")->getValue());
+        
+        if (!preg_match('/^\d{6}$/', $ulsaId)) {
+            ErrorList::add("Fila {$rowIndex}: Clave ULSA invalida.");
+            continue;
+        }
+        if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $firstName)) {
+            ErrorList::add("Fila {$rowIndex}: Nombre invalido.");
+            continue;
+        }
+        if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $lastName)) {
+            ErrorList::add("Fila {$rowIndex}: Apellidos invalidos.");
+            continue;
+        }
+        if (empty($career)) {
+            ErrorList::add("Fila {$rowIndex}: Carrera vacia.");
+            continue;
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            ErrorList::add("Fila {$rowIndex}: Correo electronico invalido.");
+            continue;
+        }
+
+        $data['ulsa_ids'][]    = intval($ulsaId);
+        $data['first_names'][] = $firstName;
+        $data['last_names'][]  = $lastName;
+        $data['careers'][]     = $career;
+        $data['emails'][]      = $email;
     }
 
-    return [
-        'ulsa_ids' => $ulsaIds,
-        'first_names' => $firstNames,
-        'last_names' => $lastNames,
-        'careers' => $careers,
-        'emails' => $emails
-    ];
+    return $data;
 }
 
 function clearDatabaseTables()
 {
     try {
         $db = getDatabaseConnection();
+        $db->beginTransaction();
         $db->exec("DELETE FROM student");
         $db->exec("DELETE FROM name");
         $db->exec("DELETE FROM program");
+        $db->commit();
     } catch (PDOException $e) {
+        $db->rollBack();
         ErrorList::add($e->getMessage());
     }
 }
@@ -160,6 +189,7 @@ function insertDataIntoDatabase($data)
 {
     try {
         $db = getDatabaseConnection();
+        $db->beginTransaction();
 
         // Insertar carreras únicas
         $careers = array_unique($data['careers']);
@@ -191,8 +221,9 @@ function insertDataIntoDatabase($data)
                 ':email' => $data['emails'][$i]
             ]);
         }
-
+        $db->commit();
     } catch (PDOException $e) {
+        $db->rollBack();
         ErrorList::add($e->getMessage());
     }
 }

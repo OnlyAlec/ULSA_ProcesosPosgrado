@@ -110,7 +110,7 @@ get_header("Gestión de Alumnos");
     <main class="container content marco">
         <div>
             <div class="d-flex justify-content-end align-items-center">
-                <a href="$_SERVER['DOCUMENT_ROOT']" class="btn btn-outline-primary">Regresar</a>
+                <a href="<?=$_SERVER['DOCUMENT_ROOT']?>" class="btn btn-outline-primary">Regresar</a>
             </div>
             <br>
             <br>
