@@ -46,13 +46,21 @@ jobs:
                   target: ${{ secrets.SSH_PATH }}
                   rm: false
 
+            - name: Debug
+              run: |
+                  ssh -i ~/.ssh/deploy_key \
+                  -o StrictHostKeyChecking=no \
+                  -p ${{ secrets.PORT }} \
+                  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+                  "which chown"
+
             - name: Change ownership to nginx
               run: |
                   ssh -i ~/.ssh/deploy_key \
                   -o StrictHostKeyChecking=no \
                   -p ${{ secrets.PORT }} \
                   ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-                  "sudo chown -R nginx:nginx ${{ secrets.SSH_PATH }}"
+                  "sudo -n /usr/bin/chown -R nginx:nginx ${{ secrets.SSH_PATH }}"
 
             - name: Restore .env
               run: |
