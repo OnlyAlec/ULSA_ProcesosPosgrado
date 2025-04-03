@@ -156,7 +156,7 @@ function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $
             continue;
         }
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            ErrorList::add("Fila {$rowIndex}: Correo electronico invalido.");
+            ErrorList::add("Fila {$rowIndex}: Correo electrónico invalido.");
             continue;
         }
 
