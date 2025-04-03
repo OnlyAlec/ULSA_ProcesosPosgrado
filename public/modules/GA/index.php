@@ -31,7 +31,9 @@ try {
             }
 
             if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
+                if (!mkdir($uploadDir, 0755, true)) {
+                    throw new RuntimeException('Error creating directory for XLSX files.');
+                }
             }
 
             if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName")) {

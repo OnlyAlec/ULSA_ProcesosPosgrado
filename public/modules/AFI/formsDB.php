@@ -241,7 +241,9 @@ function createExcel($students, $programCount)
 
     //* Save File
     if (!file_exists(XLSX_DIR)) {
-        mkdir(XLSX_DIR, 0777, true);
+        if (!mkdir(XLSX_DIR, 0755, true)) {
+            throw new RuntimeException('Error creating directory for XLSX files.');
+        }
     }
 
     $timestamp = date('Y-m-d_H-i-s');

@@ -62,7 +62,9 @@ try {
                 }
 
                 if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
+                    if (!mkdir($uploadDir, 0755, true)) {
+                        throw new RuntimeException('Error creating upload directory.');
+                    }
                 }
 
                 if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName")) {
@@ -82,7 +84,9 @@ try {
 
                 if (in_array($ext1, $allowedExtensions) && in_array($ext2, $allowedExtensions)) {
                     if (!is_dir($uploadDir)) {
-                        mkdir($uploadDir, 0777, true);
+                        if (!mkdir($uploadDir, 0755, true)) {
+                            throw new RuntimeException('Error creating directory for XLSX files.');
+                        }
                     }
 
                     if (!move_uploaded_file($fileTmpPath1, "$uploadDir$fileName1") || !move_uploaded_file($fileTmpPath2, "$uploadDir$fileName2")) {
