@@ -2,12 +2,16 @@
 
 function get_header($title)
 {
-    echo '<div class="overlay"></div><!-- Dark Overlay element -->
+    $menuItems = get_modules_links();
+    $logo = ASSETS_PATH . "/img/logo_lasalle.png";
+    $home = BASE_URL;
+    $header = <<< HTML
+    <div class="overlay"></div><!-- Dark Overlay element -->
     
     <aside id="sidebar" class="bg-light defaultShadow d-flex flex-column p-4">
         <div class="d-flex mainMain align-items-center mb-1">
             <div class="logotipo"><a href="https://lasalle.mx/" target="_blank">
-                    <img src="' . ASSETS_PATH . '/img/logo_lasalle.png" id="logo" border="0" class="img-fluid">
+                    <img src="$logo" id="logo" border="0" class="img-fluid">
                 </a>
             </div>
             <div class="flex-grow-1 d-flex justify-content-end">
@@ -26,14 +30,15 @@ function get_header($title)
             </div>
         </div>
     
-    
         <div class="accordion px-2" id="accordionMenu">
             <p class="mb-0 mt-3 ml-4 pl-1">
-                <a class="d-block side-menu" href="#">Menu 1</a>
-            </p>
-            <p class="mb-0 mt-3 ml-4 pl-1">
-                <a class="d-block side-menu" href="#">Menu 2</a>
-            </p>
+                <a class="d-block side-menu" href="$home">
+                    <i class="fas fa-home mr-2" style="width: 20px; text-align: center;"></i>
+                    Página Principal
+                </a>
+                <hr>
+             </p>
+            $menuItems
         </div>
     </aside>
     
@@ -41,7 +46,7 @@ function get_header($title)
     <header class="sticky-top bg-white bg-head">
         <div class="menu d-flex align-items-center" style="visibility: visible;">
             <div class="logotipo"><a href="https://lasalle.mx/" target="_blank">
-                    <img id="logo" src="' . ASSETS_PATH . '/img/logo_lasalle.png" border="0" class="img-fluid">
+                    <img id="logo" src="$logo" border="0" class="img-fluid">
                 </a>
             </div>
             <div class="flex-grow-1 d-flex justify-content-end">
@@ -67,10 +72,52 @@ function get_header($title)
             <div class="col-12">
                 <div class="mx-0 py-3 marco">
                     <h4 class="text-info">GPP | <small>Gestión de Procesos de Posgrado</small></h4>
-                    <h2 class="text-uppercase">' . $title . '</h2>
+                    <h2 class="text-uppercase"> $title </h2>
                 </div>
             </div>
         </div>
     </div>
-    ';
+    HTML;
+
+    echo $header;
+}
+
+function get_modules_links()
+{
+    $modules_file_config = CONFIG_PATH . '/module_descriptions.json';
+    $modules = scandir(MODULES_DIR);
+    $valid_modules = [];
+    $sideMenu = [];
+    $module_info = [];
+
+    if (file_exists($modules_file_config)) {
+        $module_info = json_decode(file_get_contents($modules_file_config), true);
+    }
+
+    foreach ($modules as $module) {
+        if ($module !== "." && $module !== ".." && is_dir(MODULES_DIR . "/$module")) {
+            $valid_modules[] = $module;
+        }
+    }
+
+    if (empty($valid_modules)) {
+        return '<div class="col-12"><div class="alert alert-info">No modules available.</div></div>';
+    }
+
+    sort($valid_modules);
+    foreach ($valid_modules as $module) {
+        $module_path = htmlspecialchars(BASE_URL . "/modules/$module/index.php", ENT_QUOTES, 'UTF-8');
+        $name = $module_info[$module]['name'] ?? ucfirst($module);
+        $icon = $module_info[$module]['icon'] ?? 'fas fa-cube';
+        $sideMenu[] = <<< HTML
+                    <p class="mb-0 mt-3 ml-4 pl-1">
+                        <a class="d-block side-menu" href="$module_path">
+                            <i class="$icon mr-2" style="width: 20px; text-align: center;"></i> 
+                            $name
+                        </a>
+                    </p>
+                    HTML;
+    }
+
+    return implode("\n", $sideMenu);
 }
