@@ -45,19 +45,19 @@ try {
         } elseif ($_POST["action"] === "registerOneStudent") {
 
             if (!preg_match('/^\d{6}$/', $_POST["claveUlsa"])) {
-                throw new RuntimeException('Clave ULSA inválida. Debe ser un número de 6 dígitos.');
+                throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
             }
             if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST["nombre"])) {
-                throw new RuntimeException('Nombre inválido. Solo se permiten letras y espacios.');
+                throw new RuntimeException('Nombre invalido. Solo se permiten letras y espacios.');
             }
             if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST["apellidos"])) {
-                throw new RuntimeException('Apellidos inválidos. Solo se permiten letras y espacios.');
+                throw new RuntimeException('Apellidos invalidos. Solo se permiten letras y espacios.');
             }
             if (empty($_POST["carrera"])) {
-                throw new RuntimeException('Carrera no puede estar vacía.');
+                throw new RuntimeException('Carrera no puede estar vacia.');
             }
             if (!filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)) {
-                throw new RuntimeException('Correo electrónico inválido.');
+                throw new RuntimeException('Correo electronico invalido.');
             }
 
             $res = insertOneStudent($_POST["claveUlsa"], $_POST["nombre"], $_POST["apellidos"], $_POST["carrera"], $_POST["email"]);
@@ -112,7 +112,7 @@ get_header("Gestión de Alumnos");
     <main class="container content marco">
         <div>
             <div class="d-flex justify-content-end align-items-center">
-                <a href="$_SERVER['DOCUMENT_ROOT']" class="btn btn-outline-primary">Regresar</a>
+                <a href="<?=$_SERVER['DOCUMENT_ROOT']?>" class="btn btn-outline-primary">Regresar</a>
             </div>
             <br>
             <br>
