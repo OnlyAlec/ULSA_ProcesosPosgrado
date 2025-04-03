@@ -33,7 +33,7 @@ jobs:
                   -o StrictHostKeyChecking=no \
                   -p ${{ secrets.PORT }} \
                   ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-                  "sudo rm -rf ${{ secrets.SSH_PATH }}/*"
+                  "sudo rm -rf ${{ secrets.SSH_PATH }}/.* && sudo rm -rf ${{ secrets.SSH_PATH }}/*"
 
             - name: Deploy to Server
               uses: appleboy/scp-action@v0.1.7
