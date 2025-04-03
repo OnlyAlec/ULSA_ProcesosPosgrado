@@ -46,6 +46,18 @@ jobs:
                   target: ${{ secrets.SSH_PATH }}
                   rm: false
 
+            # TEMPORARY DEBUG STEP
+            - name: Verify SSH_PATH
+              run: |
+                  echo "SSH_PATH length: ${#SSH_PATH}"
+                  ssh -i ~/.ssh/deploy_key \
+                  -o StrictHostKeyChecking=no \
+                  -p ${{ secrets.PORT }} \
+                  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+                  "echo 'Server path:' && stat ${{ secrets.SSH_PATH }}"
+              env:
+                  SSH_PATH: ${{ secrets.SSH_PATH }}
+
             - name: Change ownership to nginx
               run: |
                   ssh -i ~/.ssh/deploy_key \
