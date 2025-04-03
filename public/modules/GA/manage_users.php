@@ -19,7 +19,7 @@ function restartDatabaseFromExcel($filePath, $ulsaIdColumn, $nameColumn, $lastna
 
         $data = loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $careerColumn, $emailColumn);
         if (empty($data['ulsa_ids'])) {
-            throw new RuntimeException('El archivo Excel no contiene datos válidos.');
+            throw new RuntimeException('El archivo Excel no contiene datos validos.');
         }
         clearDatabaseTables();
         insertDataIntoDatabase($data);
@@ -156,7 +156,7 @@ function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $
             continue;
         }
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            ErrorList::add("Fila {$rowIndex}: Correo electrónico invalido.");
+            ErrorList::add("Fila {$rowIndex}: Correo electrOnico invalido.");
             continue;
         }
 
