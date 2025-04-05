@@ -8,7 +8,7 @@ ob_start();
 $studentsDB = getStudents();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-try {
+    try {
         header('Content-Type: application/json');
         require_once './gestorStudents.php';
 
@@ -23,32 +23,32 @@ try {
                 $error = false;
                 $studentIDs = $_POST['studentIDS'] ?? [];
                 foreach ($studentIDs as $id) {
-                    if(updateStudentFieldBoolean($id, 'sed', true) == 0 ){
+                    if (updateStudentFieldBoolean($id, 'sed', true) == 0) {
                         ErrorList::add("Not update student $id");
                         $error = true;
                     }
                 }
 
-                if($error) {
+                if ($error) {
                     throw new RuntimeException("");
                 }
-                
+
                 $res = "";
                 break;
 
             case 'getMasters':
                 $programs = getMastersPrograms();
-                $res = array_map(fn($program) => $program->getName(), $programs);
+                $res = array_map(fn ($program) => $program->getName(), $programs);
                 break;
 
             case 'getSpecialty':
                 $programs = getSpecialtyPrograms();
-                $res = array_map(fn($program) => $program->getName(), $programs);
+                $res = array_map(fn ($program) => $program->getName(), $programs);
                 break;
 
             case '':
                 $allPrograms = getPrograms($_POST['action']);
-                $res = array_map(fn($program) => $program->getName(), $allPrograms);
+                $res = array_map(fn ($program) => $program->getName(), $allPrograms);
                 break;
 
             case 'sendEmail':
@@ -59,13 +59,13 @@ try {
             default:
                 throw new RuntimeException('Not valid action!');
         }
-        
+
         echo responseOK($res);
         exit;
     } catch (RuntimeException $e) {
         echo responseInternalError($e->getMessage());
         exit;
-    }   
+    }
 }
 ob_end_flush();
 ?>
@@ -79,8 +79,8 @@ get_head("SED");
 
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-        get_header("Seguimiento de Evaluación Docente");
-    ?>
+get_header("Seguimiento de Evaluación Docente");
+?>
     <main class="container content marco">
         <div class="sectionsSED">
             <h1 class="text-center">Lista de alumnos</h1>
@@ -129,8 +129,8 @@ get_head("SED");
             </thead>
             <tbody id="studentsTable">
                 <?php
-                $studentsDB = getStudents();
-                foreach ($studentsDB as $student): ?>
+            $studentsDB = getStudents();
+foreach ($studentsDB as $student): ?>
                     <tr data-carrer="<?= $student->getProgram() ?>">
                         <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
                         <td><?= htmlspecialchars($student->getUlsaId()) ?></td>
@@ -139,13 +139,13 @@ get_head("SED");
                         <td>
                             <div class="d-flex gap-2">
                                 <?php
-                                    $btnClass = $student->getSed() ? 'btn-success' : 'btn-danger';
-                                ?>
+                    $btnClass = $student->getSed() ? 'btn-success' : 'btn-danger';
+    ?>
                                 <button class="btn <?= $btnClass ?> btn-sm text-white changeSED border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
                                     <?= $student->getSed()
-                                        ? '<i class="fas fa-check-square fa-2x"></i>'
-                                        : '<i class="fas fa-minus-square fa-2x"></i>' 
-                                    ?>
+            ? '<i class="fas fa-check-square fa-2x"></i>'
+            : '<i class="fas fa-minus-square fa-2x"></i>'
+    ?>
                                 </button>
 
                                 <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">

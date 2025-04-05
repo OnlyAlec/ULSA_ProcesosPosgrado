@@ -166,7 +166,7 @@ function getMastersPrograms(): array
     $stmt->execute();
 
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $programsM[] = new Program($row['id'], $row['career']); 
+        $programsM[] = new Program($row['id'], $row['career']);
     }
     return $programsM;
 }
