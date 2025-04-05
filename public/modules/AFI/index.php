@@ -237,7 +237,7 @@ get_header("Avisos de Fechas Importantes");
                         <option selected value="all"></option>
                         <?php
                     foreach (getMastersPrograms() as $master) {
-                        $master = ucfirst(strtolower($master));
+                        $master = ucfirst(strtolower($master->getName()));
                         echo "<option value='$master'>$master</option>";
                     } ?>
                     </select>
@@ -248,7 +248,7 @@ get_header("Avisos de Fechas Importantes");
                         <option selected value="all"></option>
                         <?php
                     foreach (getSpecialtyPrograms() as $special) {
-                        $special = ucfirst(strtolower($special));
+                        $special = ucfirst(strtolower($special->getName()));
                         echo "<option value='$special'>$special</option>";
                     } ?>
                     </select>
@@ -293,7 +293,7 @@ get_header("Avisos de Fechas Importantes");
                         <option selected value="all"></option>
                         <?php
                     foreach (getMastersPrograms() as $master) {
-                        $master = ucfirst(strtolower($master));
+                        $master = ucfirst(strtolower($master->getName()));
                         echo "<option value='$master'>$master</option>";
                     } ?>
                     </select>
@@ -304,7 +304,7 @@ get_header("Avisos de Fechas Importantes");
                         <option selected value="all"></option>
                         <?php
                     foreach (getSpecialtyPrograms() as $special) {
-                        $special = ucfirst(strtolower($special));
+                        $special = ucfirst(strtolower($special->getName()));
                         echo "<option value='$special'>$special</option>";
                     } ?>
                     </select>

@@ -1,6 +1,8 @@
 <?php
 
 require_once VENDOR_DIR . "/autoload.php";
+require_once INCLUDES_DIR . "/models/program.php";
+require_once INCLUDES_DIR . "/models/student.php";
 
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
 $dotenv->load();
@@ -159,12 +161,12 @@ function getMastersPrograms(): array
     $programsM = [];
     $db = getDatabaseConnection();
 
-    $query = "SELECT DISTINCT career FROM program WHERE LOWER(career) LIKE 'maestría%'";
+    $query = "SELECT DISTINCT id, career FROM program WHERE LOWER(career) LIKE 'maestría%'";
     $stmt = $db->prepare($query);
     $stmt->execute();
 
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $programsM[] = ucfirst(strtoupper($row['career']));
+        $programsM[] = new Program($row['id'], $row['career']); 
     }
     return $programsM;
 }
@@ -174,12 +176,12 @@ function getSpecialtyPrograms(): array
     $programsS = [];
     $db = getDatabaseConnection();
 
-    $query = "SELECT DISTINCT career FROM program WHERE LOWER(career) LIKE 'especialidad%'";
+    $query = "SELECT DISTINCT id, career FROM program WHERE LOWER(career) LIKE 'especialidad%'";
     $stmt = $db->prepare($query);
     $stmt->execute();
 
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $programsS[] = ucfirst(strtoupper($row['career']));
+        $programsS[] = new Program($row['id'], $row['career']);
     }
     return $programsS;
 }

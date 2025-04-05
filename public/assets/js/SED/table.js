@@ -10,27 +10,34 @@ $("#programType").on("change", function () {
     $("#selectedCount").text("0");
     $("#selectAll").prop("checked", false);
 
+    //console.log(selectedOption);
+
     $.ajax({
         url: "",
         type: "POST",
         data: { action: selectedOption },
         success: function (response) {
-            if (!Array.isArray(response)) response = Object.values(response);
-
-            if (response.length == 0) {
-                displayMessage(
-                    $(".sectionsAFI"),
-                    "No hay áreas disponibles para el tipo de programa seleccionado",
-                    "error"
-                );
+            console.log(response);
+            
+            //if (!Array.isArray(response))
+                //response = Object.values(response);
+            
+            if(!response.success || !Array.isArray(response.data)) {
+                displayMessage($('.sectionsSED'), "Ocurrio un problema", 'error');
                 return;
             }
-            $("#programArea").empty();
+
+            /*if (response.length == 0) {
+                displayMessage($('.sectionsAFI'), "No hay áreas disponibles para el tipo de programa seleccionado", 'error');
+                return;
+            }*/
+
+            $('#programArea').empty();
             const option = document.createElement("option");
             option.text = "Seleccione un tipo de programa primero";
             $("#programArea").append(option);
 
-            response.forEach((element) => {
+            response.data.forEach(element => {
                 const option = document.createElement("option");
                 option.value = element;
                 option.text = element;
@@ -112,8 +119,8 @@ $(".studentCheckbox").on("change", function () {
 
 $("#selectAll").on("change", function () {
     const checked = $(this).is(":checked");
-    $(".studentCheckbox").prop("checked", checked);
-    $(".studentCheckbox").trigger("change");
+    $(".studentCheckbox:visible").prop("checked", checked);
+    $(".studentCheckbox:visible").trigger("change");
 });
 
 $("#confirmChanges").on("click", function () {
@@ -151,8 +158,10 @@ $("#confirmChanges").on("click", function () {
                 $(".studentCheckbox").prop("checked", false);
                 $("tr").removeClass("selected");
                 $("#confirmChanges").prop("disabled", true);
-                $("#selectedCount").text("0");
-            } else {
+                $("#selectedCount").text("0"); 
+                $("#selectAll").prop("checked", false);
+            }
+            else {
                 alert("ERROR: Error al actualizar el estatus SED de los alumnos.");
             }
         },
@@ -165,6 +174,7 @@ $("#confirmChanges").on("click", function () {
 
 $(".changeSED").on("click", function () {
     let icon = $(this).find("i");
+    let button = icon.closest("button");
     let studentID = $(this).data("student-id");
     let newState = icon.hasClass("fa-minus-square") ? 1 : 0;
 
@@ -175,13 +185,11 @@ $(".changeSED").on("click", function () {
         success: function (response) {
             if (response.success) {
                 if (newState) {
-                    icon.removeClass("fa-minus-square")
-                        .addClass("fa-check-square")
-                        .css("color", "#36b18c");
+                    icon.removeClass("fa-minus-square").addClass("fa-check-square");
+                    button.removeClass("btn-danger").addClass("btn-success");
                 } else {
-                    icon.removeClass("fa-check-square")
-                        .addClass("fa-minus-square")
-                        .css("color", "#dc3545");
+                    icon.removeClass("fa-check-square").addClass("fa-minus-square");
+                    button.removeClass("btn-success").addClass("btn-danger");
                 }
             } else {
                 alert("ERROR: Error al actualizar el estado SED.");
@@ -191,6 +199,100 @@ $(".changeSED").on("click", function () {
             const errorMsg = xhr.responseText || "Error al procesar la solicitud";
             displayMessage($(".sectionsAFI"), errorMsg, "error");
         },
+    });
+});
+
+$(".sendEmail").on("click", function () {
+    let studentID = $(this).data("student-id");
+    let divError = $(".sectionsSED");
+    let buttonEmail = $(this);
+    let buttonStatus = $(".changeSED")
+
+    console.log(studentID);
+
+    $.ajax({
+        url: '',
+        type: 'POST',
+        data: { action: "sendEmail", studentID: studentID },
+        beforeSend: function () {
+            $(".alert").remove();
+            buttonEmail.prop("disabled", true);
+            buttonStatus.prop("disabled", true);
+        },
+        success: function (response) {
+            if (!response.success || !response.data.delivered) {
+                displayMessage(
+                    divError,
+                    response.message ?? "No se pudo mandar el correo",
+                    "error"
+                );
+                return;
+            }
+            displayMessage(
+                divError,
+                "Correo enviado correctamente: " + response.data.receipt
+            );
+            divError[0].scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+                inline: "nearest",
+            });
+        },
+        error: function (xhr) {
+            const errorMsg = xhr.responseText || 'Error al procesar la solicitud';
+            displayMessage($('.sectionsAFI'), errorMsg, 'error');
+        },
+        complete: function () {
+            buttonEmail.prop("disabled", false);
+            buttonStatus.prop("disable", false);
+        }
+    });
+});
+
+$(".sendEmail").on("click", function () {
+    let studentID = $(this).data("student-id");
+    let divError = $(".sectionsSED");
+    let buttonEmail = $(this);
+    let buttonStatus = $(".changeSED")
+
+    console.log(studentID);
+
+    $.ajax({
+        url: '',
+        type: 'POST',
+        data: { action: "sendEmail", studentID: studentID },
+        beforeSend: function () {
+            $(".alert").remove();
+            buttonEmail.prop("disabled", true);
+            buttonStatus.prop("disabled", true);
+        },
+        success: function (response) {
+            if (!response.success || !response.data.delivered) {
+                displayMessage(
+                    divError,
+                    response.message ?? "No se pudo mandar el correo",
+                    "error"
+                );
+                return;
+            }
+            displayMessage(
+                divError,
+                "Correo enviado correctamente: " + response.data.receipt
+            );
+            divError[0].scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+                inline: "nearest",
+            });
+        },
+        error: function (xhr) {
+            const errorMsg = xhr.responseText || 'Error al procesar la solicitud';
+            displayMessage($('.sectionsAFI'), errorMsg, 'error');
+        },
+        complete: function () {
+            buttonEmail.prop("disabled", false);
+            buttonStatus.prop("disable", false);
+        }
     });
 });
 
@@ -217,6 +319,8 @@ $("#generateReport").on("click", function () {
 
         allStudents.push(student);
     });
+
+    //console.log(allStudents);
 
     $.ajax({
         url: "generate_report.php",
