@@ -47,6 +47,8 @@ temp/
 .history/
 jsconfig.json
 .php-cs-fixer.cache
+fiveserver.config.js
+
 
 #  XLSX/PDF
 public/assets/pdf/*
