@@ -1,18 +1,10 @@
 <?php require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php'; ?>
 <!DOCTYPE html>
 
-<head>
-    <title>Proyectos | Facultad de ingeniería</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="<?= ASSETS_PATH ?>/css/bootstrap-ulsa.min.css" type="text/css">
-    <link rel="stylesheet" href="<?= ASSETS_PATH ?>/css/jquery-ui.css" type="text/css">
-    <link rel="stylesheet" href="<?= ASSETS_PATH ?>/css/indivisa.css" type="text/css">
-    <link rel="stylesheet" href="<?= ASSETS_PATH ?>/css/style.css" type="text/css">
-    <link rel="stylesheet" href="<?= ASSETS_PATH ?>/css/fa_all.css" type="text/css">
-
-    <script src="<?= ASSETS_PATH ?>/js/util.js"></script>
-</head>
+<?php
+require_once INCLUDES_DIR . '/templates/head.php';
+get_head("AFI");
+?>
 
 <body style="display: block;">
     <?php
