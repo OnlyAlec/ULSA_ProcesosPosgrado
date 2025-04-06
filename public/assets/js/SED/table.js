@@ -296,6 +296,53 @@ $(".sendEmail").on("click", function () {
     });
 });
 
+$(".sendEmail").on("click", function () {
+    let studentID = $(this).data("student-id");
+    let divError = $(".sectionsSED");
+    let buttonEmail = $(this);
+    let buttonStatus = $(".changeSED")
+
+    console.log(studentID);
+
+    $.ajax({
+        url: '',
+        type: 'POST',
+        data: { action: "sendEmail", studentID: studentID },
+        beforeSend: function () {
+            $(".alert").remove();
+            buttonEmail.prop("disabled", true);
+            buttonStatus.prop("disabled", true);
+        },
+        success: function (response) {
+            if (!response.success || !response.data.delivered) {
+                displayMessage(
+                    divError,
+                    response.message ?? "No se pudo mandar el correo",
+                    "error"
+                );
+                return;
+            }
+            displayMessage(
+                divError,
+                "Correo enviado correctamente: " + response.data.receipt
+            );
+            divError[0].scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+                inline: "nearest",
+            });
+        },
+        error: function (xhr) {
+            const errorMsg = xhr.responseText || 'Error al procesar la solicitud';
+            displayMessage($('.sectionsAFI'), errorMsg, 'error');
+        },
+        complete: function () {
+            buttonEmail.prop("disabled", false);
+            buttonStatus.prop("disable", false);
+        }
+    });
+});
+
 $("#generateReport").on("click", function () {
     let allStudents = [];
     let filename = $(this).data("filename");
