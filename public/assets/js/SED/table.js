@@ -236,11 +236,11 @@ $("#generateReport").on("click", function () {
     let filename = $(this).data("filename");
 
     $("#studentsTable tbody tr").each(function () {
-        let studentID = $(this).find("td").eq(1).text(); 
-        let fullName = $(this).find("td").eq(2).text(); 
+        let studentID = $(this).find("td").eq(1).text();
+        let fullName = $(this).find("td").eq(2).text();
         let email = $(this).find("td").eq(3).text();
         let sedStatus = $(this).find(".changeSED i").hasClass("fa-check-square") ? true : false;
-        let carrer = $(this).data("carrer"); 
+        let carrer = $(this).data("carrer");
 
         fullName = fullName.replace(/(?:^|\s)\S/g, (match) => match.toUpperCase());
 
