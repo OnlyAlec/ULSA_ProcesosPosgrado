@@ -14,14 +14,16 @@ class Mailer
     private string $htmlContent;
     private string $subject;
     private string $template;
+    private string $module;
 
-    public function __construct(Student $contact, string $subject, string $template)
+    public function __construct(Student $contact, string $subject, string $template, string $module)
     {
         $this->brevo = new Brevo();
         $this->htmlContent = '';
         $this->contact = $contact;
         $this->subject = $subject;
         $this->template = $template;
+        $this->module = $module;
     }
 
     private function getTemplateHTML(): string
@@ -67,7 +69,8 @@ class Mailer
                 return false;
             }
 
-            $url = filePathToUrl(MODULES_DIR . "/AFI/confirmation.php");
+            //$url = filePathToUrl(MODULES_DIR . "/AFI/confirmation.php");
+            $url = filePathToUrl(MODULES_DIR . "/" . $this->module . "/confirmation.php");
             $lastNameParts = preg_split('/\s+/', $this->contact->getLastName());
             $formattedLastName = implode(' ', array_map('ucfirst', $lastNameParts));
             $dataReplace = [

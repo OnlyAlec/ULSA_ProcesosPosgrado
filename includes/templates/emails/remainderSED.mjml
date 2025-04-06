@@ -1,0 +1,38 @@
+<mjml>
+  <mj-head>
+    <mj-preview>
+      ¡-- NAME --, dale un vistazo a lo que se viene! 🚀✨
+    </mj-preview>
+  </mj-head>
+
+  <mj-body>
+    <mj-include path="..\..\..\..\includes\templates\emails\header.mjml" />
+
+    <!-- Content -->
+    <mj-section background-color="#f0f0f0">
+      <mj-column>
+        <mj-text font-size="20px" font-family="Indivisa Display Sans" font-style="italic" font-weight="900" padding="30px 50px">
+          Hola -- NAME --,
+        </mj-text>
+        <mj-text font-size="16px" font-family="Indivisa Text Sans" padding="0px 50px">
+          Espero que estés disfrutando cada momento de este viaje académico y que cada día te traiga nuevas oportunidades. Quería compartir contigo un espacio especial que preparamos justamente para ayudarte a tener todo bajo control y aprovechar al máximo tu cuatrimestre.
+        </mj-text>
+        <mj-text font-size="16px" font-family="Indivisa Text Sans" padding="10px 50px">
+          📅 <b> Es importante que realices la evaluación docente desde tu Portal de Servicios.</b>
+          Esto nos ayuda a mantener una mejor retroalimentación de nuestros docentes. Por eso requerimos que la realices a la brevedad.
+        </mj-text>
+        <mj-button href="-- URL --" font-size="20px" font-family="Indivisa Display Sans" font-weight="900" background-color="#D21034" color="white" width="400px" padding="30px 50px">
+          Evaluación Docente
+        </mj-button>
+        <mj-text font-size="16px" font-family="Indivisa Text Sans" padding="10px 50px">
+          ¿Sabías que mantener todos tus compromisos organizados puede marcar la diferencia? ¡Cuéntame qué estrategias utilizas para planificar tus días! 🌟
+        </mj-text>
+        <mj-text font-size="16px" font-family="Indivisa Text Sans" padding="10px 50px">
+          Confío en que, con tu compromiso, este cuatrimestre será aún más exitoso. <b>¡Realiza tu evaluación docente para ayudarnos a mejorar nuestro desempeño!</b>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-include path="..\..\..\..\includes\templates\emails\footer.mjml" />
+  </mj-body>
+</mjml>

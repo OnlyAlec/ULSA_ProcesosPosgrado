@@ -24,7 +24,7 @@ function changeStatusAFI($ulsaID)
 
 function sendEmailRemainder(Student $student)
 {
-    $mailer = new Mailer($student, "¡No dejes pasar estas fechas importantes!", "remainderAFI");
+    $mailer = new Mailer($student, "¡No dejes pasar estas fechas importantes!", "remainderAFI", "AFI");
     $mailer->constructEmail();
     return  $mailer->send();
 }

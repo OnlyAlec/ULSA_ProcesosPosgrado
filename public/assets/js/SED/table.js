@@ -10,27 +10,15 @@ $("#programType").on("change", function () {
     $("#selectedCount").text("0");
     $("#selectAll").prop("checked", false);
 
-    //console.log(selectedOption);
-
     $.ajax({
         url: "",
         type: "POST",
         data: { action: selectedOption },
         success: function (response) {
-            console.log(response);
-
-            //if (!Array.isArray(response))
-            //response = Object.values(response);
-
             if (!response.success || !Array.isArray(response.data)) {
                 displayMessage($(".sectionsSED"), "Ocurrio un problema", "error");
                 return;
             }
-
-            /*if (response.length == 0) {
-                displayMessage($('.sectionsAFI'), "No hay áreas disponibles para el tipo de programa seleccionado", 'error');
-                return;
-            }*/
 
             $("#programArea").empty();
             const option = document.createElement("option");
@@ -145,10 +133,10 @@ $("#confirmChanges").on("click", function () {
                 alert("EXITO: El estatus SED de los alumnos ha sido actualizado.");
 
                 $(".studentCheckbox:checked").each(function () {
-                    let btn = $(this).closest("tr").find(".changeSED i");
-                    btn.removeClass("fa-minus-square")
-                        .addClass("fa-check-square")
-                        .css("color", "#36b18c");
+                    let icon = $(this).closest("tr").find(".changeSED i");
+                    let button = icon.closest("button");
+                    icon.removeClass("fa-minus-square").addClass("fa-check-square");
+                    button.removeClass("btn-danger").addClass("btn-success");
                 });
 
                 $("#programType").val("");
@@ -207,96 +195,6 @@ $(".sendEmail").on("click", function () {
     let buttonEmail = $(this);
     let buttonStatus = $(".changeSED");
 
-    console.log(studentID);
-
-    $.ajax({
-        url: "",
-        type: "POST",
-        data: { action: "sendEmail", studentID: studentID },
-        beforeSend: function () {
-            $(".alert").remove();
-            buttonEmail.prop("disabled", true);
-            buttonStatus.prop("disabled", true);
-        },
-        success: function (response) {
-            if (!response.success || !response.data.delivered) {
-                displayMessage(
-                    divError,
-                    response.message ?? "No se pudo mandar el correo",
-                    "error"
-                );
-                return;
-            }
-            displayMessage(divError, "Correo enviado correctamente: " + response.data.receipt);
-            divError[0].scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-                inline: "nearest",
-            });
-        },
-        error: function (xhr) {
-            const errorMsg = xhr.responseText || "Error al procesar la solicitud";
-            displayMessage($(".sectionsAFI"), errorMsg, "error");
-        },
-        complete: function () {
-            buttonEmail.prop("disabled", false);
-            buttonStatus.prop("disable", false);
-        },
-    });
-});
-
-$(".sendEmail").on("click", function () {
-    let studentID = $(this).data("student-id");
-    let divError = $(".sectionsSED");
-    let buttonEmail = $(this);
-    let buttonStatus = $(".changeSED");
-
-    console.log(studentID);
-
-    $.ajax({
-        url: "",
-        type: "POST",
-        data: { action: "sendEmail", studentID: studentID },
-        beforeSend: function () {
-            $(".alert").remove();
-            buttonEmail.prop("disabled", true);
-            buttonStatus.prop("disabled", true);
-        },
-        success: function (response) {
-            if (!response.success || !response.data.delivered) {
-                displayMessage(
-                    divError,
-                    response.message ?? "No se pudo mandar el correo",
-                    "error"
-                );
-                return;
-            }
-            displayMessage(divError, "Correo enviado correctamente: " + response.data.receipt);
-            divError[0].scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-                inline: "nearest",
-            });
-        },
-        error: function (xhr) {
-            const errorMsg = xhr.responseText || "Error al procesar la solicitud";
-            displayMessage($(".sectionsAFI"), errorMsg, "error");
-        },
-        complete: function () {
-            buttonEmail.prop("disabled", false);
-            buttonStatus.prop("disable", false);
-        },
-    });
-});
-
-$(".sendEmail").on("click", function () {
-    let studentID = $(this).data("student-id");
-    let divError = $(".sectionsSED");
-    let buttonEmail = $(this);
-    let buttonStatus = $(".changeSED");
-
-    console.log(studentID);
-
     $.ajax({
         url: "",
         type: "POST",
@@ -338,11 +236,11 @@ $("#generateReport").on("click", function () {
     let filename = $(this).data("filename");
 
     $("#studentsTable tbody tr").each(function () {
-        let studentID = $(this).find("td").eq(1).text(); // Clave ULSA
-        let fullName = $(this).find("td").eq(2).text(); // Nombre Completo
-        let email = $(this).find("td").eq(3).text(); // Correo
-        let sedStatus = $(this).find(".changeSED i").hasClass("fa-check-square") ? true : false; // Estatus SED
-        let carrer = $(this).data("carrer"); // Carrera (programa de maestría o especialidad)
+        let studentID = $(this).find("td").eq(1).text(); 
+        let fullName = $(this).find("td").eq(2).text(); 
+        let email = $(this).find("td").eq(3).text();
+        let sedStatus = $(this).find(".changeSED i").hasClass("fa-check-square") ? true : false;
+        let carrer = $(this).data("carrer"); 
 
         fullName = fullName.replace(/(?:^|\s)\S/g, (match) => match.toUpperCase());
 
@@ -356,8 +254,6 @@ $("#generateReport").on("click", function () {
 
         allStudents.push(student);
     });
-
-    //console.log(allStudents);
 
     $.ajax({
         url: "generate_report.php",

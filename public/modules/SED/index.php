@@ -7,66 +7,50 @@ require_once INCLUDES_DIR . "/models/student.php";
 ob_start();
 $studentsDB = getStudents();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    try {
+try {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Content-Type: application/json');
-        require_once './gestorStudents.php';
 
-        switch ($_POST['action']) {
-            case 'updateSingleSED':
-                $studentID = $_POST['studentID'] ?? null;
-                $newState = $_POST['state'] ?? null;
-                $res = updateStudentFieldBoolean($studentID, 'sed', $newState);
-                break;
+        if (isset($_POST['action'])) {
+            require_once 'functionsSED.php';
 
-            case 'updateSED':
-                $error = false;
-                $studentIDs = $_POST['studentIDS'] ?? [];
-                foreach ($studentIDs as $id) {
-                    if (updateStudentFieldBoolean($id, 'sed', true) == 0) {
-                        ErrorList::add("Not update student $id");
-                        $error = true;
+            switch ($_POST['action']) {
+                case 'updateSingleSED':
+                    $res = changeStatusSEDSingle($_POST['studentID'], $_POST['state']);
+                    break;
+                case 'updateSED':
+                    $res = changeStatusSEDGroup($_POST['studentIDS']);
+                    break;
+                case 'getMasters':
+                    $res = array_map(fn($program) => $program->getName(), getMastersPrograms());
+                    break;
+                case 'getSpecialty':
+                    $res = array_map(fn($program) => $program->getName(), getSpecialtyPrograms());
+                    break;
+                case 'sendEmail':
+                    $student = getStudentByUlsaID($_POST['studentID']);
+                    if ($student) {
+                        $res = sendEmailRemainder($student);
+                    } else {
+                        throw new RuntimeException('Student not found');
                     }
-                }
-
-                if ($error) {
-                    throw new RuntimeException("");
-                }
-
-                $res = "";
-                break;
-
-            case 'getMasters':
-                $programs = getMastersPrograms();
-                $res = array_map(fn ($program) => $program->getName(), $programs);
-                break;
-
-            case 'getSpecialty':
-                $programs = getSpecialtyPrograms();
-                $res = array_map(fn ($program) => $program->getName(), $programs);
-                break;
-
-            case '':
-                $allPrograms = getPrograms($_POST['action']);
-                $res = array_map(fn ($program) => $program->getName(), $allPrograms);
-                break;
-
-            case 'sendEmail':
-                $student = getStudentFromUlsaID($_POST['studentID']) ?? null;
-                $res = sendEmailRemainder($student);
-                break;
-
-            default:
-                throw new RuntimeException('Not valid action!');
+                    break;
+                case '':
+                    $res = array_map(fn($program) => $program->getName(), getProgramsFiltered($_POST['action']));
+                    break;
+                default:
+                    throw new RuntimeException('Not valid action!');
+            }
         }
 
         echo responseOK($res);
-        exit;
-    } catch (RuntimeException $e) {
-        echo responseInternalError($e->getMessage());
-        exit;
+        exit;        
     }
+} catch (RuntimeException $e) {
+    echo responseInternalError($e->getMessage());
+    exit;
 }
+
 ob_end_flush();
 ?>
 
@@ -129,32 +113,32 @@ get_header("Seguimiento de Evaluación Docente");
             </thead>
             <tbody id="studentsTable">
                 <?php
-            $studentsDB = getStudents();
-foreach ($studentsDB as $student): ?>
-                    <tr data-carrer="<?= $student->getProgram() ?>">
-                        <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
-                        <td><?= htmlspecialchars($student->getUlsaId()) ?></td>
-                        <td><?= htmlspecialchars($student->getName()) . " " . htmlspecialchars($student->getLastName()) ?></td>
-                        <td><?= htmlspecialchars($student->getEmail()) ?></td>
-                        <td>
-                            <div class="d-flex gap-2">
-                                <?php
-                    $btnClass = $student->getSed() ? 'btn-success' : 'btn-danger';
-    ?>
-                                <button class="btn <?= $btnClass ?> btn-sm text-white changeSED border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
-                                    <?= $student->getSed()
-            ? '<i class="fas fa-check-square fa-2x"></i>'
-            : '<i class="fas fa-minus-square fa-2x"></i>'
-    ?>
-                                </button>
-
-                                <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
-                                    <i class="fas fa-paper-plane fa-2x"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
+                    $studentsDB = getStudents();
+                    foreach ($studentsDB as $student): ?>
+                        <tr data-carrer="<?= $student->getProgram() ?>">
+                            <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
+                            <td><?= htmlspecialchars($student->getUlsaId()) ?></td>
+                            <td><?= htmlspecialchars($student->getName()) . " " . htmlspecialchars($student->getLastName()) ?></td>
+                            <td><?= htmlspecialchars($student->getEmail()) ?></td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <?php
+                                        $btnClass = $student->getSed() ? 'btn-success' : 'btn-danger';
+                                    ?>
+                                    <button class="btn <?= $btnClass ?> btn-sm text-white changeSED border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
+                                        <?= $student->getSed()
+                                            ? '<i class="fas fa-check-square fa-2x"></i>'
+                                            : '<i class="fas fa-minus-square fa-2x"></i>'
+                                        ?>
+                                    </button>
+                                    <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
+                                        <i class="fas fa-paper-plane fa-2x"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; 
+                ?>
             </tbody>
         </table>
 
