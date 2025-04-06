@@ -29,12 +29,12 @@ $(function () {
                     return;
                 }
 
-                displayMessage(form, "Archivo procesado correctamente");
+                displayMessage($(".subSectionAFI:visible"), "Archivo procesado correctamente");
                 if (response.data && response.data.students && response.data.students.length > 0) {
                     // @ts-ignore
                     response.data.students.forEach((student) => {
                         const row = `<tr>
-                                <td>${student.ulsaID}</td>
+                                <th scope='row'>${student.ulsaID}</th>
                                 <td>${student.firstName} ${student.lastName}</td>
                                 <td>${student.carrer}</td>
                                 <td>${student.email}</td>
@@ -69,14 +69,18 @@ $(function () {
         });
     });
 
-    $("#selectMaster, #selectSpecialty").on("change", function () {
-        const selectedOption = String($(this).val())?.toUpperCase();
-        if (this.id === "selectMaster") {
-            $("#selectSpecialty").val("all");
-        } else {
-            $("#selectMaster").val("all");
-        }
-        filterTableByCarrer(selectedOption, "tableStudents");
+    $("#selectMaster, #selectSpecialty").on("input", function () {
+        const value = String($(this).val())?.toUpperCase();
+        const icon = $(this).closest(".datalist").find("i");
+
+        value
+            ? icon.removeClass("fa-search").addClass("fa-times")
+            : icon.removeClass("fa-times").addClass("fa-search");
+        const otherSelect = $(this).is("#selectMaster") ? "#selectSpecialty" : "#selectMaster";
+        $(otherSelect).val("");
+        $(otherSelect).closest(".datalist").find("i").removeClass("fa-times").addClass("fa-search");
+
+        filterTableByCarrer(value, "tableStudents");
     });
 });
 

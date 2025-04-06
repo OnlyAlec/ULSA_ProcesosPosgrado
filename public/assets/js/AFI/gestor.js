@@ -26,29 +26,25 @@ $(function () {
                     // @ts-ignore
                     response.data.forEach((student) => {
                         let row = `<tr>
-                                <td>${student.ulsaID}</td>
+                                <th scope='row'>${student.ulsaID}</th>
                                 <td>${student.firstName} ${student.lastName}</td>
                                 <td>${student.carrer}</td>
                                 <td>${student.email}</td>
-                                <td class="row">
-                                    <button class="col btn ??? btn-sm text-white statusAFI" data-ulsaID=${student.ulsaID}>
-                                        ###
-                                    </button>
+                                <td class="icono-acciones text-center">
+                                    ###
                                     ~~~
                             </tr>`;
                         const afiStatusBtn = student.afi
-                            ? '<i class="fas fa-minus-square"></i>'
-                            : '<i class="fas fa-check-square"></i>';
-                        const afiStatusColor = student.afi ? "btn-danger" : "btn-success";
+                            ? `<i class="fas fa-minus-square fa-lg statusAFI" data-ulsaID=${student.ulsaID}></i>`
+                            : `<i class="fas fa-check-square fa-lg statusAFI" data-ulsaID=${student.ulsaID}></i>`;
                         if (!student.afi)
                             row = row.replace(
                                 "~~~",
-                                `<button class="col btn btn-info btn-sm text-white sendEmail" data-ulsaID=${student.ulsaID}><i class= "fas fa-paper-plane"></i></button>`
+                                `<i class="fas fa-paper-plane sendEmail" data-ulsaID=${student.ulsaID}></i>`
                             );
                         else row = row.replace("~~~", "");
 
                         row = row.replace("###", afiStatusBtn);
-                        row = row.replace("???", afiStatusColor);
                         tableBody.append(row);
                     });
                     setupActions();
@@ -69,15 +65,18 @@ $(function () {
         });
     });
 
-    $("#selectMasterConfirm, #selectSpecialtyConfirm").on("change", function () {
-        let selectedOption = String($(this).val());
-        selectedOption?.toUpperCase();
-        if (this.id === "selectMasterConfirm") {
-            $("#selectSpecialtyConfirm").val("all");
-        } else {
-            $("#selectMasterConfirm").val("all");
-        }
-        filterTableByCarrer(selectedOption, "tableStudentsConfirm");
+    $("#selectMasterConfirm, #selectSpecialtyConfirm").on("input", function () {
+        const value = String($(this).val())?.toUpperCase();
+        const icon = $(this).closest(".datalist").find("i");
+
+        value
+            ? icon.removeClass("fa-search").addClass("fa-times")
+            : icon.removeClass("fa-times").addClass("fa-search");
+        const otherSelect = $(this).is("#selectMaster") ? "#selectSpecialty" : "#selectMaster";
+        $(otherSelect).val("");
+        $(otherSelect).closest(".datalist").find("i").removeClass("fa-times").addClass("fa-search");
+
+        filterTableByCarrer(value, "tableStudents");
     });
 
     $("#onlyMissing").on("click", function () {
@@ -114,6 +113,17 @@ $(function () {
                 '<tr><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
             );
     });
+    $("#removeFilter").on("click", function () {
+        const tableContainer = $("#tableStudentsConfirm");
+        const tableBody = tableContainer.find("tbody");
+
+        tableBody.find("tr").show();
+
+        if (tableBody.find("tr:visible").length == 0)
+            tableBody.append(
+                '<tr><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
+            );
+    });
 });
 
 function setupActions() {
@@ -121,6 +131,7 @@ function setupActions() {
         .off("click")
         .on("click", function () {
             const button = $(this);
+            const parent = button.parent();
             const ulsaID = button.data("ulsaid");
             const divError = $(".sectionsAFI");
 
@@ -138,20 +149,14 @@ function setupActions() {
                     }
                     const newStatus = response.data.newStatus;
                     const newIcon = newStatus
-                        ? '<i class="fas fa-minus-square"></i>'
-                        : '<i class="fas fa-check-square"></i>';
-                    const newColor = newStatus ? "btn-danger" : "btn-success";
-                    button.html(newIcon);
-                    button.removeClass("btn-success btn-danger");
-                    button.addClass(newColor);
+                        ? `<i class="fas fa-minus-square fa-lg statusAFI" data-ulsaID=${ulsaID}></i>`
+                        : `<i class="fas fa-check-square fa-lg statusAFI" data-ulsaID=${ulsaID}></i>`;
+                    parent.html(newIcon);
 
-                    if (newStatus) button.parent().parent().find(".sendEmail").remove();
-                    else
-                        button
-                            .parent()
-                            .append(
-                                `<button class="col btn btn-info btn-sm text-white sendEmail" data-ulsaid=${ulsaID}><i class= "fas fa-paper-plane"></i></button>`
-                            );
+                    if (!newStatus)
+                        parent.append(
+                            `<i class="fas fa-paper-plane fa-lg sendEmail" data-ulsaID=${ulsaID}></i>`
+                        );
                     setupActions();
                 },
                 error: function (xhr) {
