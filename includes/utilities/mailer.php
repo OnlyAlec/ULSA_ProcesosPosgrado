@@ -26,7 +26,7 @@ class Mailer
 
     private function getTemplateHTML(): string
     {
-        $baseHTML = file_get_contents(EMAIL_TEMPLATES_DIR . "/". $this->template. ".mjml");
+        $baseHTML = file_get_contents(EMAIL_TEMPLATES_DIR . "/" . $this->template . ".mjml");
         if ($baseHTML === false) {
             throw new \RuntimeException('Error reading base template!');
         }
@@ -35,18 +35,21 @@ class Mailer
 
     private function convertMJMLToHTML(string $mjml): string
     {
-        $htmlObj = Mjml::new()->beautify()->convert($mjml);
-        if ($htmlObj->hasErrors()) {
-            $e = "";
-            foreach ($htmlObj->errors() as $error) {
-                if ($error->line() === null || $error->line() === 0) {
-                    continue;
+        try {
+            $options = ['filePath' => realpath(EMAIL_TEMPLATES_DIR)];
+            $htmlObj = Mjml::new()->beautify()->convert($mjml, $options);
+
+            if ($htmlObj->hasErrors()) {
+                $e = "";
+                foreach ($htmlObj->errors() as $error) {
+                    $e .= $error->formattedMessage() . "\n";
                 }
-                $e .= $error->formattedMessage() . "\n";
+                throw new \RuntimeException("Error converting MJML: $e");
             }
-            throw new \RuntimeException("Error converting to MJML <$e>");
+            return $htmlObj->html();
+        } catch (\Throwable $th) {
+            throw new \RuntimeException("MJML conversion failed: " . $th->getMessage());
         }
-        return $htmlObj->html();
     }
 
     private function saveToken(int $studentID, string $token): bool
@@ -73,10 +76,11 @@ class Mailer
             $dataReplace = [
                 "program" => ucfirst($this->contact->getProgram()),
                 "name" => ucfirst($this->contact->getName()) . " " . $formattedLastName,
-                "url" => "$url?token=$token",
+                "url" => "$url?token=" . urlencode($token),
             ];
             $base = $this->getTemplateHTML();
-            $keys = array_map(fn ($key) => "-- ". strtoupper($key). " --", array_keys($dataReplace));
+            $keys = array_map(fn ($key) => "-- " . strtoupper($key) . " --", array_keys($dataReplace));
+
             $this->htmlContent = $this->convertMJMLToHTML($base);
             $this->htmlContent = str_replace($keys, array_values($dataReplace), $this->htmlContent);
             return true;
@@ -95,7 +99,7 @@ class Mailer
                 "receipt" => $this->contact->getEmail()
             ];
         }
-        ErrorList::add("Error sending email to: ". $this->contact->getEmail());
-        throw new \RuntimeException("Error sending email to: ". $this->contact->getEmail());
+        ErrorList::add("Error sending email to: " . $this->contact->getEmail());
+        throw new \RuntimeException("Error sending email to: " . $this->contact->getEmail());
     }
 }

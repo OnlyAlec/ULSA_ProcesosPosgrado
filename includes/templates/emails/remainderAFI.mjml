@@ -6,7 +6,7 @@
   </mj-head>
 
   <mj-body>
-    <mj-include path="..\..\..\..\includes\templates\emails\header.mjml" />
+    <mj-include path="header.mjml" />
 
     <!-- Content -->
     <mj-section background-color="#f0f0f0">
@@ -33,6 +33,6 @@
       </mj-column>
     </mj-section>
 
-    <mj-include path="..\..\..\..\includes\templates\emails\footer.mjml" />
+    <mj-include path="footer.mjml" />
   </mj-body>
 </mjml>
