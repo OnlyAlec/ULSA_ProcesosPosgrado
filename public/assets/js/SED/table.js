@@ -18,12 +18,12 @@ $("#programType").on("change", function () {
         data: { action: selectedOption },
         success: function (response) {
             console.log(response);
-            
+
             //if (!Array.isArray(response))
-                //response = Object.values(response);
-            
-            if(!response.success || !Array.isArray(response.data)) {
-                displayMessage($('.sectionsSED'), "Ocurrio un problema", 'error');
+            //response = Object.values(response);
+
+            if (!response.success || !Array.isArray(response.data)) {
+                displayMessage($(".sectionsSED"), "Ocurrio un problema", "error");
                 return;
             }
 
@@ -32,12 +32,12 @@ $("#programType").on("change", function () {
                 return;
             }*/
 
-            $('#programArea').empty();
+            $("#programArea").empty();
             const option = document.createElement("option");
             option.text = "Seleccione un tipo de programa primero";
             $("#programArea").append(option);
 
-            response.data.forEach(element => {
+            response.data.forEach((element) => {
                 const option = document.createElement("option");
                 option.value = element;
                 option.text = element;
@@ -158,10 +158,9 @@ $("#confirmChanges").on("click", function () {
                 $(".studentCheckbox").prop("checked", false);
                 $("tr").removeClass("selected");
                 $("#confirmChanges").prop("disabled", true);
-                $("#selectedCount").text("0"); 
+                $("#selectedCount").text("0");
                 $("#selectAll").prop("checked", false);
-            }
-            else {
+            } else {
                 alert("ERROR: Error al actualizar el estatus SED de los alumnos.");
             }
         },
@@ -206,13 +205,13 @@ $(".sendEmail").on("click", function () {
     let studentID = $(this).data("student-id");
     let divError = $(".sectionsSED");
     let buttonEmail = $(this);
-    let buttonStatus = $(".changeSED")
+    let buttonStatus = $(".changeSED");
 
     console.log(studentID);
 
     $.ajax({
-        url: '',
-        type: 'POST',
+        url: "",
+        type: "POST",
         data: { action: "sendEmail", studentID: studentID },
         beforeSend: function () {
             $(".alert").remove();
@@ -228,10 +227,7 @@ $(".sendEmail").on("click", function () {
                 );
                 return;
             }
-            displayMessage(
-                divError,
-                "Correo enviado correctamente: " + response.data.receipt
-            );
+            displayMessage(divError, "Correo enviado correctamente: " + response.data.receipt);
             divError[0].scrollIntoView({
                 behavior: "smooth",
                 block: "start",
@@ -239,13 +235,13 @@ $(".sendEmail").on("click", function () {
             });
         },
         error: function (xhr) {
-            const errorMsg = xhr.responseText || 'Error al procesar la solicitud';
-            displayMessage($('.sectionsAFI'), errorMsg, 'error');
+            const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+            displayMessage($(".sectionsAFI"), errorMsg, "error");
         },
         complete: function () {
             buttonEmail.prop("disabled", false);
             buttonStatus.prop("disable", false);
-        }
+        },
     });
 });
 
@@ -253,13 +249,13 @@ $(".sendEmail").on("click", function () {
     let studentID = $(this).data("student-id");
     let divError = $(".sectionsSED");
     let buttonEmail = $(this);
-    let buttonStatus = $(".changeSED")
+    let buttonStatus = $(".changeSED");
 
     console.log(studentID);
 
     $.ajax({
-        url: '',
-        type: 'POST',
+        url: "",
+        type: "POST",
         data: { action: "sendEmail", studentID: studentID },
         beforeSend: function () {
             $(".alert").remove();
@@ -275,10 +271,7 @@ $(".sendEmail").on("click", function () {
                 );
                 return;
             }
-            displayMessage(
-                divError,
-                "Correo enviado correctamente: " + response.data.receipt
-            );
+            displayMessage(divError, "Correo enviado correctamente: " + response.data.receipt);
             divError[0].scrollIntoView({
                 behavior: "smooth",
                 block: "start",
@@ -286,13 +279,13 @@ $(".sendEmail").on("click", function () {
             });
         },
         error: function (xhr) {
-            const errorMsg = xhr.responseText || 'Error al procesar la solicitud';
-            displayMessage($('.sectionsAFI'), errorMsg, 'error');
+            const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+            displayMessage($(".sectionsAFI"), errorMsg, "error");
         },
         complete: function () {
             buttonEmail.prop("disabled", false);
             buttonStatus.prop("disable", false);
-        }
+        },
     });
 });
 
@@ -300,13 +293,13 @@ $(".sendEmail").on("click", function () {
     let studentID = $(this).data("student-id");
     let divError = $(".sectionsSED");
     let buttonEmail = $(this);
-    let buttonStatus = $(".changeSED")
+    let buttonStatus = $(".changeSED");
 
     console.log(studentID);
 
     $.ajax({
-        url: '',
-        type: 'POST',
+        url: "",
+        type: "POST",
         data: { action: "sendEmail", studentID: studentID },
         beforeSend: function () {
             $(".alert").remove();
@@ -322,10 +315,7 @@ $(".sendEmail").on("click", function () {
                 );
                 return;
             }
-            displayMessage(
-                divError,
-                "Correo enviado correctamente: " + response.data.receipt
-            );
+            displayMessage(divError, "Correo enviado correctamente: " + response.data.receipt);
             divError[0].scrollIntoView({
                 behavior: "smooth",
                 block: "start",
@@ -333,13 +323,13 @@ $(".sendEmail").on("click", function () {
             });
         },
         error: function (xhr) {
-            const errorMsg = xhr.responseText || 'Error al procesar la solicitud';
-            displayMessage($('.sectionsAFI'), errorMsg, 'error');
+            const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+            displayMessage($(".sectionsAFI"), errorMsg, "error");
         },
         complete: function () {
             buttonEmail.prop("disabled", false);
             buttonStatus.prop("disable", false);
-        }
+        },
     });
 });
 
