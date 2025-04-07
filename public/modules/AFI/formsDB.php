@@ -1,6 +1,7 @@
 <?php
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
 
@@ -9,6 +10,7 @@ use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
 use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
 use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
 use PhpOffice\PhpSpreadsheet\Chart\Title;
+
 
 function init_process($filePath)
 {
@@ -228,6 +230,10 @@ function createExcel($students, $programCount)
     $masters = [];
     $specialties = [];
 
+
+    $masters = [];
+    $specialties = [];
+
     foreach ($programCount['programs'] as $program) {
 
         $sheet2->setCellValue("A{$rowIndex}", $program);
@@ -275,7 +281,7 @@ function createExcel($students, $programCount)
     $timestamp = date('Y-m-d_H-i-s');
     $outputFile = XLSX_DIR . "/filtered_students_{$timestamp}.xlsx";
     $writer = new PhpOffice\PhpSpreadsheet\Writer\Xlsx($newSpreadsheet);
-    $writer->setIncludeCharts(true);
+    $writer->setIncludeCharts(true); 
     $writer->save($outputFile);
 
     return $outputFile;
