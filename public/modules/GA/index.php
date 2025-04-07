@@ -98,39 +98,6 @@ require_once INCLUDES_DIR . '/templates/head.php';
 get_head("GA");
 ?>
 
-<head>
-    <style>
-        #tableStudents {
-            width: 100%;
-            margin-bottom: 1rem;
-            color: #001D68;
-            border: 1px solid #FFFFFF;
-            border-collapse: collapse;
-        }
-
-        #tableStudents thead {
-            background-color: #001D68;
-            color: #FFFFFF;
-        }
-
-        #tableStudents th,
-        #tableStudents td {
-            border: 1px solid #FFFFFF;
-            padding: 8px;
-        }
-
-        #tableStudents th {
-            text-align: center;
-        }
-
-        #tableStudents tbody tr:nth-child(odd) {
-            background-color: #F7F7F7;
-        }
-    </style>
-</style>
-
-</head>
-
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
 get_header("Gestión de Alumnos");
