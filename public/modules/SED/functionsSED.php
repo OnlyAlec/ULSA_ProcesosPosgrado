@@ -32,7 +32,7 @@ function changeStatusSEDGroup($studentIDs)
 
 function sendEmailRemainder(Student $student)
 {
-    $mailer = new Mailer($student, "¡No olvides contestar la Evaluación Docente!", "remainderSED", "SED");
+    $mailer = new Mailer($student, "¡No olvides contestar la Evaluación Docente!", "remainderSED");
     $mailer->constructEmail();
     return  $mailer->send();
 }

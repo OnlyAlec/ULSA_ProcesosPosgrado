@@ -14,16 +14,15 @@ class Mailer
     private string $htmlContent;
     private string $subject;
     private string $template;
-    private string $module;
+    private string $url;
 
-    public function __construct(Student $contact, string $subject, string $template, string $module)
+    public function __construct(Student $contact, string $subject, string $template)
     {
         $this->brevo = new Brevo();
         $this->htmlContent = '';
         $this->contact = $contact;
         $this->subject = $subject;
         $this->template = $template;
-        $this->module = $module;
     }
 
     private function getTemplateHTML(): string
@@ -63,20 +62,23 @@ class Mailer
     public function constructEmail()
     {
         try {
+            
+            /*Por modificar*/
+            /*----------------------------------------------------------------------------*/
             $token = bin2hex(random_bytes(32));
             $save = $this->saveToken($this->contact->getID(), $token);
             if (!$save) {
                 return false;
             }
+            $url = filePathToUrl(MODULES_DIR . "/" . $this->url . "/confirmation.php");
+            /*----------------------------------------------------------------------------*/
 
-            //$url = filePathToUrl(MODULES_DIR . "/AFI/confirmation.php");
-            $url = filePathToUrl(MODULES_DIR . "/" . $this->module . "/confirmation.php");
             $lastNameParts = preg_split('/\s+/', $this->contact->getLastName());
             $formattedLastName = implode(' ', array_map('ucfirst', $lastNameParts));
             $dataReplace = [
                 "program" => ucfirst($this->contact->getProgram()),
                 "name" => ucfirst($this->contact->getName()) . " " . $formattedLastName,
-                "url" => "$url?token=$token",
+                "url" => "$url?token=$token", /*--> Posible modificación*/
             ];
             $base = $this->getTemplateHTML();
             $keys = array_map(fn ($key) => "-- ". strtoupper($key). " --", array_keys($dataReplace));
@@ -100,5 +102,10 @@ class Mailer
         }
         ErrorList::add("Error sending email to: ". $this->contact->getEmail());
         throw new \RuntimeException("Error sending email to: ". $this->contact->getEmail());
+    }
+
+    public function setUrl(string $url) 
+    {
+        $this->url = filePathToUrl($url);
     }
 }

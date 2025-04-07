@@ -24,7 +24,8 @@ function changeStatusAFI($ulsaID)
 
 function sendEmailRemainder(Student $student)
 {
-    $mailer = new Mailer($student, "¡No dejes pasar estas fechas importantes!", "remainderAFI", "AFI");
+    $mailer = new Mailer($student, "¡No dejes pasar estas fechas importantes!", "remainderAFI");
+    $mailer->setUrl(MODULES_DIR . "/AFI/confirmation.php");
     $mailer->constructEmail();
     return  $mailer->send();
 }
