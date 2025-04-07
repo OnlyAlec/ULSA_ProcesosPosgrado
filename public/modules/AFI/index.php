@@ -249,8 +249,8 @@ get_header("Avisos de Fechas Importantes");
                         <ul style="display: none;">
                             <?php
                     foreach (getMastersPrograms() as $master) {
-                        $master = ucfirst(strtolower($master));
-                        echo "<li>$master</li>";
+                        $master = ucfirst(strtolower($master->getName()));
+                        echo "<option value='$master'>$master</option>";
                     } ?>
                         </ul>
                     </div>
@@ -264,8 +264,8 @@ get_header("Avisos de Fechas Importantes");
                         <ul style="display: none;">
                             <?php
                     foreach (getSpecialtyPrograms() as $special) {
-                        $special = ucfirst(strtolower($special));
-                        echo "<li>$special</li>";
+                        $special = ucfirst(strtolower($special->getName()));
+                        echo "<option value='$special'>$special</option>";
                     } ?>
                         </ul>
                     </div>
@@ -313,8 +313,8 @@ get_header("Avisos de Fechas Importantes");
                         <ul style="display: none;">
                             <?php
                     foreach (getMastersPrograms() as $master) {
-                        $master = ucfirst(strtolower($master));
-                        echo "<li>$master</li>";
+                        $master = ucfirst(strtolower($master->getName()));
+                        echo "<option value='$master'>$master</option>";
                     } ?>
                         </ul>
                     </div>
@@ -328,8 +328,8 @@ get_header("Avisos de Fechas Importantes");
                         <ul style="display: none;">
                             <?php
                     foreach (getSpecialtyPrograms() as $special) {
-                        $special = ucfirst(strtolower($special));
-                        echo "<li>$special</li>";
+                        $special = ucfirst(strtolower($special->getName()));
+                        echo "<option value='$special'>$special</option>";
                     } ?>
                         </ul>
                     </div>

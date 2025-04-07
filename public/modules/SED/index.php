@@ -1,36 +1,56 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once INCLUDES_DIR . "/utilities/database.php";
+require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
 require_once INCLUDES_DIR . "/models/student.php";
 
 ob_start();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    require_once './update_functions.php';
-    header('Content-Type: application/json');
+try {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        header('Content-Type: application/json');
 
-    if ($_POST['action'] === 'updateSingleSED') {
-        $studentID = $_POST['studentID'] ?? null;
-        $newState = $_POST['state'] ?? null;
+        if (isset($_POST['action'])) {
+            require_once 'functionsSED.php';
 
-        $response = updateSingleSED($studentID, $newState);
-        echo json_encode($response);
+            switch ($_POST['action']) {
+                case 'updateSingleSED':
+                    $res = changeStatusSEDSingle($_POST['studentID'], $_POST['state']);
+                    break;
+                case 'updateSED':
+                    $res = changeStatusSEDGroup($_POST['studentIDS']);
+                    break;
+                case 'getMasters':
+                    $res = array_map(fn ($program) => $program->getName(), getMastersPrograms());
+                    break;
+                case 'getSpecialty':
+                    $res = array_map(fn ($program) => $program->getName(), getSpecialtyPrograms());
+                    break;
+                case 'sendEmail':
+                    $student = getStudentByUlsaID($_POST['studentID']);
+                    if ($student) {
+                        $res = sendEmailRemainder($student);
+                    } else {
+                        throw new RuntimeException('Student not found');
+                    }
+                    break;
+                case '':
+                    $res = array_map(fn ($program) => $program->getName(), getProgramsFiltered($_POST['action']));
+                    break;
+                default:
+                    throw new RuntimeException('Not valid action!');
+            }
+        }
+
+        echo responseOK($res);
         exit;
     }
-
-    if ($_POST['action'] === 'updateSED') {
-        $studentIDs = $_POST['studentIDS'] ?? [];
-        $response = updateSelectedSED($studentIDs);
-        echo json_encode($response);
-        exit;
-    }
-
-    if ($_POST['action'] === 'getMasters' || $_POST['action'] === 'getSpecialty' || $_POST['action'] === '') {
-        $response = getPrograms($_POST['action']);
-        echo json_encode($response);
-        exit;
-    }
+} catch (RuntimeException $e) {
+    echo responseInternalError($e->getMessage());
+    exit;
 }
+
+ob_end_flush();
 ?>
 
 <!DOCTYPE html>
@@ -45,11 +65,17 @@ get_head("SED");
 get_header("Seguimiento de Evaluación Docente");
 ?>
     <main class="container content marco">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="mb-2">Lista de alumnos</h1>
-            <a href="../../index.php" class="btn btn-outline-primary">Regresar</a>
+        <div class="sectionsSED">
+            <h1 class="text-center">Lista de alumnos</h1>
+            <p>
+                El sistema permite gestionar la selección y actualización del <strong>Estado SED</strong> de los alumnos mediante una tabla 
+                interactiva con filtros y opciones de selección múltiple.
+            </p>
+            <ul>
+                <li><strong>Checkboxes (cuadros de selección):</strong> Puede seleccionar varios alumnos mediante los checkboxes para cambiar su estado SED a "realizado" confirmando los cambios.</li>
+                <li><strong>Iconos de Estado:</strong> Puede actualizar el estado sed a "realizado" o "no realizado" de los alumnos de manera invidiual dando un clic en el icono de "Estatus SED".</li>
+            </ul>
         </div>
-        <br>
         <div class="row justify-content-end">
             <div class="col-10">
                 <label for="programType">Seleccionar Tipo de Programa:</label>
@@ -86,24 +112,32 @@ get_header("Seguimiento de Evaluación Docente");
             </thead>
             <tbody id="studentsTable">
                 <?php
-            if (empty($studentsDB = getStudents())) {
-                echo '<tr><td colspan="5">No hay alumnos registrados.</td></tr>';
-            } else {
-                foreach ($studentsDB as $student): ?>
+                    $studentsDB = getStudents();
+foreach ($studentsDB as $student): ?>
                         <tr data-carrer="<?= $student->getProgram() ?>">
                             <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
                             <td><?= htmlspecialchars($student->getUlsaId()) ?></td>
-                            <td><?= htmlspecialchars($student->getName()) . " " . htmlspecialchars($student->getLastName()) ?>
-                            </td>
+                            <td><?= htmlspecialchars($student->getName()) . " " . htmlspecialchars($student->getLastName()) ?></td>
                             <td><?= htmlspecialchars($student->getEmail()) ?></td>
                             <td>
-                                <button class="changeSED border-0" data-student-id="<?= $student->getUlsaId() ?>">
-                                    <?= $student->getSed() ? '<i class="fas fa-check-square fa-2x" style="color:#36b18c"></i>' : '<i class="fas fa-minus-square fa-2x" style="color:rgb(206, 85, 85)"></i>' ?>
-                                </button>
+                                <div class="d-flex gap-2">
+                                    <?php
+                    $btnClass = $student->getSed() ? 'btn-success' : 'btn-danger';
+    ?>
+                                    <button class="btn <?= $btnClass ?> btn-sm text-white changeSED border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
+                                        <?= $student->getSed()
+            ? '<i class="fas fa-check-square fa-2x"></i>'
+            : '<i class="fas fa-minus-square fa-2x"></i>'
+    ?>
+                                    </button>
+                                    <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
+                                        <i class="fas fa-paper-plane fa-2x"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
-                <?php endforeach;
-            } ?>
+                    <?php endforeach;
+?>
             </tbody>
         </table>
 
