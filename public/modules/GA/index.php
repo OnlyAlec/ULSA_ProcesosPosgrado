@@ -80,13 +80,7 @@ try {
     }
 
 } catch (RuntimeException $e) {
-    $response = [
-        'success' => false,
-        'message' => $e->getMessage(),
-    ];
-    http_response_code(500);
-    header('Content-Type: application/json');
-    echo json_encode($response);
+    echo responseInternalError($e->getMessage());
     exit;
 }
 ob_end_flush();
