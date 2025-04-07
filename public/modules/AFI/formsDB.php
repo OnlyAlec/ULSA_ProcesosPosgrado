@@ -11,7 +11,6 @@ use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
 use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
 use PhpOffice\PhpSpreadsheet\Chart\Title;
 
-
 function init_process($filePath)
 {
     ErrorList::clear();
@@ -281,7 +280,7 @@ function createExcel($students, $programCount)
     $timestamp = date('Y-m-d_H-i-s');
     $outputFile = XLSX_DIR . "/filtered_students_{$timestamp}.xlsx";
     $writer = new PhpOffice\PhpSpreadsheet\Writer\Xlsx($newSpreadsheet);
-    $writer->setIncludeCharts(true); 
+    $writer->setIncludeCharts(true);
     $writer->save($outputFile);
 
     return $outputFile;
