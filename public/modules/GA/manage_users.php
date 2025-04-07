@@ -140,23 +140,23 @@ function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $
         $email     = trim($sheet->getCell("{$emailColumn}{$rowIndex}")->getValue());
 
         if (!preg_match('/^\d{6}$/', $ulsaId)) {
-            ErrorList::add("Fila {$rowIndex}: Clave ULSA invalida.");
+            ErrorList::add("Fila {$rowIndex}: Clave ULSA invalida.\n");
             continue;
         }
         if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $firstName)) {
-            ErrorList::add("Fila {$rowIndex}: Nombre invalido.");
+            ErrorList::add("Fila {$rowIndex}: Nombre invalido.\n");
             continue;
         }
         if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $lastName)) {
-            ErrorList::add("Fila {$rowIndex}: Apellidos invalidos.");
+            ErrorList::add("Fila {$rowIndex}: Apellidos invalidos.\n");
             continue;
         }
         if (empty($career)) {
-            ErrorList::add("Fila {$rowIndex}: Carrera vacia.");
+            ErrorList::add("Fila {$rowIndex}: Carrera vacia.\n");
             continue;
         }
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            ErrorList::add("Fila {$rowIndex}: Correo electrOnico invalido.");
+            ErrorList::add("Fila {$rowIndex}: Correo electrOnico invalido.\n");
             continue;
         }
 
