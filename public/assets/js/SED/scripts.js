@@ -31,13 +31,6 @@ $(document).ready(function () {
             },
         });
     });
-
-    function displayMessage(pos, message, type = "success") {
-        const newDiv = document.createElement("div");
-        newDiv.className = type == "success" ? "alert alert-success" : "alert alert-danger";
-        newDiv.innerHTML = message;
-        pos.before(newDiv);
-    }
 });
 
 function displayMessage(pos, message, type = "success") {
