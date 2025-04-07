@@ -96,39 +96,46 @@ require_once INCLUDES_DIR . '/templates/head.php';
 get_head("GA");
 ?>
 
-<style>
-    .btn-group .btn {
-        flex-grow: 1;
-    }
-</style>
-
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
 get_header("Gestión de Alumnos");
 ?>
 
     <main class="container content marco">
-        <div>
-            <div class="d-flex justify-content-end align-items-center">
-                <a href="<?=$_SERVER['DOCUMENT_ROOT']?>" class="btn btn-outline-primary">Regresar</a>
-            </div>
-            <br>
-            <br>
-            <div class="btn-group d-flex mb-4" role="group" id="button-group">
-                <button class="btn btn-dark flex-grow-1"    id="btn-crear" onclick="showSection('crear')">Registrar Alumnos</button>
-                <button class="btn btn-primary flex-grow-1" id="btn-consultar" onclick="showSection('consultar')">Consultar Alumnos</button>
-                <button class="btn btn-primary flex-grow-1" id="btn-eliminar" onclick="showSection('eliminar')" type="submit">Eliminar Alumnos</button>
-            </div>
-            
-            <div id="section-crear" class="section">
-                <h2>Carga de concentrado de alumnos en Excel:</h2>
-                <form action="" method="post" enctype="multipart/form-data" class="mt-4">
+        <!-- Botones Nav -->
+        <div class="sectionsGA row mb-3">
+            <button id="btn-crear" class="col btn btn-outline-primary mr-3 p-4">
+                <span>Registrar Alumnos</span>
+            </button>
+            <button id="btn-consultar" class="col btn btn-outline-primary mr-3 p-4">
+                <span>Consultar Alumnos</span>
+            </button>
+            <button id="btn-eliminar" class="col btn btn-outline-primary p-4">
+                <span>Eliminar Alumnos</span>
+            </button>
+        </div>
+
+        <div>         
+            <div id="crear" class="my-5 sectionGA" style="display: none;">
+                <h3>Registrar Alumnos desde Excel</h3>
+                <p class="d-flex justify-content-end">
+                    <b>Se sobreescribirá la base de datos.</b>
+                </p>
+                <form action="" method="post" enctype="multipart/form-data" class="form-box custom-file formsForm">
                     <input type="hidden" name="action" value="registerFromExcel">
-                    <div class="mb-3">
-                        <h4 for="gaExcelFile" class="form-label">Subir archivo Excel:</h4>
-                        <input type="file" class="form-control form-control-lg w-100 pb-5 pl-2" id="gaExcelFile" name="gaExcelFile" accept=".xls,.xlsx" required>
-                        <div id="emailHelp" class="form-text d-flex justify-content-end">Se sobreescribirá la base de datos.</div>
+
+                    <!-- Archivo Excel -->
+                    <div class="form-group row mb-4">
+                        <label for="gaExcelFile" class="col-md-3 col-form-label">Archivo Excel</label>
+                        <div class="col-md-8 custom-file ml-2">
+                            <input type="file" class="custom-file-input" id="gaExcelFile" name="gaExcelFile" accept=".xls,.xlsx" required>
+                            <label class="custom-file-label" for="gaExcelFile" data-browse="Examinar">
+                                Seleccionar archivo...
+                            </label>
+                        </div>
                     </div>
+
+                    <!-- Encabezados -->
                     <div class="d-flex align-items-center">
                         <h4>Encabezados</h4>
                         <div class="fs-6 text-muted ml-2 mb-1">(ej: A, B, C, ...)</div>
@@ -164,17 +171,19 @@ get_header("Gestión de Alumnos");
                         </div>
                     </div>
 
-
-                    <br>
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary">Cargar Excel</button>
+                    <!-- Botón de envío -->
+                    <div class="text-center mt-4 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-outline-primary" style="width: 200px;">
+                            <i class="fas fa-file-import mr-2"></i>
+                            <span>Cargar Excel</span>
+                        </button>
                     </div>
                 </form>
                 
                 <br>
                 <hr>
 
-                <h2>Registro único de alumno:</h2>
+                <h3>Registro único de alumno:</h3>
                 <form action="" method="post" enctype="multipart/form-data" class="mt-4">
                     <input type="hidden" name="action" value="registerOneStudent">
 
@@ -215,16 +224,19 @@ get_header("Gestión de Alumnos");
 
 
                     <br>
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary">Registrar alumno</button>
+                    <div class="text-center mt-4 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-outline-primary" style="width: 200px;">
+                            <i class="fas fa-user-plus mr-2"></i>
+                            <span>Registrar alumno</span>
+                        </button>
                     </div>
                 </form>
             </div>
 
-            <div id="section-consultar" class="section d-none">
+            <div id="consultar" class="sectionGA" style="display: none;">
                 <h2>Consultar Alumnos</h2>
-                <table id="tableStudents" class="table">
-                <thead>
+                <table id="tableStudents" class="table table-white table-nostriped">
+                <thead class="thead-dark">
                         <tr>
                             <th scope="col">Clave ULSA</th>
                             <th scope="col">Nombre Completo</th>
@@ -237,7 +249,7 @@ get_header("Gestión de Alumnos");
                 </table>
             </div>
 
-            <div id="section-eliminar" class="section d-none">
+            <div id="eliminar" class="sectionGA" style="display: none;">
 
                 <h2>Borrado único de alumno:</h2>
                 <form action="" method="post" enctype="multipart/form-data" class="mt-4">

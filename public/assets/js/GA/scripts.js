@@ -75,21 +75,30 @@ $(document).ready(function () {
     }
 });
 
-function showSection(section) {
-    document.querySelectorAll(".section").forEach((div) => div.classList.add("d-none"));
-    document.getElementById("section-" + section).classList.remove("d-none");
+function setupBtnsGA(name) {
+    if (!name) {
+        throw new Error("Missing name - setupBtnsGA");
+    }
 
-    document
-        .querySelectorAll(".btn-group button")
-        .forEach((btn) => btn.classList.remove("btn-dark"));
-    document
-        .querySelectorAll(".btn-group button")
-        .forEach((btn) => btn.classList.add("btn-primary"));
-    document.getElementById("btn-" + section).classList.add("btn-dark");
+    $("#" + name).on("click", function () {
+        $(".alert").remove();
+        $(".forms-result").hide();
+        $(".sectionsGA button").removeClass("btn-primary").addClass("btn-outline-primary");
+        $(this).removeClass("btn-outline-primary").addClass("btn-primary");
+
+        const div = name.split("-").slice(1).join("-");
+        hideSectionsGA();
+        $("#" + div).show();
+    });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    showSection("crear");
-});
+function hideSectionsGA() {
+    $(".sectionGA").each(function () {
+        $(this).hide();
+    });
+}
 
-window.showSection = showSection;
+// Llamadas para inicializar
+setupBtnsGA("btn-crear");
+setupBtnsGA("btn-consultar");
+setupBtnsGA("btn-eliminar");
