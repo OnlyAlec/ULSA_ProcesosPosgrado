@@ -62,7 +62,7 @@ class Mailer
     public function constructEmail()
     {
         try {
-            
+
             /*Por modificar*/
             /*----------------------------------------------------------------------------*/
             $token = bin2hex(random_bytes(32));
@@ -104,7 +104,7 @@ class Mailer
         throw new \RuntimeException("Error sending email to: ". $this->contact->getEmail());
     }
 
-    public function setUrl(string $url) 
+    public function setUrl(string $url)
     {
         $this->url = filePathToUrl($url);
     }

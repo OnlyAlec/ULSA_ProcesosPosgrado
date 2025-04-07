@@ -22,10 +22,10 @@ try {
                     $res = changeStatusSEDGroup($_POST['studentIDS']);
                     break;
                 case 'getMasters':
-                    $res = array_map(fn($program) => $program->getName(), getMastersPrograms());
+                    $res = array_map(fn ($program) => $program->getName(), getMastersPrograms());
                     break;
                 case 'getSpecialty':
-                    $res = array_map(fn($program) => $program->getName(), getSpecialtyPrograms());
+                    $res = array_map(fn ($program) => $program->getName(), getSpecialtyPrograms());
                     break;
                 case 'sendEmail':
                     $student = getStudentByUlsaID($_POST['studentID']);
@@ -36,7 +36,7 @@ try {
                     }
                     break;
                 case '':
-                    $res = array_map(fn($program) => $program->getName(), getProgramsFiltered($_POST['action']));
+                    $res = array_map(fn ($program) => $program->getName(), getProgramsFiltered($_POST['action']));
                     break;
                 default:
                     throw new RuntimeException('Not valid action!');
@@ -44,7 +44,7 @@ try {
         }
 
         echo responseOK($res);
-        exit;        
+        exit;
     }
 } catch (RuntimeException $e) {
     echo responseInternalError($e->getMessage());
@@ -114,7 +114,7 @@ get_header("Seguimiento de Evaluación Docente");
             <tbody id="studentsTable">
                 <?php
                     $studentsDB = getStudents();
-                    foreach ($studentsDB as $student): ?>
+foreach ($studentsDB as $student): ?>
                         <tr data-carrer="<?= $student->getProgram() ?>">
                             <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
                             <td><?= htmlspecialchars($student->getUlsaId()) ?></td>
@@ -123,13 +123,13 @@ get_header("Seguimiento de Evaluación Docente");
                             <td>
                                 <div class="d-flex gap-2">
                                     <?php
-                                        $btnClass = $student->getSed() ? 'btn-success' : 'btn-danger';
-                                    ?>
+                    $btnClass = $student->getSed() ? 'btn-success' : 'btn-danger';
+    ?>
                                     <button class="btn <?= $btnClass ?> btn-sm text-white changeSED border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
                                         <?= $student->getSed()
-                                            ? '<i class="fas fa-check-square fa-2x"></i>'
-                                            : '<i class="fas fa-minus-square fa-2x"></i>'
-                                        ?>
+            ? '<i class="fas fa-check-square fa-2x"></i>'
+            : '<i class="fas fa-minus-square fa-2x"></i>'
+    ?>
                                     </button>
                                     <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
                                         <i class="fas fa-paper-plane fa-2x"></i>
@@ -137,8 +137,8 @@ get_header("Seguimiento de Evaluación Docente");
                                 </div>
                             </td>
                         </tr>
-                    <?php endforeach; 
-                ?>
+                    <?php endforeach;
+?>
             </tbody>
         </table>
 
