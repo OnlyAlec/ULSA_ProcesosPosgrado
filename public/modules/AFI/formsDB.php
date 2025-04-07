@@ -13,7 +13,10 @@ function init_process($filePath)
     $outputFile = null;
 
     try {
-        $studentsDB = getStudents();
+        if (empty($studentsDB = getStudents())) {
+            return [];
+        }
+
         $studentsExcel = processExcel($filePath);
         $missingStudents = filterMissingStudents($studentsExcel, $studentsDB);
         $programCount = getProgramCount($studentsDB, $missingStudents);

@@ -56,7 +56,7 @@ $(function () {
                 tableContainer.show();
             },
             error: function (xhr) {
-                const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+                const errorMsg = "Error al procesar la solicitud";
                 displayMessage(divError, errorMsg, "error");
             },
             complete: function () {
@@ -160,7 +160,7 @@ function setupActions() {
                     setupActions();
                 },
                 error: function (xhr) {
-                    const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+                    const errorMsg = "Error al procesar la solicitud";
                     displayMessage(divError, errorMsg, "error");
                 },
                 complete: function () {
@@ -206,7 +206,7 @@ function setupActions() {
                     });
                 },
                 error: function (xhr) {
-                    const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+                    const errorMsg = "Error al procesar la solicitud";
                     displayMessage(divError, errorMsg, "error");
                 },
                 complete: function () {

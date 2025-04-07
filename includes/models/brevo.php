@@ -64,7 +64,7 @@ class Brevo
                 }
             }
         } catch (\RuntimeException $e) {
-            throw new \RuntimeException("API: {$e->getMessage()}");
+            throw new \RuntimeException("Brevo API: {$e->getMessage()}");
         }
     }
 
@@ -74,7 +74,7 @@ class Brevo
             $res = $this->apiTransactionalEmails->sendTransacEmail($data)->getMessageId();
             return $res;
         } catch (\RuntimeException $e) {
-            throw new \RuntimeException("API: {$e->getMessage()}");
+            throw new \RuntimeException("Brevo API: {$e->getMessage()}");
         }
     }
 

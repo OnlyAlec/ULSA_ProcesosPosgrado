@@ -9,6 +9,7 @@ ob_start();
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Content-Type: application/json');
+        $res = false;
 
         if (isset($_POST['action'])) {
             require_once 'gestorStudents.php';
@@ -30,17 +31,11 @@ try {
                     break;
                 case 'sendEmail':
                     $student = getStudentByUlsaID($_POST['ulsaID']);
-                    if ($student) {
-                        $res = sendEmailRemainder($student);
-                    } else {
-                        throw new RuntimeException('Student not found');
-                    }
+                    $res = sendEmailRemainder($student);
                     break;
                 case 'setConfigDate':
                     $res = updateConfig($_POST['type'], $_POST['date']);
                     break;
-                default:
-                    throw new RuntimeException('Not valid action!');
             }
         } elseif (count($_FILES) > 0) {
             require_once 'formsDB.php';
@@ -57,21 +52,18 @@ try {
                 $fileName = str_replace(' ', '_', htmlspecialchars($_FILES['excelFile']['name'], ENT_QUOTES, 'UTF-8'));
                 $ext = strtolower(pathinfo($_FILES['excelFile']['name'], PATHINFO_EXTENSION));
 
-                if (!in_array($ext, $allowedExtensions)) {
-                    throw new RuntimeException('Invalid file type.');
-                }
-
-                if (!is_dir($uploadDir)) {
-                    if (!mkdir($uploadDir, 0755, true)) {
-                        throw new RuntimeException('Error creating upload directory.');
+                if (in_array($ext, $allowedExtensions)) {
+                    if (!is_dir($uploadDir)) {
+                        if (!mkdir($uploadDir, 0755, true)) {
+                            throw new RuntimeException('Error creating upload directory.');
+                        }
                     }
-                }
+                    if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName")) {
+                        throw new RuntimeException('Error uploading file.');
+                    }
 
-                if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName")) {
-                    throw new RuntimeException('Error uploading file.');
+                    $res = init_process("$uploadDir$fileName");
                 }
-
-                $res = init_process("$uploadDir$fileName");
             } elseif (isset($_FILES['excelForms']) && isset($_FILES['excelAlumni'])) {
                 $fileTmpPath1 = $_FILES['excelForms']['tmp_name'];
                 $fileTmpPath2 = $_FILES['excelAlumni']['tmp_name'];
@@ -94,10 +86,13 @@ try {
                     }
 
                     $res = process_multiple_excels($uploadDir, $fileName1, $fileName2);
-                } else {
-                    throw new RuntimeException('Invalid file type.');
                 }
             }
+        }
+
+        if ($res === false || $res === null || empty($res)) {
+            echo responseBadRequest('Error processing the request.');
+            exit;
         }
         echo responseOK($res);
         exit;
@@ -253,10 +248,10 @@ get_header("Avisos de Fechas Importantes");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                        foreach (getMastersPrograms() as $master) {
-                            $master = ucfirst(strtolower($master));
-                            echo "<li>$master</li>";
-                        } ?>
+                    foreach (getMastersPrograms() as $master) {
+                        $master = ucfirst(strtolower($master));
+                        echo "<li>$master</li>";
+                    } ?>
                         </ul>
                     </div>
                 </div>
@@ -268,10 +263,10 @@ get_header("Avisos de Fechas Importantes");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                        foreach (getSpecialtyPrograms() as $special) {
-                            $special = ucfirst(strtolower($special));
-                            echo "<li>$special</li>";
-                        } ?>
+                    foreach (getSpecialtyPrograms() as $special) {
+                        $special = ucfirst(strtolower($special));
+                        echo "<li>$special</li>";
+                    } ?>
                         </ul>
                     </div>
                 </div>
@@ -317,10 +312,10 @@ get_header("Avisos de Fechas Importantes");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                        foreach (getMastersPrograms() as $master) {
-                            $master = ucfirst(strtolower($master));
-                            echo "<li>$master</li>";
-                        } ?>
+                    foreach (getMastersPrograms() as $master) {
+                        $master = ucfirst(strtolower($master));
+                        echo "<li>$master</li>";
+                    } ?>
                         </ul>
                     </div>
                 </div>
@@ -332,10 +327,10 @@ get_header("Avisos de Fechas Importantes");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                        foreach (getSpecialtyPrograms() as $special) {
-                            $special = ucfirst(strtolower($special));
-                            echo "<li>$special</li>";
-                        } ?>
+                    foreach (getSpecialtyPrograms() as $special) {
+                        $special = ucfirst(strtolower($special));
+                        echo "<li>$special</li>";
+                    } ?>
                         </ul>
                     </div>
                 </div>

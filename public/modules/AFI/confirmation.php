@@ -13,9 +13,8 @@ $title = "";
 $subtitle = "";
 $status = true;
 $token = $_GET["token"];
-$student = getStudentByID(getStudentIDByToken($token));
 
-if ($student) {
+if ($student = getStudentByID(getStudentIDByToken($token))) {
     switch ($student->getAfi()) {
         case true:
             $title = "¡Aviso ya confirmado!";
@@ -23,8 +22,7 @@ if ($student) {
             $msg = "Ya has confirmado tus avisos de fechas importantes. 🎉";
             break;
         default:
-            $res = updateStudentFieldBoolean($student->getUlsaId(), 'afi', true);
-            if ($res != 0) {
+            if (updateStudentFieldBoolean($student->getUlsaId(), 'afi', true)) {
                 $title = "¡Aviso confirmado!";
                 $subtitle = "Verificación para: " . $student->getEmail();
                 $msg = "Gracias por confirmar tus avisos de fechas importantes. 🎉";
