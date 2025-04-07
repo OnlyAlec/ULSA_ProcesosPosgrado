@@ -251,8 +251,8 @@ get_header("Avisos de Fechas Importantes");
                                 foreach (getMastersPrograms() as $master) {
                                     $master = ucfirst(strtolower($master->getName()));
                                     echo "<option value='$master'>$master</option>";
-                                } 
-                            ?>
+                                }
+?>
                         </ul>
                     </div>
                 </div>
