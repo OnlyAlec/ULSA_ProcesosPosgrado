@@ -4,6 +4,13 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
 
+use PhpOffice\PhpSpreadsheet\Chart\Chart;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
+use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
+use PhpOffice\PhpSpreadsheet\Chart\Title;
+
+
 function init_process($filePath)
 {
     ErrorList::clear();
@@ -22,7 +29,7 @@ function init_process($filePath)
         $missingStudents = filterMissingStudents($studentsExcel, $studentsDB);
         $programCount = getProgramCount($studentsDB, $missingStudents);
         $outputFile = createExcel($missingStudents, $programCount);
-        $studentsArray = array_map(fn ($student) => $student->getJSON(), $missingStudents);
+        $studentsArray = array_map(fn($student) => $student->getJSON(), $missingStudents);
         _updateInDB($studentsExcel, $missingStudents);
 
         return [
@@ -237,11 +244,9 @@ function createExcel($students, $programCount)
         $rowIndex++;
 
         if (strpos(strtolower($program), 'maestría') === 0) {
-            $masters[$program]['partial'] = $partial;
-            $masters[$program]['total'] = $total;
+            $masters[$program] = $partial;
         } else {
-            $specialties[$program]['partial'] = $partial;
-            $specialties[$program]['total'] = $total;
+            $specialties[$program] = $partial;
         }
     }
 
@@ -251,19 +256,15 @@ function createExcel($students, $programCount)
     }
 
     //* Add Graphs
-    $graphsDir = GRAPHS_DIR;
-    if (!is_dir($graphsDir)) {
-        if (!mkdir($graphsDir, 0755, true)) {
-            throw new RuntimeException('Error creating graphs directory.');
-        }
-    }
-
-    $scriptPath = '../../../includes/generate_chart.js';
+    // Gráfica de Maestría
     $sheet3 = $newSpreadsheet->createSheet();
-    $sheet3->setTitle('Gráficas');
+    $sheet3->setTitle('Gráfica de Maestría');
+    createBarChart($sheet3, 'Maestrías - Alumnos sin firmar', $masters);
 
-    generateChartAndInsert($masters, 'maestrias', $scriptPath, $graphsDir, 'A1', $sheet3);
-    generateChartAndInsert($specialties, 'especialidades', $scriptPath, $graphsDir, 'P1', $sheet3);
+    // Gráfica de Especialidad
+    $sheet4 = $newSpreadsheet->createSheet();
+    $sheet4->setTitle('Gráfica de Especialidad');
+    createBarChart($sheet4, 'Especialidades - Alumnos sin firmar', $specialties);
 
     //* Save File
     if (!file_exists(XLSX_DIR)) {
@@ -312,23 +313,54 @@ function _updateInDB($studentsConfirm, $studentsNotConfirm)
     }
 }
 
-function generateChartAndInsert(array $data, string $type, string $scriptPath, string $graphsDir, string $cell, $sheet)
+function createBarChart($sheet, $title, $dataArray)
 {
-    $tempFile = tempnam(sys_get_temp_dir(), 'data_');
-    file_put_contents($tempFile, json_encode($data));
+    $row = 1;
+    $sheet->setCellValue("A{$row}", "Programa");
+    $sheet->setCellValue("B{$row}", "No firmaron");
 
-    $process = new \Symfony\Component\Process\Process(['node', $scriptPath, $tempFile, $type, $graphsDir]);
-    $process->run();
-
-    if (!$process->isSuccessful()) {
-        throw new \Symfony\Component\Process\Exception\ProcessFailedException($process);
+    foreach ($dataArray as $program => $count) {
+        $row++;
+        $sheet->setCellValue("A{$row}", $program);
+        $sheet->setCellValue("B{$row}", $count);
     }
 
-    $imagePath = "$graphsDir/chart_{$type}.png";
-    if (file_exists($imagePath)) {
-        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-        $drawing->setPath($imagePath);
-        $drawing->setCoordinates($cell);
-        $drawing->setWorksheet($sheet);
+    $endRow = $row;
+
+    $categories = [new DataSeriesValues('String', "'{$sheet->getTitle()}'!A2:A{$endRow}", null, count($dataArray))];
+    $values = [new DataSeriesValues('Number', "'{$sheet->getTitle()}'!B2:B{$endRow}", null, count($dataArray))];
+
+    // Crear la serie de datos
+    $series = new DataSeries(
+        DataSeries::TYPE_BARCHART,
+        DataSeries::GROUPING_CLUSTERED,
+        range(0, count($values) - 1),
+        [],
+        $categories,
+        $values
+    );
+
+    $plotArea = new PlotArea(null, [$series]);
+    $chartTitle = new Title($title);
+
+    $chart = new Chart(
+        $title,
+        $chartTitle,
+        null,
+        $plotArea,
+        true,
+        DataSeries::EMPTY_AS_GAP
+    );
+
+    // Posicionar la gráfica en la hoja
+    $chart->setTopLeftPosition("D1");
+    $chart->setBottomRightPosition("L15");
+
+    // Agregar la gráfica a la hoja
+    $sheet->addChart($chart);
+
+    // Ajustar el tamaño de las celdas
+    foreach (range('A', 'B') as $col) {
+        $sheet->getColumnDimension($col)->setAutoSize(true);
     }
 }
