@@ -10,7 +10,6 @@ use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
 use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
 use PhpOffice\PhpSpreadsheet\Chart\Title;
 
-
 function init_process($filePath)
 {
     ErrorList::clear();
@@ -273,7 +272,7 @@ function createExcel($students, $programCount)
     $timestamp = date('Y-m-d_H-i-s');
     $outputFile = XLSX_DIR . "/filtered_students_{$timestamp}.xlsx";
     $writer = new PhpOffice\PhpSpreadsheet\Writer\Xlsx($newSpreadsheet);
-    $writer->setIncludeCharts(true); 
+    $writer->setIncludeCharts(true);
     $writer->save($outputFile);
 
     return $outputFile;
@@ -310,7 +309,8 @@ function _updateInDB($studentsConfirm, $studentsNotConfirm)
     }
 }
 
-function createBarChart($sheet, $title, $dataArray) {
+function createBarChart($sheet, $title, $dataArray)
+{
     $row = 1;
     $sheet->setCellValue("A{$row}", "Programa");
     $sheet->setCellValue("B{$row}", "No firmaron");
@@ -322,7 +322,7 @@ function createBarChart($sheet, $title, $dataArray) {
     }
 
     $endRow = $row;
-    
+
     $categories = [new DataSeriesValues('String', "'{$sheet->getTitle()}'!A2:A{$endRow}", null, count($dataArray))];
     $values = [new DataSeriesValues('Number', "'{$sheet->getTitle()}'!B2:B{$endRow}", null, count($dataArray))];
 
