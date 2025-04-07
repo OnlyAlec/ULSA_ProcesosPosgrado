@@ -1,7 +1,15 @@
 <?php
 
+require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
+
+use PhpOffice\PhpSpreadsheet\Chart\Chart;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
+use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
+use PhpOffice\PhpSpreadsheet\Chart\Title;
+
 
 function init_process($filePath)
 {
@@ -217,6 +225,10 @@ function createExcel($students, $programCount)
     $sheet2->getStyle('A1:D1')->getFont()->setBold(true);
 
     $rowIndex = 2;
+
+    $masters = [];
+    $specialties = [];
+
     foreach ($programCount['programs'] as $program) {
 
         $sheet2->setCellValue("A{$rowIndex}", $program);
@@ -230,6 +242,12 @@ function createExcel($students, $programCount)
         $sheet2->setCellValue("D{$rowIndex}", round($percentage, 2) . '%');
 
         $rowIndex++;
+
+        if (strpos(strtolower($program), 'maestría') === 0) {
+            $masters[$program] = $partial;
+        } else {
+            $specialties[$program] = $partial;
+        }
     }
 
     //* Format
@@ -238,9 +256,15 @@ function createExcel($students, $programCount)
     }
 
     //* Add Graphs
+    // Gráfica de Maestría
     $sheet3 = $newSpreadsheet->createSheet();
-    $sheet3->setTitle('Gráficas');
-    $sheet2->setCellValue('A1', 'Gráficas de ');
+    $sheet3->setTitle('Gráfica de Maestría');
+    createBarChart($sheet3, 'Maestrías - Alumnos sin firmar', $masters);
+
+    // Gráfica de Especialidad
+    $sheet4 = $newSpreadsheet->createSheet();
+    $sheet4->setTitle('Gráfica de Especialidad');
+    createBarChart($sheet4, 'Especialidades - Alumnos sin firmar', $specialties);
 
     //* Save File
     if (!file_exists(XLSX_DIR)) {
@@ -252,6 +276,7 @@ function createExcel($students, $programCount)
     $timestamp = date('Y-m-d_H-i-s');
     $outputFile = XLSX_DIR . "/filtered_students_{$timestamp}.xlsx";
     $writer = new PhpOffice\PhpSpreadsheet\Writer\Xlsx($newSpreadsheet);
+    $writer->setIncludeCharts(true); 
     $writer->save($outputFile);
 
     return $outputFile;
@@ -285,5 +310,56 @@ function _updateInDB($studentsConfirm, $studentsNotConfirm)
 
     foreach ($studentsConfirm as $student) {
         updateStudentFieldBoolean($student->getUlsaId(), 'afi', true);
+    }
+}
+
+function createBarChart($sheet, $title, $dataArray) {
+    $row = 1;
+    $sheet->setCellValue("A{$row}", "Programa");
+    $sheet->setCellValue("B{$row}", "No firmaron");
+
+    foreach ($dataArray as $program => $count) {
+        $row++;
+        $sheet->setCellValue("A{$row}", $program);
+        $sheet->setCellValue("B{$row}", $count);
+    }
+
+    $endRow = $row;
+    
+    $categories = [new DataSeriesValues('String', "'{$sheet->getTitle()}'!A2:A{$endRow}", null, count($dataArray))];
+    $values = [new DataSeriesValues('Number', "'{$sheet->getTitle()}'!B2:B{$endRow}", null, count($dataArray))];
+
+    // Crear la serie de datos
+    $series = new DataSeries(
+        DataSeries::TYPE_BARCHART,
+        DataSeries::GROUPING_CLUSTERED,
+        range(0, count($values) - 1),
+        [],
+        $categories,
+        $values
+    );
+
+    $plotArea = new PlotArea(null, [$series]);
+    $chartTitle = new Title($title);
+
+    $chart = new Chart(
+        $title,
+        $chartTitle,
+        null,
+        $plotArea,
+        true,
+        DataSeries::EMPTY_AS_GAP
+    );
+
+    // Posicionar la gráfica en la hoja
+    $chart->setTopLeftPosition("D1");
+    $chart->setBottomRightPosition("L15");
+
+    // Agregar la gráfica a la hoja
+    $sheet->addChart($chart);
+
+    // Ajustar el tamaño de las celdas
+    foreach (range('A', 'B') as $col) {
+        $sheet->getColumnDimension($col)->setAutoSize(true);
     }
 }
