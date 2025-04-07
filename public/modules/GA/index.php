@@ -96,6 +96,39 @@ require_once INCLUDES_DIR . '/templates/head.php';
 get_head("GA");
 ?>
 
+<head>
+    <style>
+        #tableStudents {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: #001D68;
+            border: 1px solid #FFFFFF;
+            border-collapse: collapse;
+        }
+
+        #tableStudents thead {
+            background-color: #001D68;
+            color: #FFFFFF;
+        }
+
+        #tableStudents th,
+        #tableStudents td {
+            border: 1px solid #FFFFFF;
+            padding: 8px;
+        }
+
+        #tableStudents th {
+            text-align: center;
+        }
+
+        #tableStudents tbody tr:nth-child(odd) {
+            background-color: #F7F7F7;
+        }
+    </style>
+</style>
+
+</head>
+
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
 get_header("Gestión de Alumnos");
@@ -121,7 +154,8 @@ get_header("Gestión de Alumnos");
                 <p class="d-flex justify-content-end">
                     <b>Se sobreescribirá la base de datos.</b>
                 </p>
-                <form action="" method="post" enctype="multipart/form-data" class="form-box custom-file formsForm">
+
+                <form action="" method="post" enctype="multipart/form-data" class="form-box">
                     <input type="hidden" name="action" value="registerFromExcel">
 
                     <!-- Archivo Excel -->
@@ -142,32 +176,35 @@ get_header("Gestión de Alumnos");
                     </div>
                     <br>
 
-                    <div class="mb-3">
-                        <div class="row align-items-center mb-2">
-                            <div class="col-6 d-flex">
-                                <label class="col-4" for="claveUlsaCol">Clave Ulsa:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="claveUlsaCol" name="claveUlsaCol" placeholder="Columna" maxlength="1">
-                            </div>
-                            <div class="col-6 d-flex">
-                                <label class="col-4" for="nombreCol">Nombre(s):</label>
-                                <input type="text" class="col-6 form-control w-auto" id="nombreCol" name="nombreCol" placeholder="Columna" maxlength="1">
-                            </div>
+                    <!-- Columnas -->
+                    <div class="form-group row mb-4">
+                        <label for="claveUlsaCol" class="col-md-3 col-form-label">Clave Ulsa:</label>
+                        <div class="col-md-8 ml-2">
+                            <input type="text" class="form-control w-auto" id="claveUlsaCol" name="claveUlsaCol" placeholder="Columna" maxlength="1">
                         </div>
-                        <div class="row align-items-center mb-2">
-                            <div class="col-6 d-flex">
-                                <label class="col-4" for="apellidosCol">Apellidos:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="apellidosCol" name="apellidosCol" placeholder="Columna" maxlength="1">
-                            </div>
-                            <div class="col-6 d-flex">
-                                <label class="col-4" for="carreraCol">Carrera:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="carreraCol" name="carreraCol" placeholder="Columna" maxlength="1">
-                            </div>
+                    </div>
+                    <div class="form-group row mb-4">
+                        <label for="nombreCol" class="col-md-3 col-form-label">Nombre(s):</label>
+                        <div class="col-md-8 ml-2">
+                            <input type="text" class="form-control w-auto" id="nombreCol" name="nombreCol" placeholder="Columna" maxlength="1">
                         </div>
-                        <div class="row align-items-center mb-2">
-                            <div class="col-6 d-flex">
-                                <label class="col-4" for="emailCol">Email:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="emailCol" name="emailCol" placeholder="Columna" maxlength="1">
-                            </div>
+                    </div>
+                    <div class="form-group row mb-4">
+                        <label for="apellidosCol" class="col-md-3 col-form-label">Apellidos:</label>
+                        <div class="col-md-8 ml-2">
+                            <input type="text" class="form-control w-auto" id="apellidosCol" name="apellidosCol" placeholder="Columna" maxlength="1">
+                        </div>
+                    </div>
+                    <div class="form-group row mb-4">
+                        <label for="carreraCol" class="col-md-3 col-form-label">Carrera:</label>
+                        <div class="col-md-8 ml-2">
+                            <input type="text" class="form-control w-auto" id="carreraCol" name="carreraCol" placeholder="Columna" maxlength="1">
+                        </div>
+                    </div>
+                    <div class="form-group row mb-4">
+                        <label for="emailCol" class="col-md-3 col-form-label">Email:</label>
+                        <div class="col-md-8 ml-2">
+                            <input type="text" class="form-control w-auto" id="emailCol" name="emailCol" placeholder="Columna" maxlength="1">
                         </div>
                     </div>
 
@@ -179,12 +216,11 @@ get_header("Gestión de Alumnos");
                         </button>
                     </div>
                 </form>
-                
-                <br>
+
                 <hr>
 
-                <h3>Registro único de alumno:</h3>
-                <form action="" method="post" enctype="multipart/form-data" class="mt-4">
+                <h3>Registro único de alumno</h3>
+                <form action="" method="post" enctype="multipart/form-data" class="form-box">
                     <input type="hidden" name="action" value="registerOneStudent">
 
                     <div class="d-flex align-items-center">
@@ -193,32 +229,38 @@ get_header("Gestión de Alumnos");
                     </div>
                     <br>
 
-                    <div class="mb-3">
-                        <div class="row align-items-center mb-2">
-                            <div class="col-6 d-flex">
-                                <label class="col-4" for="claveUlsa">Clave Ulsa:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="claveUlsa" name="claveUlsa" placeholder="Clave Ulsa">
-                            </div>
-                            <div class="col-6 d-flex">
-                                <label class="col-4" for="nombre">Nombre(s):</label>
-                                <input type="text" class="col-6 form-control w-auto" id="nombre" name="nombre" placeholder="Nombre(s)">
-                            </div>
+                    <div class="form-group row mb-4">
+                        <label for="claveUlsa" class="col-md-3 col-form-label">Clave Ulsa:</label>
+                        <div class="col-md-8 ml-2">
+                            <input type="text" class="form-control w-auto" id="claveUlsa" name="claveUlsa" placeholder="Clave Ulsa">
                         </div>
-                        <div class="row align-items-center mb-2">
-                            <div class="col-6 d-flex">
-                                <label class="col-4" for="apellidos">Apellidos:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="apellidos" name="apellidos" placeholder="Apellidos">
-                            </div>
-                            <div class="col-6 d-flex">
-                                <label class="col-4" for="carrera">Carrera:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="carrera" name="carrera" placeholder="Carrera">
-                            </div>
+                    </div>
+
+                    <div class="form-group row mb-4">
+                        <label for="nombre" class="col-md-3 col-form-label">Nombre(s):</label>
+                        <div class="col-md-8 ml-2">
+                            <input type="text" class="form-control w-auto" id="nombre" name="nombre" placeholder="Nombre(s)">
                         </div>
-                        <div class="row align-items-center mb-2">
-                            <div class="col-6 d-flex">
-                                <label class="col-4" for="email">Email:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="email" name="email" placeholder="Correo electrónico">
-                            </div>
+                    </div>
+
+                    <div class="form-group row mb-4">
+                        <label for="apellidos" class="col-md-3 col-form-label">Apellidos:</label>
+                        <div class="col-md-8 ml-2">
+                            <input type="text" class="form-control w-auto" id="apellidos" name="apellidos" placeholder="Apellidos">
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-4">
+                        <label for="carrera" class="col-md-3 col-form-label">Carrera:</label>
+                        <div class="col-md-8 ml-2">
+                            <input type="text" class="form-control w-auto" id="carrera" name="carrera" placeholder="Carrera">
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-4">
+                        <label for="email" class="col-md-3 col-form-label">Email:</label>
+                        <div class="col-md-8 ml-2">
+                            <input type="text" class="form-control w-auto" id="email" name="email" placeholder="Correo electrónico">
                         </div>
                     </div>
 
@@ -233,12 +275,13 @@ get_header("Gestión de Alumnos");
                 </form>
             </div>
 
-            <div id="consultar" class="sectionGA" style="display: none;">
-                <h2>Consultar Alumnos</h2>
+            <div id="consultar" class="my-5 sectionGA" style="display: none;">
+                <h3>Consultar Alumnos</h3>
+                <br>
                 <table id="tableStudents" class="table table-white table-nostriped">
-                <thead class="thead-dark">
+                    <thead class="thead-dark">
                         <tr>
-                            <th scope="col">Clave ULSA</th>
+                            <th scope="col">Clave</th>
                             <th scope="col">Nombre Completo</th>
                             <th scope="col">Programa</th>
                             <th scope="col">Correo</th>
@@ -249,40 +292,41 @@ get_header("Gestión de Alumnos");
                 </table>
             </div>
 
-            <div id="eliminar" class="sectionGA" style="display: none;">
+            <div id="eliminar" class="my-5 sectionGA" style="display: none;">
 
-                <h2>Borrado único de alumno:</h2>
-                <form action="" method="post" enctype="multipart/form-data" class="mt-4">
+                <div class="d-flex align-items-center">
+                    <h3>Borrado único de alumno</h3>
+                    <div class="fs-6 text-muted ml-2 mb-1">(no utilizar "al")</div>
+                </div>
+
+                <form action="" method="post" enctype="multipart/form-data" class="mt-4 form-box">
                     <input type="hidden" name="action" value="deleteOneStudent">
-                    <div class="d-flex align-items-center">
-                        <h4>Clave Ulsa del Alumno</h4>
-                        <div class="fs-6 text-muted ml-2 mb-1">(no utilizar "al" en la Clave Ulsa )</div>
+                    <div class="form-group row mb-4">
+                        <label for="claveUlsaDelete" class="col-md-3 col-form-label">Clave Ulsa:</label>
+                        <div class="col-md-8 ml-2">
+                            <input type="text" class="form-control w-auto" id="claveUlsaDelete" name="claveUlsaDelete" placeholder="Clave Ulsa" maxlength="6">
+                        </div>
                     </div>
-                    <br>
-
-                    <div class="mb-3">
-                        <div class="row align-items-center mb-2">
-                            <div class="col-6 d-flex">
-                                <label class="col-4" for="claveUlsaDelete">Clave Ulsa:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="claveUlsaDelete" name="claveUlsaDelete" placeholder="Clave Ulsa" maxlength="6">
-                            </div>
-                    </div>
-
-                    <br>
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary">Eliminar alumno</button>
+                    <div class="text-center mt-4 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-outline-primary" style="width: 200px;">
+                            <i class="fas fa-user-minus mr-2"></i>
+                            <span>Eliminar alumno</span>
+                        </button>
                     </div>
                 </form>
 
                 <br>
                 <hr>
 
-                <h2>Borrado de todos los alumnos</h2>
+                <h3>Borrado de todos los alumnos</h3>
                 <form action="" method="post" enctype="multipart/form-data" class="mt-4">
                     <input type="hidden" name="action" value="deleteAllStudents">
                     <br>
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-danger">Eliminar alumnos</button>
+                    <div class="text-center mt-4 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-outline-danger" style="width: 200px;">
+                            <i class="fas fa-trash mr-2"></i>
+                            <span>Eliminar alumnos</span>
+                        </button>
                     </div>
                 </form>
 
@@ -294,7 +338,6 @@ get_header("Gestión de Alumnos");
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
     <script src="<?= ASSETS_PATH ?>/js/jquery.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/bootstrap/popper.min.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/bootstrap/bootstrap.min.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/util.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/sidebarmenu.js"></script>

@@ -30,7 +30,8 @@ $(document).ready(function () {
 
     $("#btn-consultar").on("click", function () {
         const button = $(this);
-        let tableBody = $("#tableStudents tbody");
+        const tableContainer = $("#tableStudents");
+        const tableBody = tableContainer.find("tbody");
 
         $.ajax({
             url: "",
@@ -38,6 +39,7 @@ $(document).ready(function () {
             data: { action: "getTableStudents" },
             beforeSend: function () {
                 button.prop("disabled", true);
+                tableContainer.hide();
                 tableBody.empty();
             },
             success: function (response) {
@@ -56,6 +58,7 @@ $(document).ready(function () {
                         '<tr><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
                     );
                 }
+                tableContainer.show();
             },
             error: function (xhr) {
                 const errorMsg = xhr.responseText || "Error al procesar la solicitud";
