@@ -36,5 +36,4 @@ $(document).ready(function () {
         newDiv.innerHTML = message;
         pos.before(newDiv);
     }
-
 });
