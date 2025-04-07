@@ -3,9 +3,10 @@
 define('BASE_DIR', $_SERVER['DOCUMENT_ROOT'] . '/..');
 define('PUBLIC_DIR', BASE_DIR . '/public');
 define('INCLUDES_DIR', BASE_DIR . '/includes');
-define('MODULES_DIR', BASE_DIR . '/public/modules');
 define('VENDOR_DIR', BASE_DIR . '/vendor');
+define('MODULES_DIR', BASE_DIR . '/public/modules');
 define('XLSX_DIR', BASE_DIR . '/public/assets/xlsx');
+define('PDF_DIR', BASE_DIR . '/public/assets/pdf');
 define('EMAIL_TEMPLATES_DIR', INCLUDES_DIR . '/templates/emails');
 
 define('ASSETS_PATH', '/assets');

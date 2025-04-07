@@ -22,8 +22,11 @@ class Brevo
     public function __construct()
     {
         $config = Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['BREVO_API_KEY']);
+        $path = (DIRECTORY_SEPARATOR === '\\')
+            ? str_replace('/', '\\', VENDOR_DIR . '\cacert.pem')
+            : str_replace('\\', '/', VENDOR_DIR . '\cacert.pem');
         $client = new Client([
-            'verify' => VENDOR_DIR . '\cacert.pem'
+            'verify' => $path
         ]);
 
         $this->apiEmailCampaigns = new \Brevo\Client\Api\EmailCampaignsApi(
@@ -61,7 +64,7 @@ class Brevo
                 }
             }
         } catch (\RuntimeException $e) {
-            throw new \RuntimeException("API: {$e->getMessage()}");
+            throw new \RuntimeException("Brevo API: {$e->getMessage()}");
         }
     }
 
@@ -71,7 +74,7 @@ class Brevo
             $res = $this->apiTransactionalEmails->sendTransacEmail($data)->getMessageId();
             return $res;
         } catch (\RuntimeException $e) {
-            throw new \RuntimeException("API: {$e->getMessage()}");
+            throw new \RuntimeException("Brevo API: {$e->getMessage()}");
         }
     }
 

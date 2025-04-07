@@ -9,6 +9,7 @@ ob_start();
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Content-Type: application/json');
+        $res = false;
 
         if (isset($_POST['action'])) {
             require_once 'gestorStudents.php';
@@ -30,17 +31,11 @@ try {
                     break;
                 case 'sendEmail':
                     $student = getStudentByUlsaID($_POST['ulsaID']);
-                    if ($student) {
-                        $res = sendEmailRemainder($student);
-                    } else {
-                        throw new RuntimeException('Student not found');
-                    }
+                    $res = sendEmailRemainder($student);
                     break;
                 case 'setConfigDate':
                     $res = updateConfig($_POST['type'], $_POST['date']);
                     break;
-                default:
-                    throw new RuntimeException('Not valid action!');
             }
         } elseif (count($_FILES) > 0) {
             require_once 'formsDB.php';
@@ -57,19 +52,18 @@ try {
                 $fileName = str_replace(' ', '_', htmlspecialchars($_FILES['excelFile']['name'], ENT_QUOTES, 'UTF-8'));
                 $ext = strtolower(pathinfo($_FILES['excelFile']['name'], PATHINFO_EXTENSION));
 
-                if (!in_array($ext, $allowedExtensions)) {
-                    throw new RuntimeException('Invalid file type.');
-                }
+                if (in_array($ext, $allowedExtensions)) {
+                    if (!is_dir($uploadDir)) {
+                        if (!mkdir($uploadDir, 0755, true)) {
+                            throw new RuntimeException('Error creating upload directory.');
+                        }
+                    }
+                    if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName")) {
+                        throw new RuntimeException('Error uploading file.');
+                    }
 
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
+                    $res = init_process("$uploadDir$fileName");
                 }
-
-                if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName")) {
-                    throw new RuntimeException('Error uploading file.');
-                }
-
-                $res = init_process("$uploadDir$fileName");
             } elseif (isset($_FILES['excelForms']) && isset($_FILES['excelAlumni'])) {
                 $fileTmpPath1 = $_FILES['excelForms']['tmp_name'];
                 $fileTmpPath2 = $_FILES['excelAlumni']['tmp_name'];
@@ -82,7 +76,9 @@ try {
 
                 if (in_array($ext1, $allowedExtensions) && in_array($ext2, $allowedExtensions)) {
                     if (!is_dir($uploadDir)) {
-                        mkdir($uploadDir, 0777, true);
+                        if (!mkdir($uploadDir, 0755, true)) {
+                            throw new RuntimeException('Error creating directory for XLSX files.');
+                        }
                     }
 
                     if (!move_uploaded_file($fileTmpPath1, "$uploadDir$fileName1") || !move_uploaded_file($fileTmpPath2, "$uploadDir$fileName2")) {
@@ -90,10 +86,13 @@ try {
                     }
 
                     $res = process_multiple_excels($uploadDir, $fileName1, $fileName2);
-                } else {
-                    throw new RuntimeException('Invalid file type.');
                 }
             }
+        }
+
+        if ($res === false || $res === null || empty($res)) {
+            echo responseBadRequest('Error processing the request.');
+            exit;
         }
         echo responseOK($res);
         exit;
@@ -155,44 +154,58 @@ get_header("Avisos de Fechas Importantes");
                     <h4>Lista de Alumnos y Microsoft Forms</h4>
                 </button>
             </div>
-            <div id="forms-msf" class="subSectionAFI mb-5" style="display: none;">
-                <form action="" method="post" enctype="multipart/form-data" class="mt-4 formsForm">
-                    <div class="mb-3">
-                        <input type="file" class="form-control form-control-lg pb-5" id="excelFile" name="excelFile"
-                            accept=".xls,.xlsx" required>
-                        <div id="emailHelp" class="form-text d-flex justify-content-end">
-                            Los datos se actualizarán en la base de datos.
+            <div id="forms-msf" class="my-5 subSectionAFI" style="display: none;">
+                <h4>Únicamente Microsoft Forms</h4>
+                <p class="d-flex justify-content-end">
+                    <b>Los datos sobreescribiran la base de datos.</b>
+                </p>
+                <form action="" method="post" enctype="multipart/form-data" class="form-box custom-file formsForm">
+                    <div class="form-group row">
+                        <label for="excelFile" class="col-md-3 col-form-label">Excel</label>
+                        <div class="col-md-8 custom-file ml-2">
+                            <input type="file" id="excelFile" name="excelFile" accept=".xls,.xlsx"
+                                class="custom-file-input" required>
+                            <label class="custom-file-label" for="customFile" data-browse="Examinar">
+                                Seleccionar archivo...
+                            </label>
                         </div>
+                        <button type="submit" class="btn btn-outline-primary mt-2 mx-auto" style="width: 200px;">
+                            <i class="fas fa-file-import mr-2"></i>
+                            <span>Importar datos</span>
+                        </button>
                     </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-file-import mr-2"></i>
-                        <span>Importar datos</span>
-                    </button>
                 </form>
             </div>
-            <div id="forms-lst" class="subSectionAFI mb-5" style="display: none;">
-                <form action="" method="post" enctype="multipart/form-data" class="mt-4 formsForm">
-                    <div class="mb-3">
-                        <label for="excelForms" class="form-label">
-                            <b>Excel de Microsoft Forms:</b>
-                        </label>
-                        <input type="file" class="form-control form-control-lg pb-5" id="excelForms" name="excelForms"
-                            accept=".xls,.xlsx" required>
+            <div id="forms-lst" class="my-5 subSectionAFI" style="display: none;">
+                <h4>Lista de alumnos y Microsoft Forms</h4>
+                <p class="d-flex justify-content-end">
+                    <b>Los datos no modificaran la base de datos.</b>
+                </p>
+                <form action="" method="post" enctype="multipart/form-data" class="form-box custom-file formsForm">
+                    <div class="form-group row">
+                        <label for="excelForms" class="col-md-3 col-form-label">Excel Microsoft Forms</label>
+                        <div class="col-md-8 custom-file ml-2">
+                            <input type="file" id="excelForms" name="excelForms" accept=".xls,.xlsx"
+                                class="custom-file-input" required>
+                            <label class="custom-file-label" for="customFile" data-browse="Examinar">
+                                Seleccionar archivo...
+                            </label>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="excelAlumni" class="form-label">
-                            <b>Lista de alumnos:</b>
-                        </label>
-                        <input type="file" class="form-control form-control-lg pb-5" id="excelAlumni" name="excelAlumni"
-                            accept=".xls,.xlsx" required>
+                    <div class="form-group row">
+                        <label for="excelAlumni" class="col-md-3 col-form-label">Excel Lista de Alumnos</label>
+                        <div class="col-md-8 custom-file ml-2">
+                            <input type="file" id="excelAlumni" name="excelAlumni" accept=".xls,.xlsx"
+                                class="custom-file-input" required>
+                            <label class="custom-file-label" for="customFile" data-browse="Examinar">
+                                Seleccionar archivo...
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary mt-2 mx-auto" style="width: 200px;">
+                            <i class="fas fa-file-import mr-2"></i>
+                            <span>Importar datos</span>
+                        </button>
                     </div>
-                    <div id="emailHelp" class="form-text d-flex justify-content-end">
-                        Los datos no modificaran la base de datos.
-                    </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-file-import mr-2"></i>
-                        <span>Importar datos</span>
-                    </button>
                 </form>
             </div>
         </div>
@@ -226,34 +239,42 @@ get_header("Avisos de Fechas Importantes");
                     <i class="fas fa-file-excel fa-2x"></i>
                 </a>
             </div>
-            <div class="row mb-3">
-                <div class="col">
-                    <label for="selectMaster">Filtrar por maestría:</label> <br>
-                    <select name="filter" id="selectMaster" class="custom-select">
-                        <option selected value="all"></option>
-                        <?php
+            <div class="form-box">
+                <div class="form-group row">
+                    <label for="selectMaster" class="col-md-3 col-form-label">Por maestría</label>
+                    <div class="col-md-8 ml-2 datalist">
+                        <input type="text" id="selectMaster" class="datalist-input w-100" placeholder="Seleccionar"
+                            readonly>
+                        <i class="fas fa-search icono filter"></i>
+                        <ul style="display: none;">
+                            <?php
                     foreach (getMastersPrograms() as $master) {
                         $master = ucfirst(strtolower($master));
-                        echo "<option value='$master'>$master</option>";
+                        echo "<li>$master</li>";
                     } ?>
-                    </select>
+                        </ul>
+                    </div>
                 </div>
-                <div class="col">
-                    <label for="selectSpecialty">Filtrar por especialidad:</label>
-                    <select name="filter" id="selectSpecialty" class="custom-select">
-                        <option selected value="all"></option>
-                        <?php
+                <div class="form-group row">
+                    <label for="selectSpecialty" class="col-md-3 col-form-label">Por especialidad:</label>
+                    <div class="col-md-8 ml-2 datalist">
+                        <input type="text" id="selectSpecialty" class="datalist-input w-100" placeholder="Seleccionar"
+                            readonly>
+                        <i class="fas fa-search icono filter"></i>
+                        <ul style="display: none;">
+                            <?php
                     foreach (getSpecialtyPrograms() as $special) {
                         $special = ucfirst(strtolower($special));
-                        echo "<option value='$special'>$special</option>";
+                        echo "<li>$special</li>";
                     } ?>
-                    </select>
+                        </ul>
+                    </div>
                 </div>
             </div>
-            <table id="tableStudents" class="table">
-                <thead>
+            <table id="tableStudents" class="table table-white table-nostriped">
+                <thead class="thead-dark">
                     <tr>
-                        <th scope="col">Clave ULSA</th>
+                        <th scope="col">Clave</th>
                         <th scope="col">Nombre Completo</th>
                         <th scope="col">Programa</th>
                         <th scope="col">Correo</th>
@@ -282,44 +303,53 @@ get_header("Avisos de Fechas Importantes");
                 <b>Evita el marcado manual</b> de la confirmación del alumno, como alternativa puedes mandar un
                 <b>recordatorio por correo electrónico</b>.
             </p>
-            <div class="row my-3">
-                <div class="col-6 mb-2">
-                    <label for="selectMaster">Filtrar por maestría:</label> <br>
-                    <select name="filter" id="selectMasterConfirm" class="custom-select">
-                        <option selected value="all"></option>
-                        <?php
+            <div class="form-box">
+                <div class="form-group row">
+                    <label for="selectMasterConfirm" class="col-md-3 col-form-label">Por maestría</label>
+                    <div class="col-md-8 ml-2 datalist">
+                        <input type="text" id="selectMasterConfirm" class="datalist-input w-100"
+                            placeholder="Seleccionar" readonly>
+                        <i class="fas fa-search icono filter"></i>
+                        <ul style="display: none;">
+                            <?php
                     foreach (getMastersPrograms() as $master) {
                         $master = ucfirst(strtolower($master));
-                        echo "<option value='$master'>$master</option>";
+                        echo "<li>$master</li>";
                     } ?>
-                    </select>
+                        </ul>
+                    </div>
                 </div>
-                <div class="col-6 mb-2">
-                    <label for="selectSpecialty">Filtrar por especialidad:</label>
-                    <select name="filter" id="selectSpecialtyConfirm" class="custom-select">
-                        <option selected value="all"></option>
-                        <?php
+                <div class="form-group row">
+                    <label for="selectSpecialtyConfirm" class="col-md-3 col-form-label">Por especialidad:</label>
+                    <div class="col-md-8 ml-2 datalist">
+                        <input type="text" class="datalist-input w-100" id="selectSpecialtyConfirm"
+                            placeholder="Seleccionar" readonly>
+                        <i class="fas fa-search icono filter"></i>
+                        <ul style="display: none;">
+                            <?php
                     foreach (getSpecialtyPrograms() as $special) {
                         $special = ucfirst(strtolower($special));
-                        echo "<option value='$special'>$special</option>";
+                        echo "<li>$special</li>";
                     } ?>
-                    </select>
+                        </ul>
+                    </div>
                 </div>
-                <div class="col-12  mb-2">
-                    <button id="onlyMissing" type="button" class="btn btn-danger w-100">
-                        Solamente faltantes
+                <div class="form-group row justify-content-center mt-3">
+                    <button id="removeFilter" class="btn btn-outline-success mr-2" style="width: 230px;">
+                        <i class="fas fa-users"></i> Todos
                     </button>
-                </div>
-                <div class="col-12">
-                    <button id="onlyConfirm" type="button" class="btn btn-success w-100">
-                        Solamente confirmados
+                    <button id="onlyConfirm" class="btn btn-outline-primary mr-2" style="width: 230px;">
+                        <i class="fas fa-check-double"></i> Solamente confirmados
+                    </button>
+                    <button id="onlyMissing" class="btn btn-outline-danger" style="width: 230px;">
+                        <i class="fas fa-times-circle"></i> Solamente faltantes
                     </button>
                 </div>
             </div>
-            <table id="tableStudentsConfirm" class="table">
-                <thead>
+            <table id="tableStudentsConfirm" class="table table-white table-nostriped">
+                <thead class="thead-dark">
                     <tr>
-                        <th scope="col">Clave ULSA</th>
+                        <th scope="col">Clave</th>
                         <th scope="col">Nombre Completo</th>
                         <th scope="col">Programa</th>
                         <th scope="col">Correo</th>

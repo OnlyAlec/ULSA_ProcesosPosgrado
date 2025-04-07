@@ -13,7 +13,10 @@ function init_process($filePath)
     $outputFile = null;
 
     try {
-        $studentsDB = getStudents();
+        if (empty($studentsDB = getStudents())) {
+            return [];
+        }
+
         $studentsExcel = processExcel($filePath);
         $missingStudents = filterMissingStudents($studentsExcel, $studentsDB);
         $programCount = getProgramCount($studentsDB, $missingStudents);
@@ -241,7 +244,9 @@ function createExcel($students, $programCount)
 
     //* Save File
     if (!file_exists(XLSX_DIR)) {
-        mkdir(XLSX_DIR, 0777, true);
+        if (!mkdir(XLSX_DIR, 0755, true)) {
+            throw new RuntimeException('Error creating directory for XLSX files.');
+        }
     }
 
     $timestamp = date('Y-m-d_H-i-s');
