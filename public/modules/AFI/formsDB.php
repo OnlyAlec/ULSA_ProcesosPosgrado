@@ -1,9 +1,15 @@
 <?php
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
+
+use PhpOffice\PhpSpreadsheet\Chart\Chart;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
+use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
+use PhpOffice\PhpSpreadsheet\Chart\Title;
+
 
 function init_process($filePath)
 {
@@ -223,10 +229,6 @@ function createExcel($students, $programCount)
     $masters = [];
     $specialties = [];
 
-
-    $masters = [];
-    $specialties = [];
-
     foreach ($programCount['programs'] as $program) {
 
         $sheet2->setCellValue("A{$rowIndex}", $program);
@@ -242,11 +244,9 @@ function createExcel($students, $programCount)
         $rowIndex++;
 
         if (strpos(strtolower($program), 'maestría') === 0) {
-            $masters[$program]['partial'] = $partial;
-            $masters[$program]['total'] = $total;
+            $masters[$program] = $partial;
         } else {
-            $specialties[$program]['partial'] = $partial;
-            $specialties[$program]['total'] = $total;
+            $specialties[$program] = $partial;
         }
     }
 
