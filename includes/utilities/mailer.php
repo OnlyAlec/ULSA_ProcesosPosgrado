@@ -14,6 +14,9 @@ class Mailer
     private string $htmlContent;
     private string $subject;
     private string $template;
+    private string $redirection;
+    private string $url;
+    private bool $needToken = false;
 
     public function __construct(Student $contact, string $subject, string $template)
     {
@@ -58,25 +61,28 @@ class Mailer
         if ($tokenDB == $token) {
             return true;
         }
-        return ($tokenDB == "") ? insertToken($studentID, $token) : updateToken($studentID, $token);
+        return $tokenDB == "" ? insertToken($studentID, $token) : updateToken($studentID, $token);
     }
 
     public function constructEmail()
     {
         try {
-            $token = bin2hex(random_bytes(32));
-            $save = $this->saveToken($this->contact->getID(), $token);
-            if (!$save) {
-                return false;
+            if ($this->needToken) {
+                $token = bin2hex(random_bytes(32));
+                if (!$this->saveToken($this->contact->getID(), $token)) {
+                    return false;
+                }
+                $this->url = "$this->redirection?token=" . urlencode($token);
             }
 
-            $url = filePathToUrl(MODULES_DIR . "/AFI/confirmation.php");
             $lastNameParts = preg_split('/\s+/', $this->contact->getLastName());
             $formattedLastName = implode(' ', array_map('ucfirst', $lastNameParts));
+
+            // FIXME: Maybe is best to receive this as a parameter
             $dataReplace = [
                 "program" => ucfirst($this->contact->getProgram()),
                 "name" => ucfirst($this->contact->getName()) . " " . $formattedLastName,
-                "url" => "$url?token=" . urlencode($token),
+                "url" => $this->url ?? "",
             ];
             $base = $this->getTemplateHTML();
             $keys = array_map(fn ($key) => "-- " . strtoupper($key) . " --", array_keys($dataReplace));
@@ -84,15 +90,14 @@ class Mailer
             $this->htmlContent = $this->convertMJMLToHTML($base);
             $this->htmlContent = str_replace($keys, array_values($dataReplace), $this->htmlContent);
             return true;
-        } catch (RuntimeException $e) {
+        } catch (\RuntimeException $e) {
             throw new \RuntimeException("Error constructing email: {$e->getMessage()}");
         }
     }
 
     public function send()
     {
-        $res = $this->brevo->sendIndividualEmail($this->contact, $this->subject, $this->htmlContent);
-        if ($res != "") {
+        if ($res = $this->brevo->sendIndividualEmail($this->contact, $this->subject, $this->htmlContent) != "") {
             return [
                 "messageID" => $res,
                 "delivered" => "true",
@@ -100,6 +105,24 @@ class Mailer
             ];
         }
         ErrorList::add("Error sending email to: " . $this->contact->getEmail());
-        throw new \RuntimeException("Error sending email to: " . $this->contact->getEmail());
+        return [];
+    }
+
+    public function setRedirection(string $filepath)
+    {
+        if (!file_exists($filepath)) {
+            throw new \RuntimeException("File does not exist: $filepath");
+        }
+        $this->redirection = filePathToUrl($filepath);
+    }
+
+    public function setUrl(string $url)
+    {
+        $this->url = $url;
+    }
+
+    public function setNeedToken(bool $needToken)
+    {
+        $this->needToken = $needToken;
     }
 }
