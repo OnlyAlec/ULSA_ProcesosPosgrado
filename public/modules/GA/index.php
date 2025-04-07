@@ -119,7 +119,7 @@ get_header("Gestión de Alumnos");
 
         <div>         
             <div id="crear" class="my-5 sectionGA" style="display: none;">
-                <h3>Registrar Alumnos desde Excel</h3>
+                <h3>Registro de Alumnos desde Excel</h3>
                 <p class="d-flex justify-content-end">
                     <b>Se sobreescribirá la base de datos.</b>
                 </p>
@@ -188,7 +188,7 @@ get_header("Gestión de Alumnos");
 
                 <hr>
 
-                <h3>Registro único de alumno</h3>
+                <h3>Registro de alumno único</h3>
                 <form action="" method="post" enctype="multipart/form-data" class="form-box">
                     <input type="hidden" name="action" value="registerOneStudent">
 
@@ -245,7 +245,7 @@ get_header("Gestión de Alumnos");
             </div>
 
             <div id="consultar" class="my-5 sectionGA" style="display: none;">
-                <h3>Consultar Alumnos</h3>
+                <h3>Consulta de Alumnos</h3>
                 <br>
                 <table id="tableStudents" class="table table-white table-nostriped">
                     <thead class="thead-dark">
@@ -264,7 +264,7 @@ get_header("Gestión de Alumnos");
             <div id="eliminar" class="my-5 sectionGA" style="display: none;">
 
                 <div class="d-flex align-items-center">
-                    <h3>Borrado único de alumno</h3>
+                    <h3>Borrado de alumno único</h3>
                     <div class="fs-6 text-muted ml-2 mb-1">(no utilizar "al")</div>
                 </div>
 

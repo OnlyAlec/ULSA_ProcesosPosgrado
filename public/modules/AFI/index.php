@@ -248,10 +248,11 @@ get_header("Avisos de Fechas Importantes");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                    foreach (getMastersPrograms() as $master) {
-                        $master = ucfirst(strtolower($master->getName()));
-                        echo "<option value='$master'>$master</option>";
-                    } ?>
+                                foreach (getMastersPrograms() as $master) {
+                                    $master = ucfirst(strtolower($master->getName()));
+                                    echo "<option value='$master'>$master</option>";
+                                } 
+                            ?>
                         </ul>
                     </div>
                 </div>

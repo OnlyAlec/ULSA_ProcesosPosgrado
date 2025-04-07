@@ -71,49 +71,86 @@ get_header("Seguimiento de Evaluación Docente");
     <main class="container content marco">
         <div>
             <div class="d-flex justify-content-between align-items-center">
-                <h1 class="mb-2">Carga de concentrado de alumnos en Excel:</h1>
+                <h3 class="mb-2">Carga de concentrado de alumnos en Excel:</h3>
                 <a href="index.php" class="btn btn-outline-primary">Regresar</a>
             </div>
             <br>
-            <form action="" method="post" enctype="multipart/form-data" class="mt-4">
-                <div class="mb-3">
-                    <h4 for="sedExcelFile" class="form-label">Subir archivo Excel:</h4>
-                    <input type="file" class="form-control form-control-lg w-100 pb-5 pl-2" id="sedExcelFile"
-                        name="sedExcelFile" accept=".xls,.xlsx" required>
-                    <div id="emailHelp" class="form-text d-flex justify-content-end">Los datos se actualizarán en la
-                        base de datos.</div>
+            <p class="d-flex justify-content-end">
+                <b>Los datos se actualizarán en la base de datos.</b>
+            </p>
+
+            <form action="" method="post" enctype="multipart/form-data" class="mt-4 form-box">
+                <!-- Archivo Excel -->
+                <div class="form-group row mb-4">
+                    <label for="sedExcelFile" class="col-md-3 col-form-label">Subir archivo Excel:</label>
+                    <div class="col-md-8 custom-file ml-2">
+                        <input type="file"
+                            class="custom-file-input"
+                            id="sedExcelFile"
+                            name="sedExcelFile"
+                            accept=".xls,.xlsx"
+                            required>
+                        <label class="custom-file-label"
+                            for="sedExcelFile"
+                            data-browse="Examinar">
+                            Seleccionar archivo...
+                        </label>
+                    </div>
                 </div>
 
+                <!-- Encabezados -->
                 <div class="d-flex align-items-center">
                     <h4>Encabezados</h4>
                     <div class="fs-6 text-muted ml-2 mb-1">(ej: A, B, C, ...)</div>
                 </div>
+                <br>
 
-                <div class="mb-3">
-                    <div class="row align-items-center mb-2">
-                        <label class="col-2" for="claveUlsa" class="form-label me-2">Clave Ulsa:</label>
-                        <input type="text" class="col-2 form-control w-auto" id="claveUlsa" name="claveUlsa"
-                            placeholder="Columna" maxlength="2">
+                <!-- Columnas -->
+                <div class="form-group row mb-4">
+                    <label for="claveUlsa" class="col-md-3 col-form-label">Clave Ulsa:</label>
+                    <div class="col-md-8 ml-2">
+                        <input type="text"
+                            class="form-control w-auto"
+                            id="claveUlsa"
+                            name="claveUlsa"
+                            placeholder="Columna"
+                            maxlength="2">
                     </div>
-                    <div class="row align-items-center mb-2">
-                        <label class="col-2" for="nombre" class="form-label me-2">Nombre:</label>
-                        <input type="text" class="col-2 form-control w-auto" id="nombre" name="nombre"
-                            placeholder="Columna" maxlength="2">
+                </div>
+                <div class="form-group row mb-4">
+                    <label for="nombre" class="col-md-3 col-form-label">Nombre:</label>
+                    <div class="col-md-8 ml-2">
+                        <input type="text"
+                            class="form-control w-auto"
+                            id="nombre"
+                            name="nombre"
+                            placeholder="Columna"
+                            maxlength="2">
                     </div>
-                    <div class="row align-items-center">
-                        <label class="col-2" for="estatus" class="form-label me-2">Estatus:</label>
-                        <input type="text" class="col-2 form-control w-auto" id="estatus" name="estatus"
-                            placeholder="Columna" maxlength="2">
+                </div>
+                <div class="form-group row mb-4">
+                    <label for="estatus" class="col-md-3 col-form-label">Estatus:</label>
+                    <div class="col-md-8 ml-2">
+                        <input type="text"
+                            class="form-control w-auto"
+                            id="estatus"
+                            name="estatus"
+                            placeholder="Columna"
+                            maxlength="2">
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary">Cargar Excel</button>
+                <!-- Botón de envío -->
+                <div class="text-center mt-4 d-flex justify-content-end">
+                    <button type="submit"
+                            class="btn btn-outline-primary"
+                            style="width: 200px;">
+                        <i class="fas fa-file-import mr-2"></i>
+                        <span>Cargar Excel</span>
+                    </button>
                 </div>
             </form>
-            <br>
-            <hr>
-            <br>
+
     </main>
 
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
