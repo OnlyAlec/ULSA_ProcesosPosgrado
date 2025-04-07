@@ -1,7 +1,6 @@
 <?php
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
 
@@ -10,6 +9,7 @@ use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
 use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
 use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
 use PhpOffice\PhpSpreadsheet\Chart\Title;
+
 
 function init_process($filePath)
 {
@@ -229,10 +229,6 @@ function createExcel($students, $programCount)
     $masters = [];
     $specialties = [];
 
-
-    $masters = [];
-    $specialties = [];
-
     foreach ($programCount['programs'] as $program) {
 
         $sheet2->setCellValue("A{$rowIndex}", $program);
@@ -350,57 +346,5 @@ function _updateInDB($studentsConfirm, $studentsNotConfirm)
 
     foreach ($studentsConfirm as $student) {
         updateStudentFieldBoolean($student->getUlsaId(), 'afi', true);
-    }
-}
-
-function createBarChart($sheet, $title, $dataArray)
-{
-    $row = 1;
-    $sheet->setCellValue("A{$row}", "Programa");
-    $sheet->setCellValue("B{$row}", "No firmaron");
-
-    foreach ($dataArray as $program => $count) {
-        $row++;
-        $sheet->setCellValue("A{$row}", $program);
-        $sheet->setCellValue("B{$row}", $count);
-    }
-
-    $endRow = $row;
-
-    $categories = [new DataSeriesValues('String', "'{$sheet->getTitle()}'!A2:A{$endRow}", null, count($dataArray))];
-    $values = [new DataSeriesValues('Number', "'{$sheet->getTitle()}'!B2:B{$endRow}", null, count($dataArray))];
-
-    // Crear la serie de datos
-    $series = new DataSeries(
-        DataSeries::TYPE_BARCHART,
-        DataSeries::GROUPING_CLUSTERED,
-        range(0, count($values) - 1),
-        [],
-        $categories,
-        $values
-    );
-
-    $plotArea = new PlotArea(null, [$series]);
-    $chartTitle = new Title($title);
-
-    $chart = new Chart(
-        $title,
-        $chartTitle,
-        null,
-        $plotArea,
-        true,
-        DataSeries::EMPTY_AS_GAP
-    );
-
-    // Posicionar la gráfica en la hoja
-    $chart->setTopLeftPosition("D1");
-    $chart->setBottomRightPosition("L15");
-
-    // Agregar la gráfica a la hoja
-    $sheet->addChart($chart);
-
-    // Ajustar el tamaño de las celdas
-    foreach (range('A', 'B') as $col) {
-        $sheet->getColumnDimension($col)->setAutoSize(true);
     }
 }
