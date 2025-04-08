@@ -62,6 +62,7 @@ jobs:
                   ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
                     "mv /tmp/.env-backup ${{ secrets.SSH_PATH }}/.env"
     node:
+        needs: deploy
         runs-on: ubuntu-latest
         environment: Credentials Dev
         steps:
