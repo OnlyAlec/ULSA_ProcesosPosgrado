@@ -30,21 +30,28 @@ $(function () {
                                 <td>${student.firstName} ${student.lastName}</td>
                                 <td>${student.carrer}</td>
                                 <td>${student.email}</td>
-                                <td class="icono-acciones text-center">
-                                    ###
-                                    ~~~
+                                <td>
+                                    <div class="d-flex" style="gap: 8px;">
+                                        <button class="btn ??? btn-sm text-white border-0 flex-fill statusAFI" data-ulsaID="${student.ulsaID}">
+                                            ###
+                                        </button>
+                                        ~~~
+                                    </div>
+                                </td>
                             </tr>`;
-                        const afiStatusBtn = student.afi
-                            ? `<i class="fas fa-minus-square fa-lg statusAFI" data-ulsaID=${student.ulsaID}></i>`
-                            : `<i class="fas fa-check-square fa-lg statusAFI" data-ulsaID=${student.ulsaID}></i>`;
+                        const afiStatusStyle = student.afi ? 'btn-danger' : 'btn-success';
+                        const afiStatusIcon = student.afi
+                            ? `<i class="fas fa-minus-square fa-lg"></i>`
+                            : `<i class="fas fa-check-square fa-lg"></i>`;
                         if (!student.afi)
                             row = row.replace(
                                 "~~~",
-                                `<i class="fas fa-paper-plane sendEmail" data-ulsaID=${student.ulsaID}></i>`
+                                `<button class="btn btn-info btn-sm text-white border-0 flex-fill sendEmail" data-email="${student.email}"><i class="fas fa-paper-plane"></i>`
                             );
                         else row = row.replace("~~~", "");
 
-                        row = row.replace("###", afiStatusBtn);
+                        row = row.replace("???", afiStatusStyle);
+                        row = row.replace("###", afiStatusIcon);
                         tableBody.append(row);
                     });
                     setupActions();
@@ -54,6 +61,7 @@ $(function () {
                     );
                 }
                 tableContainer.show();
+                setupDatasets();
             },
             error: function (xhr) {
                 const errorMsg = "Error al procesar la solicitud";
@@ -63,20 +71,6 @@ $(function () {
                 button.prop("disabled", false);
             },
         });
-    });
-
-    $("#selectMasterConfirm, #selectSpecialtyConfirm").on("input", function () {
-        const value = String($(this).val())?.toUpperCase();
-        const icon = $(this).closest(".datalist").find("i");
-
-        value
-            ? icon.removeClass("fa-search").addClass("fa-times")
-            : icon.removeClass("fa-times").addClass("fa-search");
-        const otherSelect = $(this).is("#selectMaster") ? "#selectSpecialty" : "#selectMaster";
-        $(otherSelect).val("");
-        $(otherSelect).closest(".datalist").find("i").removeClass("fa-times").addClass("fa-search");
-
-        filterTableByCarrer(value, "tableStudents");
     });
 
     $("#onlyMissing").on("click", function () {
@@ -131,7 +125,6 @@ function setupActions() {
         .off("click")
         .on("click", function () {
             const button = $(this);
-            const parent = button.parent();
             const ulsaID = button.data("ulsaid");
             const divError = $(".sectionsAFI");
 
@@ -149,14 +142,21 @@ function setupActions() {
                     }
                     const newStatus = response.data.newStatus;
                     const newIcon = newStatus
-                        ? `<i class="fas fa-minus-square fa-lg statusAFI" data-ulsaID=${ulsaID}></i>`
-                        : `<i class="fas fa-check-square fa-lg statusAFI" data-ulsaID=${ulsaID}></i>`;
-                    parent.html(newIcon);
+                        ? `<i class="fas fa-minus-square fa-lg"></i>`
+                        : `<i class="fas fa-check-square fa-lg"></i>`;
+                    const newColor = newStatus ? "btn-danger" : "btn-success";
 
-                    if (!newStatus)
-                        parent.append(
-                            `<i class="fas fa-paper-plane fa-lg sendEmail" data-ulsaID=${ulsaID}></i>`
-                        );
+                    button.html(newIcon);
+                    button.removeClass("btn-success btn-danger");
+                    button.addClass(newColor);
+
+                    if (newStatus) button.parent().parent().find(".sendEmail").remove();
+                    else
+                        button
+                            .parent()
+                            .append(
+                                `<button class="btn btn-info btn-sm text-white border-0 flex-fill sendEmail" data-email=${response.data.email}><i class= "fas fa-paper-plane"></i></button>`
+                            );
                     setupActions();
                 },
                 error: function (xhr) {
