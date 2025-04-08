@@ -69,9 +69,7 @@ $(document).ready(function () {
       $input.val($(this).text()).trigger("input");
       $d.find("ul").hide();
       // Cambiar ícono a “limpiar”
-      $d.find(".filter")
-        .removeClass("fa-search")
-        .addClass("fa-times");
+      $d.find(".filter").removeClass("fa-search").addClass("fa-times");
     });
 
     // 5) Clic en el ícono:
@@ -92,3 +90,4 @@ $(document).ready(function () {
       }
     });
   });
+});
