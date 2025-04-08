@@ -133,6 +133,9 @@ h1 {
 .table-nostriped tbody tr:nth-of-type(odd) {
     background-color: transparent;
 }
+.table-nostriped tbody tr:nth-of-type(even) {
+    background-color: #f7f7f7;
+}
 .rotate-text {
     writing-mode: vertical-lr;
     transform: rotate(180deg);
@@ -148,6 +151,13 @@ h1 {
     margin: 0 3px;
     text-decoration: none !important;
 }
+
+.icono-acciones span:hover,
+.icono-acciones i:hover {
+    color: #d12034;
+    transition: color 0.6s ease;
+}
+
 .icono-acciones a:focus,
 .icono-acciones a:hover,
 .icono-acciones a:active {
@@ -280,6 +290,10 @@ textarea {
     border-radius: 0.25rem;
     cursor: pointer;
     border: 0;
+}
+.datalist-input:focus {
+    outline: none;
+    box-shadow: none;
 }
 .datalist.disabled .datalist-input {
     background: #f7f7f7 !important;
