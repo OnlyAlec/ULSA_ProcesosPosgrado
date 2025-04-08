@@ -118,6 +118,17 @@ $(document).ready(function () {
     }
 });
 
+$(function () {
+    $(".custom-file-input").on("change", function (e) {
+        const fileName = $(e.target).prop("files")[0]?.name
+            ? $(e.target).prop("files")[0].name.length > 70
+                ? $(e.target).prop("files")[0].name.substring(0, 68) + "..."
+                : $(e.target).prop("files")[0].name
+            : "Seleccionar archivo...";
+        $(e.target).next().text(fileName);
+    });
+});
+
 function setupBtnsGA(name) {
     if (!name) {
         throw new Error("Missing name - setupBtnsGA");
