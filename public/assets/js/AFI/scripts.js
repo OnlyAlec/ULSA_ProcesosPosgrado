@@ -35,8 +35,8 @@ function setupBtns(name) {
         $(".alert").remove();
         $(".forms-result").hide();
         $(".subSectionAFI").hide();
-        $(".custom-file-input").val("").next().text("Seleccionar archivo...")
-        
+        $(".custom-file-input").val("").next().text("Seleccionar archivo...");
+
         $(".sectionsAFI button").removeClass("btn-primary").addClass("btn-outline-primary");
         $(this).removeClass("btn-outline-primary").addClass("btn-primary");
         const div = name.split("-").slice(1).join("-");
@@ -108,47 +108,66 @@ function filterTableByCarrer(filter, tableName) {
         );
 }
 
-function setupDatasets(){
-    $(".datalist-input").off().on("click", function (e) {
-        e.stopPropagation();
-        const list = $(this).closest(".datalist").find("ul");
-        list.css("display", list.css("display") === "none" ? "" : "none");
-    });
+function setupDatasets() {
+    $(".datalist-input")
+        .off()
+        .on("click", function (e) {
+            e.stopPropagation();
+            const list = $(this).closest(".datalist").find("ul");
+            list.css("display", list.css("display") === "none" ? "" : "none");
+        });
 
-    $(".datalist li:not(.not-selectable)").off().on("click", function () {
-        const input = $(this).closest(".datalist").find(".datalist-input");
-        input.val($(this).text()).trigger("input");
-        $(this).closest("ul").css("display", "none");
-    });
+    $(".datalist li:not(.not-selectable)")
+        .off()
+        .on("click", function () {
+            const input = $(this).closest(".datalist").find(".datalist-input");
+            input.val($(this).text()).trigger("input");
+            $(this).closest("ul").css("display", "none");
+        });
 
-    $(".datalist i").off().on("click", function () {
-        const input = $(this).closest(".datalist").find(".datalist-input");
-        input.val("").trigger("input");
-        $(this).removeClass("fa-times").addClass("fa-search");
-    });
+    $(".datalist i")
+        .off()
+        .on("click", function () {
+            const input = $(this).closest(".datalist").find(".datalist-input");
+            input.val("").trigger("input");
+            $(this).removeClass("fa-times").addClass("fa-search");
+        });
 
     const selects = [
-       "selectMasterConfirm",
-       "selectSpecialtyConfirm",
-       "selectMaster",
-       "selectSpecialty", 
-    ]
+        "selectMasterConfirm",
+        "selectSpecialtyConfirm",
+        "selectMaster",
+        "selectSpecialty",
+    ];
 
     selects.forEach((select) => {
         $("#" + select).on("input", function () {
             const value = String($(this).val())?.toUpperCase();
             const icon = $(this).closest(".datalist").find("i");
-        
+
             value
                 ? icon.removeClass("fa-search").addClass("fa-times")
                 : icon.removeClass("fa-times").addClass("fa-search");
-            const otherSelect = $(this).attr('id') === "selectMasterConfirm" || $(this).attr('id') === "selectMaster" 
-                ? ($(this).attr('id')?.includes("Confirm") ? "#selectSpecialtyConfirm" : "#selectSpecialty")
-                : ($(this).attr('id')?.includes("Confirm") ? "#selectMasterConfirm" : "#selectMaster");
+            const otherSelect =
+                $(this).attr("id") === "selectMasterConfirm" ||
+                $(this).attr("id") === "selectMaster"
+                    ? $(this).attr("id")?.includes("Confirm")
+                        ? "#selectSpecialtyConfirm"
+                        : "#selectSpecialty"
+                    : $(this).attr("id")?.includes("Confirm")
+                      ? "#selectMasterConfirm"
+                      : "#selectMaster";
             $(otherSelect).val("");
-            $(otherSelect).closest(".datalist").find("i").removeClass("fa-times").addClass("fa-search");
-        
-            filterTableByCarrer(value, $(this).attr('id')?.includes("Confirm") ? "tableStudentsConfirm" : "tableStudents");
-        }) 
-    })
+            $(otherSelect)
+                .closest(".datalist")
+                .find("i")
+                .removeClass("fa-times")
+                .addClass("fa-search");
+
+            filterTableByCarrer(
+                value,
+                $(this).attr("id")?.includes("Confirm") ? "tableStudentsConfirm" : "tableStudents"
+            );
+        });
+    });
 }

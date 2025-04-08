@@ -39,7 +39,7 @@ $(function () {
                                     </div>
                                 </td>
                             </tr>`;
-                        const afiStatusStyle = student.afi ? 'btn-danger' : 'btn-success';
+                        const afiStatusStyle = student.afi ? "btn-danger" : "btn-success";
                         const afiStatusIcon = student.afi
                             ? `<i class="fas fa-minus-square fa-lg"></i>`
                             : `<i class="fas fa-check-square fa-lg"></i>`;
