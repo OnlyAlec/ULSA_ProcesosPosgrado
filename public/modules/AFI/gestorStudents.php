@@ -34,6 +34,12 @@ function sendEmailRemainder(Student $student)
     $mailer = new Mailer($student, "¡No dejes pasar estas fechas importantes!", "remainderAFI");
     $mailer->setNeedToken(true);
     $mailer->setRedirection(MODULES_DIR . "/AFI/confirmation.php");
-    $mailer->constructEmail();
+
+    $data = [
+        "title" => "Aviso de Fechas Importantes",
+        "program" => ucfirst($student->getProgram()),
+    ];
+
+    $mailer->constructEmail($data);
     return $mailer->send();
 }

@@ -64,7 +64,7 @@ class Mailer
         return $tokenDB == "" ? insertToken($studentID, $token) : updateToken($studentID, $token);
     }
 
-    public function constructEmail()
+    public function constructEmail(array $dataAdditional)
     {
         try {
             if ($this->needToken) {
@@ -78,12 +78,16 @@ class Mailer
             $lastNameParts = preg_split('/\s+/', $this->contact->getLastName());
             $formattedLastName = implode(' ', array_map('ucfirst', $lastNameParts));
 
-            // FIXME: Maybe is best to receive this as a parameter
             $dataReplace = [
-                "program" => ucfirst($this->contact->getProgram()),
+                "header" => "Gestión de Procesos de Posgrado",
                 "name" => ucfirst($this->contact->getName()) . " " . $formattedLastName,
                 "url" => $this->url ?? "",
             ];
+
+            if (!empty($dataAdditional)) {
+                $dataReplace = array_merge($dataReplace, $dataAdditional);
+            }
+
             $base = $this->getTemplateHTML();
             $keys = array_map(fn ($key) => "-- " . strtoupper($key) . " --", array_keys($dataReplace));
 
