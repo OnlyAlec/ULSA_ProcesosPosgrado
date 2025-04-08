@@ -10,7 +10,7 @@
     src:
         url("../fonts/indivisaFont/woff/IndivisaTextSans-BoldItalic.woff"),
         url("../fonts/indivisaFont/ttf/IndivisaTextSans-BoldItalic.ttf"),
-        url("../fonts/indivisaFont/eot/IndivisaTextSans-BoldItalic.IndivisaTextSans-BoldItalic");
+        url("../fonts/indivisaFont/svg/IndivisaTextSans-BoldItalic.svg#IndivisaTextSans-BoldItalic");
     font-weight: normal;
     font-style: normal;
 }
@@ -20,7 +20,7 @@
     src:
         url("../fonts/indivisaFont/woff/IndivisaTextSans-Regular.woff"),
         url("../fonts/indivisaFont/ttf/IndivisaTextSans-Regular.ttf"),
-        url("../fonts/indivisaFont/eot/IndivisaTextSans-Regular.svg#IndivisaTextSans-Regular");
+        url("../fonts/indivisaFont/svg/IndivisaTextSans-Regular.svg#IndivisaTextSans-Regular");
     font-weight: normal;
     font-style: normal;
 }
@@ -30,7 +30,7 @@
     src:
         url("../fonts/indivisaFont/woff/IndivisaTextSans-Black.woff"),
         url("../fonts/indivisaFont/ttf/IndivisaTextSans-Black.ttf"),
-        url("../fonts/indivisaFont/eot/IndivisaTextSans-Black.svg#IndivisaTextSans-Black");
+        url("../fonts/indivisaFont/svg/IndivisaTextSans-Black.svg#IndivisaTextSans-Black");
     font-weight: normal;
     font-style: normal;
 }
@@ -40,7 +40,7 @@
     src:
         url("../fonts/indivisaFont/woff/IndivisaTextSans-Bold.woff"),
         url("../fonts/indivisaFont/ttf/IndivisaTextSans-Bold.ttf"),
-        url("../fonts/indivisaFont/eot/IndivisaTextSans-Bold.svg#IndivisaTextSans-Bold");
+        url("../fonts/indivisaFont/svg/IndivisaTextSans-Bold.svg#IndivisaTextSans-Bold");
     font-weight: normal;
     font-style: normal;
 }
