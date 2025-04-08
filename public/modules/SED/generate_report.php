@@ -79,22 +79,27 @@ function separateStudents($students)
 function generateReport($students, $filename)
 {
     $pdf = new Fpdf();
+    $reportsDir = __DIR__ . '/reports/';
+    if (!is_dir($reportsDir)) {
+        mkdir($reportsDir, 0777, true);
+    }
 
     $pdf->AddFont('IndivisaSans', '', 'IndivisaDisplaySans-Regular.php');
     $pdf->AddFont('IndivisaSerif', '', 'IndivisaDisplaySerif-RegularItalic.php');
     $pdf->AddFont('IndivisaTextSans', '', 'IndivisaTextSans-Regular.php');
 
     $studentsByEvaluation = separateStudents($students);
-    $percentage = round((count($studentsByEvaluation['EVALUATED']) / count($students)) * 100, 2);
 
     if (!empty($studentsByEvaluation['EVALUATED'])) {
         addNewPage($pdf);
+        $countEvaluated = 0;
         $pdf->SetFont('IndivisaSans', '', 14);
         $pdf->Cell(0, 10, mb_convert_encoding('Alumnos que realizaron la Evaluación Docente', 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
         $pdf->Ln(5);
 
         foreach ($studentsByEvaluation['EVALUATED'] as $programName => $programStudents) {
             addTable($pdf, $programName, $programStudents);
+            $countEvaluated = $countEvaluated + count($programStudents);
         }
     }
 
@@ -109,11 +114,15 @@ function generateReport($students, $filename)
         }
     }
 
+    $percentage = round(($countEvaluated / count($students)) * 100, 2);
     addNewPage($pdf);
     $pdf->SetFont('IndivisaSans', '', 14);
+    $pdf->Cell(0, 10, mb_convert_encoding('Números de Alumnos que realizaron la evaluación: ' . $countEvaluated, 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
+    $pdf->Cell(0, 10, mb_convert_encoding('Números de Alumnos que no han realizado la evaluación: ' . (count($students) - $countEvaluated), 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
+    $pdf->Cell(0, 10, mb_convert_encoding('Total de Alumnos: ' . count($students), 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
     $pdf->Cell(0, 10, mb_convert_encoding('Porcentaje de Cumplimiento: ' . $percentage . '%', 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
 
-    $outputPath = "reports/$filename.pdf";
+    $outputPath = $reportsDir . $filename . '.pdf';
     $pdf->Output('F', $outputPath);
     echo json_encode(['url' => "/modules/SED/reports/$filename.pdf"]);
 
