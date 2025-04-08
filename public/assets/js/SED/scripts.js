@@ -1,3 +1,5 @@
+window.displayMessage = displayMessage;
+
 $(document).ready(function () {
     $("form").submit(function (e) {
         e.preventDefault();
@@ -37,3 +39,17 @@ $(document).ready(function () {
         pos.before(newDiv);
     }
 });
+
+function displayMessage(pos, message, type = "success") {
+    const newDiv = document.createElement("div");
+    newDiv.className = type == "success" ? "alert alert-success my-3" : "alert alert-danger my-3";
+    newDiv.innerHTML = message;
+    pos.after(newDiv);
+
+    const scrollOffset = 200;
+    const elementPosition = pos[0].getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({
+        top: elementPosition - scrollOffset,
+        behavior: "smooth",
+    });
+}

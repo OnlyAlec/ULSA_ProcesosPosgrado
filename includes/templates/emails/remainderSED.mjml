@@ -1,0 +1,51 @@
+<mjml>
+  <mj-head>
+    <mj-preview>
+      Recordatorio: Realiza tu Evaluación Docente desde el Portal de Servicios
+    </mj-preview>
+  </mj-head>
+
+  <mj-body>
+    <!-- Header -->
+    <mj-include path="header.mjml" />
+
+    <!-- Título principal -->
+    <mj-section background-color="#001D68" padding="2px">
+      <mj-column>
+        <mj-text align="center" font-size="20px" font-weight="bold" font-family="Indivisa Display Sans" font-style="italic" color="#FFFFFF">
+          -- TITLE --
+        </mj-text>
+      </mj-column>
+    </mj-section>s
+
+    <!-- Contenido principal -->
+    <mj-section background-color="#DCECF8" border-bottom="3px solid #C2C2C2">
+      <mj-column>
+        <mj-text font-size="16px" font-family="Indivisa Text Sans" align="justify">
+          <mj-text>
+            Estimado alumno <b>-- NAME --</b>,
+          </mj-text>
+          <br /><br /><br />
+          <b>Te recordamos que debes realizar la evaluación de docentes correspondiente.</b> Considera que no podrás hacerla después de la fecha establecida <b>-- FECHA --</b>.
+          <br /><br />
+          Recuerda que para hacerla deberás ingresar a tu Portal de Servicios, después seleccionar la pestaña EVALUACIÓN DOCENTE.
+          <br /><br />
+          Es muy importante que completes esta evaluación en tiempo y forma. Para cualquier duda, comunícate con la Coordinación de Posgrados de la Facultad de Ingeniería (<a href="mailto:correo@lasalle.mx">correo@lasalle.mx</a>).
+          <br /><br /><br />
+          Saludos cordiales.
+        </mj-text>
+
+        <mj-text font-size="14px" font-family="Indivisa Text Sans" align="justify">
+          <i>Si usted ya ha realizado la evaluación docente por favor haga caso omiso a este mensaje.</i>
+        </mj-text>
+
+        <mj-button href="https://sgu.ulsa.edu.mx/psulsa/menu.aspx" background-color="#D21034" color="#FFFFFF" font-size="16px" font-weight="bold">
+          Ir al Portal de Servicios
+        </mj-button>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
+    <mj-include path="footer.mjml" />
+  </mj-body>
+</mjml>
