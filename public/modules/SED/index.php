@@ -77,20 +77,28 @@ get_header("Seguimiento de Evaluación Docente");
             </ul>
         </div>
         <br>
-        <div class="row justify-content-end">
-            <div class="col-10">
-                <label for="programType">Seleccionar Tipo de Programa:</label>
-                <select id="programType" class="form-control">
-                    <option value="">Todos</option>
-                    <option value="getMasters">Maestría</option>
-                    <option value="getSpecialty">Especialidad</option>
-                </select>
-            </div>
+        <div class="row align-items-center">
+            <div class="col-12 row">
+                <div class="form-box col-10" style="margin-bottom: 0;">
+                    <div class="form-group row">
+                        <label for="programType" class="col-md-4 col-form-label">Seleccionar Tipo de Programa:</label>
+                        <div class="col-md-7 ml-2 datalist">
+                            <input type="text" id="programType" class="datalist-input w-100" placeholder="Seleccionar" readonly>
+                            <i class="fas fa-search icono filter"></i>
+                            <ul style="display: none;">
+                                <li value="">Todos</li >
+                                <li value="getMasters">Maestría</li>
+                                <li value="getSpecialty">Especialidad</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="col-2">
-                <a href="load_excel.php">
-                    <button type="button" class="btn btn-outline-primary h-100 w-100">Cargar Excel</button>
-                </a>
+                <div class="col-2">
+                    <a href="load_excel.php">
+                        <button type="button" class="btn btn-outline-primary w-100">Cargar Excel</button>
+                    </a>
+                </div>
             </div>
 
             <div id="filterArea" class="col-12" style="display:none;">
