@@ -115,7 +115,7 @@ get_header("Seguimiento de Evaluación Docente");
                     if (empty($studentsDB = getStudents())) {
                         echo '<tr><td colspan="5">No hay alumnos registrados.</td></tr>';
                     } else {
-                      foreach ($studentsDB as $student): ?>
+                        foreach ($studentsDB as $student): ?>
                         <tr data-carrer="<?= $student->getProgram() ?>">
                             <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
                             <td><?= htmlspecialchars($student->getUlsaId()) ?></td>
@@ -125,12 +125,12 @@ get_header("Seguimiento de Evaluación Docente");
                                 <div class="d-flex gap-2">
                                     <?php
                     $btnClass = $student->getSed() ? 'btn-success' : 'btn-danger';
-    ?>
+                            ?>
                                     <button class="btn <?= $btnClass ?> btn-sm text-white changeSED border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
                                         <?= $student->getSed()
-            ? '<i class="fas fa-check-square fa-2x"></i>'
-            : '<i class="fas fa-minus-square fa-2x"></i>'
-    ?>
+                                    ? '<i class="fas fa-check-square fa-2x"></i>'
+                                    : '<i class="fas fa-minus-square fa-2x"></i>'
+                            ?>
                                     </button>
                                     <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
                                         <i class="fas fa-paper-plane fa-2x"></i>
@@ -139,7 +139,7 @@ get_header("Seguimiento de Evaluación Docente");
                             </td>
                         </tr>
                     <?php endforeach;
-            } ?>
+                    } ?>
             </tbody>
         </table>
 
