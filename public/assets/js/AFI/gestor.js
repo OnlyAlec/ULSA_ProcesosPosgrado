@@ -26,29 +26,32 @@ $(function () {
                     // @ts-ignore
                     response.data.forEach((student) => {
                         let row = `<tr>
-                                <td>${student.ulsaID}</td>
+                                <th scope='row'>${student.ulsaID}</th>
                                 <td>${student.firstName} ${student.lastName}</td>
                                 <td>${student.carrer}</td>
                                 <td>${student.email}</td>
-                                <td class="row">
-                                    <button class="col btn ??? btn-sm text-white statusAFI" data-ulsaID=${student.ulsaID}>
-                                        ###
-                                    </button>
-                                    ~~~
+                                <td>
+                                    <div class="d-flex" style="gap: 8px;">
+                                        <button class="btn ??? btn-sm text-white border-0 flex-fill statusAFI" data-ulsaID="${student.ulsaID}">
+                                            ###
+                                        </button>
+                                        ~~~
+                                    </div>
+                                </td>
                             </tr>`;
-                        const afiStatusBtn = student.afi
-                            ? '<i class="fas fa-minus-square"></i>'
-                            : '<i class="fas fa-check-square"></i>';
-                        const afiStatusColor = student.afi ? "btn-danger" : "btn-success";
+                        const afiStatusStyle = student.afi ? "btn-danger" : "btn-success";
+                        const afiStatusIcon = student.afi
+                            ? `<i class="fas fa-minus-square fa-lg"></i>`
+                            : `<i class="fas fa-check-square fa-lg"></i>`;
                         if (!student.afi)
                             row = row.replace(
                                 "~~~",
-                                `<button class="col btn btn-info btn-sm text-white sendEmail" data-ulsaID=${student.ulsaID}><i class= "fas fa-paper-plane"></i></button>`
+                                `<button class="btn btn-info btn-sm text-white border-0 flex-fill sendEmail" data-email="${student.email}"><i class="fas fa-paper-plane"></i>`
                             );
                         else row = row.replace("~~~", "");
 
-                        row = row.replace("###", afiStatusBtn);
-                        row = row.replace("???", afiStatusColor);
+                        row = row.replace("???", afiStatusStyle);
+                        row = row.replace("###", afiStatusIcon);
                         tableBody.append(row);
                     });
                     setupActions();
@@ -58,26 +61,16 @@ $(function () {
                     );
                 }
                 tableContainer.show();
+                setupDatasets();
             },
             error: function (xhr) {
-                const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+                const errorMsg = "Error al procesar la solicitud";
                 displayMessage(divError, errorMsg, "error");
             },
             complete: function () {
                 button.prop("disabled", false);
             },
         });
-    });
-
-    $("#selectMasterConfirm, #selectSpecialtyConfirm").on("change", function () {
-        let selectedOption = String($(this).val());
-        selectedOption?.toUpperCase();
-        if (this.id === "selectMasterConfirm") {
-            $("#selectSpecialtyConfirm").val("all");
-        } else {
-            $("#selectMasterConfirm").val("all");
-        }
-        filterTableByCarrer(selectedOption, "tableStudentsConfirm");
     });
 
     $("#onlyMissing").on("click", function () {
@@ -114,6 +107,17 @@ $(function () {
                 '<tr><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
             );
     });
+    $("#removeFilter").on("click", function () {
+        const tableContainer = $("#tableStudentsConfirm");
+        const tableBody = tableContainer.find("tbody");
+
+        tableBody.find("tr").show();
+
+        if (tableBody.find("tr:visible").length == 0)
+            tableBody.append(
+                '<tr><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
+            );
+    });
 });
 
 function setupActions() {
@@ -138,9 +142,10 @@ function setupActions() {
                     }
                     const newStatus = response.data.newStatus;
                     const newIcon = newStatus
-                        ? '<i class="fas fa-minus-square"></i>'
-                        : '<i class="fas fa-check-square"></i>';
+                        ? `<i class="fas fa-minus-square fa-lg"></i>`
+                        : `<i class="fas fa-check-square fa-lg"></i>`;
                     const newColor = newStatus ? "btn-danger" : "btn-success";
+
                     button.html(newIcon);
                     button.removeClass("btn-success btn-danger");
                     button.addClass(newColor);
@@ -150,12 +155,12 @@ function setupActions() {
                         button
                             .parent()
                             .append(
-                                `<button class="col btn btn-info btn-sm text-white sendEmail" data-ulsaid=${ulsaID}><i class= "fas fa-paper-plane"></i></button>`
+                                `<button class="btn btn-info btn-sm text-white border-0 flex-fill sendEmail" data-email=${response.data.email}><i class= "fas fa-paper-plane"></i></button>`
                             );
                     setupActions();
                 },
                 error: function (xhr) {
-                    const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+                    const errorMsg = "Error al procesar la solicitud";
                     displayMessage(divError, errorMsg, "error");
                 },
                 complete: function () {
@@ -201,7 +206,7 @@ function setupActions() {
                     });
                 },
                 error: function (xhr) {
-                    const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+                    const errorMsg = "Error al procesar la solicitud";
                     displayMessage(divError, errorMsg, "error");
                 },
                 complete: function () {

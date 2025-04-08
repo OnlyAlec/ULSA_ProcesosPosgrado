@@ -39,7 +39,7 @@ $("#programType").on("change", function () {
             }
         },
         error: function (xhr) {
-            const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+            const errorMsg = "Error al procesar la solicitud";
             displayMessage($(".sectionsAFI"), errorMsg, "error");
         },
     });
@@ -153,7 +153,7 @@ $("#confirmChanges").on("click", function () {
             }
         },
         error: function (xhr) {
-            const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+            const errorMsg = "Error al procesar la solicitud";
             displayMessage($(".sectionsAFI"), errorMsg, "error");
         },
     });
@@ -183,7 +183,7 @@ $(".changeSED").on("click", function () {
             }
         },
         error: function (xhr) {
-            const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+            const errorMsg = "Error al procesar la solicitud";
             displayMessage($(".sectionsAFI"), errorMsg, "error");
         },
     });
@@ -266,7 +266,7 @@ $("#generateReport").on("click", function () {
             window.open(fileUrl, "_blank");
         },
         error: function (xhr) {
-            const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+            const errorMsg = "Error al procesar la solicitud";
             displayMessage($(".sectionsSED"), errorMsg, "error");
         },
     });

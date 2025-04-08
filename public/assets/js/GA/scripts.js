@@ -1,3 +1,4 @@
+// !FIXME: Use non deprecated functions
 $(document).ready(function () {
     $("form").submit(function (e) {
         e.preventDefault();
@@ -19,7 +20,7 @@ $(document).ready(function () {
                 console.log(response);
             },
             error: function (xhr) {
-                const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+                const errorMsg = "Error al procesar la solicitud";
                 displayMessage(form, errorMsg, "error");
             },
             complete: function () {
@@ -58,7 +59,7 @@ $(document).ready(function () {
                 }
             },
             error: function (xhr) {
-                const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+                const errorMsg = "Error al procesar la solicitud";
                 displayMessage(divError, errorMsg, "error");
             },
             complete: function () {

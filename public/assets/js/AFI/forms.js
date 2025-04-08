@@ -29,12 +29,12 @@ $(function () {
                     return;
                 }
 
-                displayMessage(form, "Archivo procesado correctamente");
+                displayMessage($(".subSectionAFI:visible"), "Archivo procesado correctamente");
                 if (response.data && response.data.students && response.data.students.length > 0) {
                     // @ts-ignore
                     response.data.students.forEach((student) => {
                         const row = `<tr>
-                                <td>${student.ulsaID}</td>
+                                <th scope='row'>${student.ulsaID}</th>
                                 <td>${student.firstName} ${student.lastName}</td>
                                 <td>${student.carrer}</td>
                                 <td>${student.email}</td>
@@ -58,25 +58,16 @@ $(function () {
                         '<tr><td colspan="4" class="text-center">No se encontraron alumnos faltantes</td></tr>'
                     );
                 tableContainer.show();
+                setupDatasets();
             },
             error: function (xhr) {
-                const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+                const errorMsg = "Error al procesar la solicitud";
                 displayMessage(form, errorMsg, "error");
             },
             complete: function () {
                 form.find("button").prop("disabled", false);
             },
         });
-    });
-
-    $("#selectMaster, #selectSpecialty").on("change", function () {
-        const selectedOption = String($(this).val())?.toUpperCase();
-        if (this.id === "selectMaster") {
-            $("#selectSpecialty").val("all");
-        } else {
-            $("#selectMaster").val("all");
-        }
-        filterTableByCarrer(selectedOption, "tableStudents");
     });
 });
 

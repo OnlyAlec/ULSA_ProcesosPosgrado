@@ -5,27 +5,41 @@ require_once INCLUDES_DIR . '/utilities/mailer.php';
 
 function showStudentsAFIByStatus($status)
 {
-    $studentsDB = getStudents();
+    if (empty($studentsDB = getStudents())) {
+        return [];
+    }
     $filteredStudents = array_filter($studentsDB, fn ($student) => $status == 'missing' ? !$student->getAfi() : $student->getAfi());
     return array_values(array_map(fn ($student) => $student->getJSON(), $filteredStudents));
 }
 
 function changeStatusAFI($ulsaID)
 {
-    $student = getStudentByUlsaID($ulsaID);
-    $newStatus = !$student->getAfi();
-
-    if (updateStudentFieldBoolean($student->getUlsaId(), "afi", $newStatus) == 0) {
-        throw new RuntimeException("Error updating AFI status");
+    if (empty($student = getStudentByUlsaID($ulsaID))) {
+        return [];
     }
 
+    $newStatus = !$student->getAfi();
+    if (!updateStudentFieldBoolean($student->getUlsaId(), "afi", $newStatus)) {
+        return ["newStatus" => !$newStatus];
+    }
     return ["newStatus" => $newStatus];
 }
 
 function sendEmailRemainder(Student $student)
 {
+    if (empty($student)) {
+        return [];
+    }
+
     $mailer = new Mailer($student, "¡No dejes pasar estas fechas importantes!", "remainderAFI");
-    $mailer->setUrl(MODULES_DIR . "/AFI/confirmation.php");
-    $mailer->constructEmail();
-    return  $mailer->send();
+    $mailer->setNeedToken(true);
+    $mailer->setRedirection(MODULES_DIR . "/AFI/confirmation.php");
+
+    $data = [
+        "title" => "Aviso de Fechas Importantes",
+        "program" => ucfirst($student->getProgram()),
+    ];
+
+    $mailer->constructEmail($data);
+    return $mailer->send();
 }

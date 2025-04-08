@@ -18,10 +18,8 @@ function getDatabaseConnection()
                 $_ENV['DB_USER'],
                 $_ENV['DB_PWD']
             );
-        } catch (PDOException $e) {
-            echo "Error de conexión! ";
-            print_r($e->getMessage());
-            exit();
+        } catch (\PDOException $e) {
+            throw new \RuntimeException("Error in connection:". $e->getMessage());
         }
     }
     return $connection;
@@ -67,13 +65,19 @@ function getStudents()
             continue;
         }
     }
-    return $studentsDB;
+
+    if (count($studentsDB) > 0) {
+        return $studentsDB;
+    }
+    ErrorList::add("No students found");
+    return [];
 }
 
 function getStudentByUlsaID($ID)
 {
-    $db = getDatabaseConnection();
-    $query = "SELECT s.id,
+    try {
+        $db = getDatabaseConnection();
+        $query = "SELECT s.id,
                 LOWER(n.last_name) AS last_name,
                 LOWER(n.first_name) AS first_name,
                 s.ulsa_id,
@@ -85,17 +89,16 @@ function getStudentByUlsaID($ID)
               JOIN name n ON s.name_id = n.id
               JOIN program p ON s.program_id = p.id
               WHERE s.ulsa_id = :ulsa_id";
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(':ulsa_id', $ID);
-    $stmt->execute();
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':ulsa_id', $ID);
+        $stmt->execute();
 
-    $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($res === false) {
+            ErrorList::add("No student found with ID $ID");
+            return false;
+        }
 
-    if ($res === false) {
-        return null;
-    }
-
-    try {
         $student = new Student(
             $res['first_name'],
             $res['last_name'],
@@ -107,16 +110,19 @@ function getStudentByUlsaID($ID)
         $student->setSed($res['sed']);
         $student->setAfi($res['afi']);
         return $student;
-    } catch (InvalidArgumentException $e) {
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting student by Ulsa ID:". $e->getMessage());
+    } catch (\InvalidArgumentException $e) {
         ErrorList::add($e->getMessage());
-        return null;
+        return false;
     }
 }
 
 function getStudentByID($ID)
 {
-    $db = getDatabaseConnection();
-    $query = "SELECT s.id,
+    try {
+        $db = getDatabaseConnection();
+        $query = "SELECT s.id,
                 LOWER(n.last_name) AS last_name,
                 LOWER(n.first_name) AS first_name,
                 s.ulsa_id,
@@ -128,17 +134,15 @@ function getStudentByID($ID)
               JOIN name n ON s.name_id = n.id
               JOIN program p ON s.program_id = p.id
               WHERE s.id = :ID";
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(':ID', $ID);
-    $stmt->execute();
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':ID', $ID);
+        $stmt->execute();
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($res === false) {
+            return null;
+        }
 
-    if ($res === false) {
-        return null;
-    }
-
-    try {
         $student = new Student(
             $res['first_name'],
             $res['last_name'],
@@ -150,12 +154,15 @@ function getStudentByID($ID)
         $student->setSed($res['sed']);
         $student->setAfi($res['afi']);
         return $student;
-    } catch (InvalidArgumentException $e) {
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting student by ID:" . $e->getMessage());
+    } catch (\InvalidArgumentException $e) {
         ErrorList::add($e->getMessage());
         return null;
     }
 }
 
+// !FIXME: Catch errors
 function getMastersPrograms(): array
 {
     $programsM = [];
@@ -171,6 +178,7 @@ function getMastersPrograms(): array
     return $programsM;
 }
 
+// !FIXME: Catch errors
 function getSpecialtyPrograms(): array
 {
     $programsS = [];
@@ -186,6 +194,7 @@ function getSpecialtyPrograms(): array
     return $programsS;
 }
 
+// !FIXME: Catch errors
 /**
  * @return Program[]
  */
@@ -204,6 +213,7 @@ function getPrograms(): array
     return $programDB;
 }
 
+// !FIXME: Catch errors
 function getProgramByID(int $id): Program
 {
     $db = getDatabaseConnection();
@@ -217,6 +227,7 @@ function getProgramByID(int $id): Program
     return new Program($row['id'], $row['career']);
 }
 
+// !FIXME: Catch errors
 function getProgramByName(string $name): Program
 {
     $db = getDatabaseConnection();
@@ -230,6 +241,7 @@ function getProgramByName(string $name): Program
     return new Program($row['id'], $row['career']);
 }
 
+// !FIXME: Catch errors
 function getConfig(string $type)
 {
     $db = getDatabaseConnection();
@@ -257,10 +269,8 @@ function getToken(int $studentID)
         $res = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $res["token"] ?? "";
-    } catch (PDOException $e) {
-        echo "Error de conexión! ";
-        print_r($e->getMessage());
-        exit();
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting token by student ID: {$e->getMessage()}");
     }
 }
 
@@ -280,9 +290,7 @@ function getStudentIDByToken(string $token)
 
         return $res["student_id"] ?? "";
     } catch (PDOException $e) {
-        echo "Error de conexión! ";
-        print_r($e->getMessage());
-        exit();
+        throw new \RuntimeException("Error getting student by token: {$e->getMessage()}");
     }
 }
 
@@ -298,9 +306,12 @@ function insertToken(int $studentID, string $token)
         $stmt->bindParam(":token", $token);
         $stmt->execute();
 
-        return $stmt->rowCount();
-    } catch (PDOException $e) {
-        throw new RuntimeException($e->getMessage());
+        if ($stmt->rowCount() > 0) {
+            return true;
+        }
+        return false;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error create token: {$e->getMessage()}");
     }
 }
 
@@ -318,14 +329,14 @@ function updateStudentFieldBoolean($id, $field, $value)
         $stmt = $db->prepare($query);
         $stmt->bindParam(':value', $value);
         $stmt->bindParam(':ulsa_id', $id);
-
         $stmt->execute();
 
-        return $stmt->rowCount();
-    } catch (PDOException $e) {
-        echo "Error de conexión! ";
-        print_r($e->getMessage());
-        exit();
+        if ($stmt->rowCount() > 0) {
+            return true;
+        }
+        return false;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error update student bool field: {$e->getMessage()}");
     }
 }
 
@@ -351,13 +362,12 @@ function updateConfig(string $type, $value)
         $stmt->bindParam(':type', $type);
         $stmt->execute();
 
-        return $stmt->rowCount();
-    } catch (PDOException $e) {
-        error_log("Database error in updateConfig: " . $e->getMessage());
-        throw new Exception("Failed to update configuration");
-    } catch (Exception $e) {
-        error_log($e->getMessage());
-        throw $e;
+        if ($stmt->rowCount() > 0) {
+            return true;
+        }
+        return false;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error update config: {$e->getMessage()}");
     }
 }
 
@@ -373,10 +383,13 @@ function updateToken(int $studentID, string $token)
         $stmt = $db->prepare($query);
         $stmt->bindParam(':token', $token);
         $stmt->bindParam(':studentID', $studentID);
-
         $stmt->execute();
-        return $stmt->rowCount();
-    } catch (PDOException $e) {
-        throw new RuntimeException($e->getMessage());
+
+        if ($stmt->rowCount() > 0) {
+            return true;
+        }
+        return false;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error update token: {$e->getMessage()}");
     }
 }

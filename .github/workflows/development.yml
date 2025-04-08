@@ -61,3 +61,28 @@ jobs:
                   -p ${{ secrets.PORT }} \
                   ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
                     "mv /tmp/.env-backup ${{ secrets.SSH_PATH }}/.env"
+    node:
+        runs-on: ubuntu-latest
+        environment: Credentials Dev
+        steps:
+            - name: Checkout código
+              uses: actions/checkout@v4
+
+            - name: Save SSH Private Key
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+                  chmod 600 ~/.ssh/deploy_key
+              env:
+                  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+            - name: Setup Node.js in remote
+              run: |
+                  ssh -i ~/.ssh/deploy_key \
+                  -o StrictHostKeyChecking=no \
+                  -p ${{ secrets.PORT }} \
+                  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+                    "cd ${{ secrets.SSH_PATH }} && npm install"
+
+            - name: Install dependencies
+              run: npm install

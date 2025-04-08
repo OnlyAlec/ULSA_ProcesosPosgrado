@@ -5,7 +5,6 @@ require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
 require_once INCLUDES_DIR . "/models/student.php";
 
 ob_start();
-$studentsDB = getStudents();
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -113,8 +112,10 @@ get_header("Seguimiento de Evaluación Docente");
             </thead>
             <tbody id="studentsTable">
                 <?php
-                    $studentsDB = getStudents();
-foreach ($studentsDB as $student): ?>
+                    if (empty($studentsDB = getStudents())) {
+                        echo '<tr><td colspan="5">No hay alumnos registrados.</td></tr>';
+                    } else {
+                      foreach ($studentsDB as $student): ?>
                         <tr data-carrer="<?= $student->getProgram() ?>">
                             <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
                             <td><?= htmlspecialchars($student->getUlsaId()) ?></td>
@@ -138,17 +139,19 @@ foreach ($studentsDB as $student): ?>
                             </td>
                         </tr>
                     <?php endforeach;
-?>
+            } ?>
             </tbody>
         </table>
 
         <div class="d-flex justify-content-between">
             <button id="confirmChanges" class="btn btn-success w-50" disabled>Confirmar Cambios</button>
-            <button id="generateReport" class="btn btn-primary" data-filename="reporte_evaluaciones">Generar Reporte</button>
+            <button id="generateReport" class="btn btn-primary" data-filename="reporte_evaluaciones">Generar
+                Reporte</button>
         </div>
 
         <div id="selectedCountContainer">
-            <p style="margin-top:15px; font-size: 20px; font-weight: bold;">Alumnos seleccionados: <span id="selectedCount">0</span></p>
+            <p style="margin-top:15px; font-size: 20px; font-weight: bold;">Alumnos seleccionados: <span
+                    id="selectedCount">0</span></p>
         </div>
     </main>
 
