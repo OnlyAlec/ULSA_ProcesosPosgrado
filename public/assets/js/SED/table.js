@@ -23,7 +23,7 @@ $(function () {
             const selectedAction = $(this).data("value");
 
             $input.val(selectedText).data("value", selectedAction);
-            $input.trigger("input");  // Dispara el evento para detectar cambios
+            $input.trigger("input"); // Dispara el evento para detectar cambios
             $d.find("ul").hide();
             // Cambia el ícono a “limpiar” (fa-times)
             $d.find(".filter").removeClass("fa-search").addClass("fa-times");
@@ -46,12 +46,16 @@ $(function () {
     }
 
     // Inicializar datalists para programType y programArea
-    initDatalist($(".datalist").filter(function () {
-        return $(this).find("#programType").length > 0;
-    }));
-    initDatalist($(".datalist").filter(function () {
-        return $(this).find("#programArea").length > 0;
-    }));
+    initDatalist(
+        $(".datalist").filter(function () {
+            return $(this).find("#programType").length > 0;
+        })
+    );
+    initDatalist(
+        $(".datalist").filter(function () {
+            return $(this).find("#programArea").length > 0;
+        })
+    );
 
     // Evento para el filtro del primer componente (tipo de programa)
     $("#programType").on("input", function () {
