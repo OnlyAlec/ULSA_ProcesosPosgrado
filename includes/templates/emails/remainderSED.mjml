@@ -16,16 +16,15 @@
           -- TITLE --
         </mj-text>
       </mj-column>
-    </mj-section>s
+    </mj-section>
 
     <!-- Contenido principal -->
     <mj-section background-color="#DCECF8" border-bottom="3px solid #C2C2C2">
       <mj-column>
-        <mj-text font-size="16px" font-family="Indivisa Text Sans" align="justify">
-          <mj-text>
-            Estimado alumno <b>-- NAME --</b>,
-          </mj-text>
-          <br /><br /><br />
+        <mj-text font-size="18px" font-family="Indivisa Display Sans" font-style="italic" font-weight="bold" padding="30px 50px" padding-bottom="0px">
+          Estimado Alumno -- NAME --,
+        </mj-text>
+        <mj-text font-size="16px" font-family="Indivisa Text Sans" align="justify" padding="30px 50px" padding-bottom="0px">
           <b>Te recordamos que debes realizar la evaluación de docentes correspondiente.</b> Considera que no podrás hacerla después de la fecha establecida <b>-- FECHA --</b>.
           <br /><br />
           Recuerda que para hacerla deberás ingresar a tu Portal de Servicios, después seleccionar la pestaña EVALUACIÓN DOCENTE.
@@ -35,7 +34,7 @@
           Saludos cordiales.
         </mj-text>
 
-        <mj-text font-size="14px" font-family="Indivisa Text Sans" align="justify">
+        <mj-text font-size="14px" font-family="Indivisa Text Sans" align="justify" padding="30px 50px">
           <i>Si usted ya ha realizado la evaluación docente por favor haga caso omiso a este mensaje.</i>
         </mj-text>
 

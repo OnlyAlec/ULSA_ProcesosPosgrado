@@ -42,10 +42,10 @@ class StudentBase
     public function getJSON()
     {
         return [
-            'firstName' => $this->getName(),
-            'lastName' => $this->getLastName(),
+            'firstName' => ucwords($this->getName()),
+            'lastName' => ucwords($this->getLastName()),
             'ulsaID' => $this->getUlsaId(),
-            'carrer' => $this->getProgram(),
+            'carrer' => capitalizeExcept($this->getProgram(), ["de", "en", "la", "y"]),
             'email' => $this->getEmail()
         ];
     }

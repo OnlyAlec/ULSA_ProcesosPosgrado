@@ -118,9 +118,9 @@ get_header("Seguimiento de Evaluación Docente");
                         foreach ($studentsDB as $student): ?>
                         <tr data-carrer="<?= $student->getProgram() ?>">
                             <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
-                            <td><?= htmlspecialchars($student->getUlsaId()) ?></td>
-                            <td><?= htmlspecialchars($student->getName()) . " " . htmlspecialchars($student->getLastName()) ?></td>
-                            <td><?= htmlspecialchars($student->getEmail()) ?></td>
+                            <td><?= $student->getUlsaId() ?></td>
+                            <td><?= ucwords($student->getName()). " " . ucwords($student->getLastName()) ?></td>
+                            <td><?= $student->getEmail() ?></td>
                             <td>
                                 <div class="d-flex gap-2">
                                     <?php
