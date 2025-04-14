@@ -42,7 +42,32 @@ $(function () {
             } else {
                 $d.find("ul").toggle();
             }
-        });
+        },
+        error: function (xhr) {
+            const errorMsg = "Error al procesar la solicitud";
+            displayMessage($(".sectionsAFI"), errorMsg, "error");
+        },
+    });
+});
+
+$("#programArea").on("change", function () {
+    const selectedOption = $(this).val();
+    const table = $("#studentsTable");
+    const tbody = table.find("tbody");
+    const rows = tbody.find("tr");
+
+    $(".studentCheckbox").prop("checked", false);
+    $("#confirmChanges").prop("disabled", true);
+    $("#selectedCount").text("0");
+    $("#selectAll").prop("checked", false);
+
+    let selectedType = $("#programType").val();
+    if (selectedType === "getMasters") {
+        selectedType = "MAESTRÍA";
+    } else if (selectedType === "getSpecialty") {
+        selectedType = "ESPECIALIDAD";
+    } else {
+        selectedType = "";
     }
 
     // Inicializar datalists para programType y programArea
@@ -216,7 +241,7 @@ $("#confirmChanges").on("click", function () {
             }
         },
         error: function (xhr) {
-            const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+            const errorMsg = "Error al procesar la solicitud";
             displayMessage($(".sectionsAFI"), errorMsg, "error");
         },
     });
@@ -246,7 +271,7 @@ $(".changeSED").on("click", function () {
             }
         },
         error: function (xhr) {
-            const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+            const errorMsg = "Error al procesar la solicitud";
             displayMessage($(".sectionsAFI"), errorMsg, "error");
         },
     });
@@ -329,7 +354,7 @@ $("#generateReport").on("click", function () {
             window.open(fileUrl, "_blank");
         },
         error: function (xhr) {
-            const errorMsg = xhr.responseText || "Error al procesar la solicitud";
+            const errorMsg = "Error al procesar la solicitud";
             displayMessage($(".sectionsSED"), errorMsg, "error");
         },
     });

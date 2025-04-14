@@ -248,11 +248,9 @@ get_header("Avisos de Fechas Importantes");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                                foreach (getMastersPrograms() as $master) {
-                                    $master = ucfirst(strtolower($master->getName()));
-                                    echo "<option value='$master'>$master</option>";
-                                }
-?>
+                    foreach (getMastersPrograms() as $master) {
+                        echo "<li>$master->getMaster()</li>";
+                    } ?>
                         </ul>
                     </div>
                 </div>
@@ -265,8 +263,7 @@ get_header("Avisos de Fechas Importantes");
                         <ul style="display: none;">
                             <?php
                     foreach (getSpecialtyPrograms() as $special) {
-                        $special = ucfirst(strtolower($special->getName()));
-                        echo "<option value='$special'>$special</option>";
+                        echo "<li>$special->getProgram()</li>";
                     } ?>
                         </ul>
                     </div>
@@ -314,8 +311,7 @@ get_header("Avisos de Fechas Importantes");
                         <ul style="display: none;">
                             <?php
                     foreach (getMastersPrograms() as $master) {
-                        $master = ucfirst(strtolower($master->getName()));
-                        echo "<option value='$master'>$master</option>";
+                        echo "<li>$master->getMaster();</li>";
                     } ?>
                         </ul>
                     </div>
@@ -329,8 +325,7 @@ get_header("Avisos de Fechas Importantes");
                         <ul style="display: none;">
                             <?php
                     foreach (getSpecialtyPrograms() as $special) {
-                        $special = ucfirst(strtolower($special->getName()));
-                        echo "<option value='$special'>$special</option>";
+                        echo "<li>$special->getProgram()</li>";
                     } ?>
                         </ul>
                     </div>

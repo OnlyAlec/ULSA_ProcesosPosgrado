@@ -8,28 +8,38 @@
   <mj-body>
     <mj-include path="header.mjml" />
 
-    <!-- Content -->
-    <mj-section background-color="#f0f0f0">
+    <!-- Título principal -->
+    <mj-section background-color="#001D68" padding="2px">
       <mj-column>
-        <mj-text font-size="20px" font-family="Indivisa Display Sans" font-style="italic" font-weight="900" padding="30px 50px">
-          Hola -- NAME --,
+        <mj-text align="center" font-size="20px" font-weight="bold" font-family="Indivisa Display Sans" font-style="italic" color="#FFFFFF">
+          -- TITLE --
         </mj-text>
-        <mj-text font-size="16px" font-family="Indivisa Text Sans" padding="0px 50px">
-          Espero que estés disfrutando cada momento de este viaje académico y que cada día te traiga nuevas oportunidades. Quería compartir contigo un espacio especial que preparamos justamente para ayudarte a tener todo bajo control y aprovechar al máximo tu cuatrimestre.
+      </mj-column>
+    </mj-section>
+
+
+    <!-- Content -->
+    <mj-section background-color="#DCECF8" border-bottom="3px solid #C2C2C2">
+      <mj-column>
+        <mj-text font-size="18px" font-family="Indivisa Display Sans" font-style="italic" font-weight="bold" padding="30px 50px">
+          Estimado Alumno -- NAME --,
         </mj-text>
-        <mj-text font-size="16px" font-family="Indivisa Text Sans" padding="10px 50px">
-          📅 <b> Es súper importante que confirmes el aviso para no perderte ni un solo detalle.</b>
-          Un simple clic y estarás al tanto de todo lo que se viene. Imagina lo fácil que será tener todo controlado y sin sorpresas de último minuto.
+        <mj-text font-size="16px" font-family="Indivisa Text Sans" align="justify" padding="10px 50px">
+          <b>Te recordamos que es necesario confirmar el aviso de fechas importante.</b> Recuerda que tienes como fecha límite para hacerlo el día <b>-- FECHA --.</b>
+          <br /><br />
+          Por favor, ingresa al siguiente enlace para confirmar de enterado. Recuerda que es muy importante que completes este paso para no perderte de ningún trámite, aviso o fecha relevante del cuatrimestre.
+          <br /><br />
+          Para cualquier duda comunícate con la Coordinación de Posgrados de la Facultada de Ingeniería (<a href="mailto:correo@lasalle.mx">correo@lasalle.mx</a>).
+          <br /><br /><br />
+          Saludos cordiales.
         </mj-text>
-        <mj-button href="-- URL --" font-size="20px" font-family="Indivisa Display Sans" font-weight="900" background-color="#D21034" color="white" width="400px" padding="30px 50px">
-          Aviso de Fechas Importantes
+        <mj-text font-size="14px" font-family="Indivisa Text Sans" align="justify" padding="30px 50px">
+          <i>Si usted ya ha confirmado el aviso de fechas importantes por favor haga caso omiso a este mensaje.</i>
+        </mj-text>
+
+        <mj-button href="-- URL --" background-color="#D21034" color="#FFFFFF" font-size="16px" font-weight="bold">
+          Confirmar aviso de fechas
         </mj-button>
-        <mj-text font-size="16px" font-family="Indivisa Text Sans" padding="10px 50px">
-          ¿Sabías que mantener todos tus compromisos organizados puede marcar la diferencia? ¡Cuéntame qué estrategias utilizas para planificar tus días! 🌟
-        </mj-text>
-        <mj-text font-size="16px" font-family="Indivisa Text Sans" padding="10px 50px">
-          Confío en que, con tu compromiso, este cuatrimestre será aún más exitoso. <b>¡Anímate y confirma ya!</b>
-        </mj-text>
       </mj-column>
     </mj-section>
 

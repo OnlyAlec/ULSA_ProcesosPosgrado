@@ -34,7 +34,31 @@ function changeStatusSEDGroup($studentIDs)
 function sendEmailRemainder(Student $student)
 {
     $mailer = new Mailer($student, "¡No olvides contestar la Evaluación Docente!", "remainderSED");
-    $mailer->constructEmail();
+    $dates = [getConfig("dateFirstAFI"), getConfig("dateSecondAFI"), getConfig("dateThirdAFI")];
+    $dateNow = date('d/m/Y');
+    $currentDate = null;
+
+    foreach ($dates as $date) {
+        $dateObj = DateTime::createFromFormat('d/m/Y', $date);
+        if ($dateObj && $dateNow <= $date) {
+            $currentDate = $dateObj;
+            break;
+        }
+    }
+
+    if (!$currentDate) {
+        $currentDate = DateTime::createFromFormat('d/m/Y', end($dates));
+    }
+
+    setlocale(LC_TIME, 'es_ES.UTF-8');
+    $formattedDate = $currentDate->format('d \d\e F \d\e\l Y');
+
+    $data = [
+        "title" => "Aviso Importante Evaluación Docente",
+        "fecha" => $formattedDate,
+    ];
+
+    $mailer->constructEmail($data);
     return  $mailer->send();
 }
 

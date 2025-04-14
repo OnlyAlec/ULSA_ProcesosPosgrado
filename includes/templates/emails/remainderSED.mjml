@@ -1,38 +1,50 @@
 <mjml>
   <mj-head>
     <mj-preview>
-      ¡-- NAME --, dale un vistazo a lo que se viene! 🚀✨
+      Recordatorio: Realiza tu Evaluación Docente desde el Portal de Servicios
     </mj-preview>
   </mj-head>
 
   <mj-body>
-    <mj-include path="..\..\..\..\includes\templates\emails\header.mjml" />
+    <!-- Header -->
+    <mj-include path="header.mjml" />
 
-    <!-- Content -->
-    <mj-section background-color="#f0f0f0">
+    <!-- Título principal -->
+    <mj-section background-color="#001D68" padding="2px">
       <mj-column>
-        <mj-text font-size="20px" font-family="Indivisa Display Sans" font-style="italic" font-weight="900" padding="30px 50px">
-          Hola -- NAME --,
-        </mj-text>
-        <mj-text font-size="16px" font-family="Indivisa Text Sans" padding="0px 50px">
-          Espero que estés disfrutando cada momento de este viaje académico y que cada día te traiga nuevas oportunidades. Quería compartir contigo un espacio especial que preparamos justamente para ayudarte a tener todo bajo control y aprovechar al máximo tu cuatrimestre.
-        </mj-text>
-        <mj-text font-size="16px" font-family="Indivisa Text Sans" padding="10px 50px">
-          📅 <b> Es importante que realices la evaluación docente desde tu Portal de Servicios.</b>
-          Esto nos ayuda a mantener una mejor retroalimentación de nuestros docentes. Por eso requerimos que la realices a la brevedad.
-        </mj-text>
-        <mj-button href="-- URL --" font-size="20px" font-family="Indivisa Display Sans" font-weight="900" background-color="#D21034" color="white" width="400px" padding="30px 50px">
-          Evaluación Docente
-        </mj-button>
-        <mj-text font-size="16px" font-family="Indivisa Text Sans" padding="10px 50px">
-          ¿Sabías que mantener todos tus compromisos organizados puede marcar la diferencia? ¡Cuéntame qué estrategias utilizas para planificar tus días! 🌟
-        </mj-text>
-        <mj-text font-size="16px" font-family="Indivisa Text Sans" padding="10px 50px">
-          Confío en que, con tu compromiso, este cuatrimestre será aún más exitoso. <b>¡Realiza tu evaluación docente para ayudarnos a mejorar nuestro desempeño!</b>
+        <mj-text align="center" font-size="20px" font-weight="bold" font-family="Indivisa Display Sans" font-style="italic" color="#FFFFFF">
+          -- TITLE --
         </mj-text>
       </mj-column>
     </mj-section>
 
-    <mj-include path="..\..\..\..\includes\templates\emails\footer.mjml" />
+    <!-- Contenido principal -->
+    <mj-section background-color="#DCECF8" border-bottom="3px solid #C2C2C2">
+      <mj-column>
+        <mj-text font-size="18px" font-family="Indivisa Display Sans" font-style="italic" font-weight="bold" padding="30px 50px" padding-bottom="0px">
+          Estimado Alumno -- NAME --,
+        </mj-text>
+        <mj-text font-size="16px" font-family="Indivisa Text Sans" align="justify" padding="30px 50px" padding-bottom="0px">
+          <b>Te recordamos que debes realizar la evaluación de docentes correspondiente.</b> Considera que no podrás hacerla después de la fecha establecida <b>-- FECHA --</b>.
+          <br /><br />
+          Recuerda que para hacerla deberás ingresar a tu Portal de Servicios, después seleccionar la pestaña EVALUACIÓN DOCENTE.
+          <br /><br />
+          Es muy importante que completes esta evaluación en tiempo y forma. Para cualquier duda, comunícate con la Coordinación de Posgrados de la Facultad de Ingeniería (<a href="mailto:correo@lasalle.mx">correo@lasalle.mx</a>).
+          <br /><br /><br />
+          Saludos cordiales.
+        </mj-text>
+
+        <mj-text font-size="14px" font-family="Indivisa Text Sans" align="justify" padding="30px 50px">
+          <i>Si usted ya ha realizado la evaluación docente por favor haga caso omiso a este mensaje.</i>
+        </mj-text>
+
+        <mj-button href="https://sgu.ulsa.edu.mx/psulsa/menu.aspx" background-color="#D21034" color="#FFFFFF" font-size="16px" font-weight="bold">
+          Ir al Portal de Servicios
+        </mj-button>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
+    <mj-include path="footer.mjml" />
   </mj-body>
 </mjml>

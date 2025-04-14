@@ -130,23 +130,25 @@ get_header("Seguimiento de Evaluación Docente");
             </thead>
             <tbody id="studentsTable">
                 <?php
-                    $studentsDB = getStudents();
-foreach ($studentsDB as $student): ?>
+                    if (empty($studentsDB = getStudents())) {
+                        echo '<tr><td colspan="5">No hay alumnos registrados.</td></tr>';
+                    } else {
+                        foreach ($studentsDB as $student): ?>
                         <tr data-carrer="<?= $student->getProgram() ?>">
-                            <td class="text-center"><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
-                            <th><?= htmlspecialchars($student->getUlsaId()) ?></th>
-                            <td><?= htmlspecialchars($student->getName()) . " " . htmlspecialchars($student->getLastName()) ?></td>
-                            <td><?= htmlspecialchars($student->getEmail()) ?></td>
+                            <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
+                            <td><?= $student->getUlsaId() ?></td>
+                            <td><?= ucwords($student->getName()). " " . ucwords($student->getLastName()) ?></td>
+                            <td><?= $student->getEmail() ?></td>
                             <td>
                                 <div class="d-flex" style="gap: 8px;">
                                     <?php
                     $btnClass = $student->getSed() ? 'btn-success' : 'btn-danger';
-    ?>
+                            ?>
                                     <button class="btn <?= $btnClass ?> btn-sm text-white changeSED border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
                                         <?= $student->getSed()
-            ? '<i class="fas fa-check-square fa-lg"></i>'
-            : '<i class="fas fa-minus-square fa-lg"></i>'
-    ?>
+                                    ? '<i class="fas fa-check-square fa-2x"></i>'
+                                    : '<i class="fas fa-minus-square fa-2x"></i>'
+                            ?>
                                     </button>
                                     <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
                                         <i class="fas fa-paper-plane fa-lg"></i>
@@ -155,11 +157,12 @@ foreach ($studentsDB as $student): ?>
                             </td>
                         </tr>
                     <?php endforeach;
-?>
+                    } ?>
             </tbody>
         </table>
 
         <div class="d-flex justify-content-between">
+
             <button id="confirmChanges" class="btn btn-outline-success w-50" style="width: 200px;" disabled>
                 <span>Confirmar Cambios</span>
             </button>

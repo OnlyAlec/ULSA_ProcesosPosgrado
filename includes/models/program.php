@@ -34,7 +34,7 @@ class Program
 
     public function getName(): string
     {
-        return $this->name;
+        return ucwords($this->name);
     }
 
     public function setName(string $name): void

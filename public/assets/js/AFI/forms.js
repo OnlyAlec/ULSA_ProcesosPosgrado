@@ -58,6 +58,7 @@ $(function () {
                         '<tr><td colspan="4" class="text-center">No se encontraron alumnos faltantes</td></tr>'
                     );
                 tableContainer.show();
+                setupDatasets();
             },
             error: function (xhr) {
                 const errorMsg = "Error al procesar la solicitud";
@@ -67,20 +68,6 @@ $(function () {
                 form.find("button").prop("disabled", false);
             },
         });
-    });
-
-    $("#selectMaster, #selectSpecialty").on("input", function () {
-        const value = String($(this).val())?.toUpperCase();
-        const icon = $(this).closest(".datalist").find("i");
-
-        value
-            ? icon.removeClass("fa-search").addClass("fa-times")
-            : icon.removeClass("fa-times").addClass("fa-search");
-        const otherSelect = $(this).is("#selectMaster") ? "#selectSpecialty" : "#selectMaster";
-        $(otherSelect).val("");
-        $(otherSelect).closest(".datalist").find("i").removeClass("fa-times").addClass("fa-search");
-
-        filterTableByCarrer(value, "tableStudents");
     });
 });
 

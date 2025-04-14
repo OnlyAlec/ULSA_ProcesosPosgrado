@@ -1,3 +1,4 @@
+// !FIXME: Use non deprecated functions
 $(document).ready(function () {
     $("form").submit(function (e) {
         e.preventDefault();
