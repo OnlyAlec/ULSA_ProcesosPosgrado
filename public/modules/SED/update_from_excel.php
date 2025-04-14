@@ -79,7 +79,7 @@ function loadExcelStudents($filePath, $ulsaIdColumn, $nameColumn, $sedColumn)
             $sedBool = !in_array(strtolower(trim($cellSed)), $falseValues, true);
 
             try {
-                $student = new Student($firstName, $maternalSurname." ".$paternalSurname , $cellUlsaId, carrer: " ", email:"");
+                $student = new Student($firstName, $maternalSurname." ".$paternalSurname, $cellUlsaId, carrer: " ", email:"");
                 $student->setSed($sedBool);
                 $students[] = $student;
             } catch (InvalidArgumentException $e) {
