@@ -138,3 +138,15 @@ function filePathToUrl($filePath)
     }
     return "#";
 }
+
+function capitalizeExcept(string $word, array $exception)
+{
+    $words = explode(' ', $word);
+    $result = [];
+
+    foreach ($words as $w) {
+        $result[] = (!in_array(strtolower($w), $exception)) ? ucfirst(strtolower($w)) : strtolower($w);
+    }
+
+    return implode(' ', $result);
+}
