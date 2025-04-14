@@ -93,15 +93,14 @@ $(function () {
                 $("#programArea").val("").data("value", "");
                 $("#programArea").siblings(".filter").removeClass("fa-times").addClass("fa-search");
 
-                if (selectedOption != "") {
+                if (selectedOption !== "") {
                     $("#filterArea").show();
                 } else {
                     $("#filterArea").hide();
                 }
             },
-            error: function (xhr) {
-                const errorMsg = xhr.responseText || "Error al procesar la solicitud";
-                displayMessage($(".sectionsAFI"), errorMsg, "error");
+            error: function () {
+                displayMessage($(".sectionsAFI"), "Error al procesar la solicitud", "error");
             },
         });
     });

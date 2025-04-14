@@ -88,12 +88,13 @@ get_head("SED");
                     <div class="form-group row">
                         <label for="programType" class="col-md-4 col-form-label">Seleccionar Tipo de Programa:</label>
                         <div class="col-md-7 ml-2 datalist">
-                            <input type="text" id="programType" class="datalist-input w-100" placeholder="Seleccionar" readonly>
+                            <input type="text" id="programType" class="datalist-input w-100" placeholder="Seleccionar"
+                                readonly>
                             <i class="fas fa-search icono filter"></i>
                             <ul style="display: none;">
-                                <li value="">Todos</li >
-                                <li value="getMasters">Maestría</li>
-                                <li value="getSpecialty">Especialidad</li>
+                                <li data-value="">Todos</li>
+                                <li data-value="getMasters">Maestría</li>
+                                <li data-value="getSpecialty">Especialidad</li>
                             </ul>
                         </div>
                     </div>
