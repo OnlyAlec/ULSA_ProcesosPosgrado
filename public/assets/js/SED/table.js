@@ -1,89 +1,148 @@
-$("#programType").on("change", function () {
-    const selectedOption = $(this).val();
-    const table = $("#studentsTable");
-    const tbody = table.find("tbody");
-    const rows = tbody.find("tr");
-    rows.show();
+$(function () {
+    // Función general para manejar el comportamiento de un componente datalist.
+    function initDatalist($container) {
+        // Al hacer clic en el input se muestra/oculta la lista
+        $container.find(".datalist-input").on("click", function (e) {
+            e.stopPropagation();
+            $(this).siblings("ul").toggle();
+        });
 
-    $(".studentCheckbox").prop("checked", false);
-    $("#confirmChanges").prop("disabled", true);
-    $("#selectedCount").text("0");
-    $("#selectAll").prop("checked", false);
-
-    $.ajax({
-        url: "",
-        type: "POST",
-        data: { action: selectedOption },
-        success: function (response) {
-            if (!response.success || !Array.isArray(response.data)) {
-                displayMessage($(".sectionsSED"), "Ocurrio un problema", "error");
-                return;
+        // Al hacer clic fuera se cierra la lista
+        $(document).on("click", function (e) {
+            if (!$(e.target).closest($container).length) {
+                $container.find("ul").hide();
             }
+        });
 
-            $("#programArea").empty();
-            const option = document.createElement("option");
-            option.text = "Seleccione un tipo de programa primero";
-            $("#programArea").append(option);
+        // Seleccionar una opción de la lista
+        $container.find("ul").on("click", "li:not(.not-selectable)", function (e) {
+            e.stopPropagation();
+            const $d = $(this).closest(".datalist");
+            const $input = $d.find(".datalist-input");
+            const selectedText = $(this).text();
+            const selectedAction = $(this).data("value");
 
-            response.data.forEach((element) => {
-                const option = document.createElement("option");
-                option.value = element;
-                option.text = element;
-                $("#programArea").append(option);
-            });
+            $input.val(selectedText).data("value", selectedAction);
+            $input.trigger("input");  // Dispara el evento para detectar cambios
+            $d.find("ul").hide();
+            // Cambia el ícono a “limpiar” (fa-times)
+            $d.find(".filter").removeClass("fa-search").addClass("fa-times");
+        });
 
-            if (selectedOption != "") {
-                $("#filterArea").show();
+        // Funcionalidad del ícono (limpiar o abrir la lista)
+        $container.find(".filter").on("click", function (e) {
+            e.stopPropagation();
+            const $icon = $(this);
+            const $d = $icon.closest(".datalist");
+            const $input = $d.find(".datalist-input");
+            if ($icon.hasClass("fa-times")) {
+                $input.val("").data("value", "");
+                $input.trigger("input");
+                $icon.removeClass("fa-times").addClass("fa-search");
             } else {
-                $("#filterArea").hide();
+                $d.find("ul").toggle();
             }
-        },
-        error: function (xhr) {
-            const errorMsg = xhr.responseText || "Error al procesar la solicitud";
-            displayMessage($(".sectionsAFI"), errorMsg, "error");
-        },
-    });
-});
-
-$("#programArea").on("change", function () {
-    const selectedOption = $(this).val();
-    const table = $("#studentsTable");
-    const tbody = table.find("tbody");
-    const rows = tbody.find("tr");
-
-    $(".studentCheckbox").prop("checked", false);
-    $("#confirmChanges").prop("disabled", true);
-    $("#selectedCount").text("0");
-    $("#selectAll").prop("checked", false);
-
-    let selectedType = $("#programType").val();
-    if (selectedType === "getMasters") {
-        selectedType = "MAESTRÍA";
-    } else if (selectedType === "getSpecialty") {
-        selectedType = "ESPECIALIDAD";
-    } else {
-        selectedType = "";
+        });
     }
 
-    rows.each(function () {
-        const row = $(this);
-        const area = row.data("carrer").toUpperCase();
+    // Inicializar datalists para programType y programArea
+    initDatalist($(".datalist").filter(function () {
+        return $(this).find("#programType").length > 0;
+    }));
+    initDatalist($(".datalist").filter(function () {
+        return $(this).find("#programArea").length > 0;
+    }));
 
-        const type = area.split(" ")[0].toUpperCase();
+    // Evento para el filtro del primer componente (tipo de programa)
+    $("#programType").on("input", function () {
+        const selectedOption = $(this).data("value") || "";
+        // Reiniciar la tabla
+        const table = $("#studentsTable");
+        const tbody = table.find("tbody");
+        tbody.find("tr").show();
+        $(".studentCheckbox").prop("checked", false);
+        $("#confirmChanges").prop("disabled", true);
+        $("#selectedCount").text("0");
+        $("#selectAll").prop("checked", false);
 
-        if (selectedOption === "" || selectedOption === "Seleccione un tipo de programa primero") {
-            if (selectedType != "" && type === selectedType.toUpperCase()) {
-                row.show();
-            } else {
-                row.hide();
-            }
+        $.ajax({
+            url: "", // Actualiza con la ruta de tu script PHP
+            type: "POST",
+            data: { action: selectedOption },
+            dataType: "json",
+            success: function (response) {
+                if (!response.success || !Array.isArray(response.data)) {
+                    displayMessage($(".sectionsSED"), "Ocurrió un problema", "error");
+                    return;
+                }
+
+                // Actualizar el componente datalist de programArea
+                const $datalistArea = $("#programArea").closest(".datalist");
+                const $ulArea = $datalistArea.find("ul");
+                $ulArea.empty();
+                // Primer elemento como placeholder
+                $ulArea.append('<li data-value="">Seleccione un área</li>');
+                response.data.forEach((element) => {
+                    $ulArea.append(`<li data-value="${element}">${element}</li>`);
+                });
+                // Limpiar el input y volver a la condición inicial
+                $("#programArea").val("").data("value", "");
+                $("#programArea").siblings(".filter").removeClass("fa-times").addClass("fa-search");
+
+                if (selectedOption !== "") {
+                    $("#filterArea").show();
+                } else {
+                    $("#filterArea").hide();
+                }
+            },
+            error: function () {
+                displayMessage($(".sectionsAFI"), "Error al procesar la solicitud", "error");
+            },
+        });
+    });
+
+    // Evento para el filtro del segundo componente (área) para filtrar la tabla
+    $("#programArea").on("input", function () {
+        const selectedOption = $(this).data("value") || "";
+        const table = $("#studentsTable");
+        const tbody = table.find("tbody");
+        tbody.find("tr").show();
+
+        $(".studentCheckbox").prop("checked", false);
+        $("#confirmChanges").prop("disabled", true);
+        $("#selectedCount").text("0");
+        $("#selectAll").prop("checked", false);
+
+        // Se obtiene el tipo seleccionado en programType para usarlo en el filtro
+        let selectedType = $("#programType").data("value") || "";
+        if (selectedType === "getMasters") {
+            selectedType = "MAESTRÍA";
+        } else if (selectedType === "getSpecialty") {
+            selectedType = "ESPECIALIDAD";
         } else {
-            if (area === selectedOption.toUpperCase()) {
-                row.show();
-            } else {
-                row.hide();
-            }
+            selectedType = "";
         }
+
+        tbody.find("tr").each(function () {
+            const row = $(this);
+            const area = row.data("carrer").toUpperCase();
+            const type = area.split(" ")[0].toUpperCase();
+
+            if (selectedOption === "" || selectedOption === "Seleccione un área") {
+                // Si no hay opción seleccionada en el segundo filtro, filtrar según el tipo del primer filtro
+                if (selectedType !== "" && type === selectedType.toUpperCase()) {
+                    row.show();
+                } else {
+                    row.hide();
+                }
+            } else {
+                if (area === selectedOption.toUpperCase()) {
+                    row.show();
+                } else {
+                    row.hide();
+                }
+            }
+        });
     });
 });
 
