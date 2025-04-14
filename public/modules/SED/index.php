@@ -86,9 +86,9 @@ get_header("Seguimiento de Evaluación Docente");
                             <input type="text" id="programType" class="datalist-input w-100" placeholder="Seleccionar" readonly>
                             <i class="fas fa-search icono filter"></i>
                             <ul style="display: none;">
-                                <li value="">Todos</li >
-                                <li value="getMasters">Maestría</li>
-                                <li value="getSpecialty">Especialidad</li>
+                                <li data-value="">Todos</li >
+                                <li data-value="getMasters">Maestría</li>
+                                <li data-value="getSpecialty">Especialidad</li>
                             </ul>
                         </div>
                     </div>
@@ -101,11 +101,20 @@ get_header("Seguimiento de Evaluación Docente");
                 </div>
             </div>
 
-            <div id="filterArea" class="col-12" style="display:none;">
-                <label for="programArea" class="mt-2">Seleccionar Área:</label>
-                <select id="programArea" class="form-control">
-                    <option value="">Seleccione un tipo de programa primero</option>
-                </select>
+            <div id="filterArea" class="col-12 row mt-1" style="display:none;">
+                <div class="form-box col-10" style="margin-bottom: 0;">
+                    <div class="form-group row">
+                        <label for="programArea" class="col-md-4 col-form-label">Seleccionar Área: </label>
+                        <div class="col-md-7 ml-2 datalist">
+                            <input type="text" id="programArea" class="datalist-input w-100" placeholder="Seleccione un área" readonly>
+                            <i class="fas fa-search icono filter"></i>
+                            <ul style="display: none;">
+                                <li data-value="">Seleccione un área</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-2"></div>
             </div>
         </div>
         <br>
