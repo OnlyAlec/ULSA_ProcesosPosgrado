@@ -56,3 +56,6 @@ public/assets/xls/*
 public/assets/xlsx/*
 public/modules/**/uploads/
 public/modules/**/reports/
+
+# GRAPHS .gitignore
+public/assets/graphs/*

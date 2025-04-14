@@ -80,8 +80,8 @@ function generateReport($students, $filename)
 {
     $pdf = new Fpdf();
     $reportsDir = __DIR__ . '/reports/';
-    if (!is_dir($reportsDir)) {
-        mkdir($reportsDir, 0777, true);
+    if (!mkdir($reportsDir, 0755, true)) {
+        throw new RuntimeException('Error creating reports directory.');
     }
 
     $pdf->AddFont('IndivisaSans', '', 'IndivisaDisplaySans-Regular.php');

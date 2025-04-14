@@ -7,6 +7,7 @@ define('VENDOR_DIR', BASE_DIR . '/vendor');
 define('MODULES_DIR', BASE_DIR . '/public/modules');
 define('XLSX_DIR', BASE_DIR . '/public/assets/xlsx');
 define('PDF_DIR', BASE_DIR . '/public/assets/pdf');
+define('GRAPHS_DIR', BASE_DIR . '/public/assets/graphs');
 define('EMAIL_TEMPLATES_DIR', INCLUDES_DIR . '/templates/emails');
 
 define('ASSETS_PATH', '/assets');
