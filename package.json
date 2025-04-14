@@ -3,6 +3,7 @@
     "prettier": "3.5.3"
   },
   "dependencies": {
+    "chartjs-node-canvas": "^5.0.0",
     "mjml": "^4.15.3"
   }
 }
