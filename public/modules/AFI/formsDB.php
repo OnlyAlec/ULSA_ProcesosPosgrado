@@ -243,9 +243,11 @@ function createExcel($students, $programCount)
         $rowIndex++;
 
         if (strpos(strtolower($program), 'maestría') === 0) {
-            $masters[$program] = $partial;
+            $masters[$program]['partial'] = $partial;
+            $masters[$program]['total'] = $total;
         } else {
-            $specialties[$program] = $partial;
+            $specialties[$program]['partial'] = $partial;
+            $specialties[$program]['total'] = $total;
         }
     }
 
