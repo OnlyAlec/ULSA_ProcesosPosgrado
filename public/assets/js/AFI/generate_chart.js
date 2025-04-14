@@ -1,6 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const fs = require("fs");
+const path = require("path");
+const { ChartJSNodeCanvas } = require("chartjs-node-canvas");
 
 // Argumentos: archivo JSON, tipo, carpeta de salida
 const args = process.argv.slice(2);
@@ -8,7 +8,7 @@ const filePath = args[0];
 const type = args[1];
 const outputDir = args[2] || __dirname;
 
-fs.readFile(filePath, 'utf-8', async (err, data) => {
+fs.readFile(filePath, "utf-8", async (err, data) => {
     if (err) throw err;
 
     const dataset = JSON.parse(data);
@@ -18,23 +18,23 @@ fs.readFile(filePath, 'utf-8', async (err, data) => {
     const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
 
     const labels = Object.keys(dataset);
-    const partialData = labels.map(k => dataset[k].partial);
-    const totalData = labels.map(k => dataset[k].total);
+    const partialData = labels.map((k) => dataset[k].partial);
+    const totalData = labels.map((k) => dataset[k].total);
 
     const config = {
-        type: 'bar',
+        type: "bar",
         data: {
             labels,
             datasets: [
                 {
-                    label: 'Parciales',
+                    label: "Parciales",
                     data: partialData,
-                    backgroundColor: 'rgba(211, 31, 31, 0.88)',
+                    backgroundColor: "rgba(211, 31, 31, 0.88)",
                 },
                 {
-                    label: 'Totales',
+                    label: "Totales",
                     data: totalData,
-                    backgroundColor: 'rgba(90, 211, 255, 0.6)',
+                    backgroundColor: "rgba(90, 211, 255, 0.6)",
                 },
             ],
         },
@@ -59,7 +59,7 @@ fs.readFile(filePath, 'utf-8', async (err, data) => {
     fs.writeFileSync(imagePath, imageBuffer);
 
     fs.unlink(filePath, (err) => {
-        if (err) console.error('Error al eliminar el archivo temporal:', err);
-        else console.log('Archivo temporal eliminado');
+        if (err) console.error("Error al eliminar el archivo temporal:", err);
+        else console.log("Archivo temporal eliminado");
     });
 });
