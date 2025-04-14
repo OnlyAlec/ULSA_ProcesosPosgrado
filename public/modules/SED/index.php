@@ -66,7 +66,7 @@ get_header("Seguimiento de Evaluación Docente");
 ?>
     <main class="container content marco">
         <div class="sectionsSED">
-            <h1 class="text-center">Lista de alumnos</h1>
+            <h3>Lista de alumnos</h3>
             <p>
                 El sistema permite gestionar la selección y actualización del <strong>Estado SED</strong> de los alumnos mediante una tabla 
                 interactiva con filtros y opciones de selección múltiple.
@@ -76,32 +76,50 @@ get_header("Seguimiento de Evaluación Docente");
                 <li><strong>Iconos de Estado:</strong> Puede actualizar el estado sed a "realizado" o "no realizado" de los alumnos de manera invidiual dando un clic en el icono de "Estatus SED".</li>
             </ul>
         </div>
-        <div class="row justify-content-end">
-            <div class="col-10">
-                <label for="programType">Seleccionar Tipo de Programa:</label>
-                <select id="programType" class="form-control">
-                    <option value="">Todos</option>
-                    <option value="getMasters">Maestría</option>
-                    <option value="getSpecialty">Especialidad</option>
-                </select>
+        <br>
+        <div class="row align-items-center">
+            <div class="col-12 row">
+                <div class="form-box col-10" style="margin-bottom: 0;">
+                    <div class="form-group row">
+                        <label for="programType" class="col-md-4 col-form-label">Seleccionar Tipo de Programa:</label>
+                        <div class="col-md-7 ml-2 datalist">
+                            <input type="text" id="programType" class="datalist-input w-100" placeholder="Seleccionar" readonly>
+                            <i class="fas fa-search icono filter"></i>
+                            <ul style="display: none;">
+                                <li data-value="">Todos</li >
+                                <li data-value="getMasters">Maestría</li>
+                                <li data-value="getSpecialty">Especialidad</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-2">
+                    <a href="load_excel.php">
+                        <button type="button" class="btn btn-outline-primary w-100">Cargar Excel</button>
+                    </a>
+                </div>
             </div>
 
-            <div class="col-2">
-                <a href="load_excel.php">
-                    <button type="button" class="btn btn-primary h-100 w-100">Cargar Excel</button>
-                </a>
-            </div>
-
-            <div id="filterArea" class="col-12" style="display:none;">
-                <label for="programArea" class="mt-2">Seleccionar Área:</label>
-                <select id="programArea" class="form-control">
-                    <option value="">Seleccione un tipo de programa primero</option>
-                </select>
+            <div id="filterArea" class="col-12 row mt-1" style="display:none;">
+                <div class="form-box col-10" style="margin-bottom: 0;">
+                    <div class="form-group row">
+                        <label for="programArea" class="col-md-4 col-form-label">Seleccionar Área: </label>
+                        <div class="col-md-7 ml-2 datalist">
+                            <input type="text" id="programArea" class="datalist-input w-100" placeholder="Seleccione un área" readonly>
+                            <i class="fas fa-search icono filter"></i>
+                            <ul style="display: none;">
+                                <li data-value="">Seleccione un área</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-2"></div>
             </div>
         </div>
-
-        <table class="table table-bordered mt-4" id="studentsTable">
-            <thead>
+        <br>
+        <table class="table table-white table-nostriped" id="studentsTable">
+            <thead class="thead-dark">
                 <tr>
                     <th><input type="checkbox" id="selectAll" style="width: 20px; height: 20px;"></th>
                     <th>Clave ULSA</th>
@@ -122,7 +140,7 @@ get_header("Seguimiento de Evaluación Docente");
                             <td><?= ucwords($student->getName()). " " . ucwords($student->getLastName()) ?></td>
                             <td><?= $student->getEmail() ?></td>
                             <td>
-                                <div class="d-flex gap-2">
+                                <div class="d-flex" style="gap: 8px;">
                                     <?php
                     $btnClass = $student->getSed() ? 'btn-success' : 'btn-danger';
                             ?>
@@ -133,7 +151,7 @@ get_header("Seguimiento de Evaluación Docente");
                             ?>
                                     </button>
                                     <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
-                                        <i class="fas fa-paper-plane fa-2x"></i>
+                                        <i class="fas fa-paper-plane fa-lg"></i>
                                     </button>
                                 </div>
                             </td>
@@ -144,9 +162,13 @@ get_header("Seguimiento de Evaluación Docente");
         </table>
 
         <div class="d-flex justify-content-between">
-            <button id="confirmChanges" class="btn btn-success w-50" disabled>Confirmar Cambios</button>
-            <button id="generateReport" class="btn btn-primary" data-filename="reporte_evaluaciones">Generar
-                Reporte</button>
+
+            <button id="confirmChanges" class="btn btn-outline-success w-50" style="width: 200px;" disabled>
+                <span>Confirmar Cambios</span>
+            </button>
+            <button id="generateReport" class="btn btn-outline-primary" style="width: 200px;" data-filename="reporte_evaluaciones">
+                <span>Generar Reporte</span>
+            </button>
         </div>
 
         <div id="selectedCountContainer">

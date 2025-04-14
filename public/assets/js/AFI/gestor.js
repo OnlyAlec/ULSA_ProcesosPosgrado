@@ -125,6 +125,7 @@ function setupActions() {
         .off("click")
         .on("click", function () {
             const button = $(this);
+            const parent = button.parent();
             const ulsaID = button.data("ulsaid");
             const divError = $(".sectionsAFI");
 

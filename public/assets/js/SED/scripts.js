@@ -19,7 +19,7 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.success) {
                     displayMessage(form, "Archivo procesado correctamente");
-                    window.location.href = "table.php";
+                    window.location.href = "index.php";
                 }
             },
             error: function (xhr) {

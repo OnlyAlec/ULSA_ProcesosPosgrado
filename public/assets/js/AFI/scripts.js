@@ -23,6 +23,41 @@ $(function () {
     setupDatasets();
 });
 
+$(function () {
+    $(document).on("click", function (e) {
+        if (!$(e.target).closest(".datalist").length) {
+            $(".datalist ul").css("display", "none");
+        }
+    });
+
+    $(".custom-file-input").on("change", function (e) {
+        const fileName = $(e.target).prop("files")[0]?.name
+            ? $(e.target).prop("files")[0].name.length > 70
+                ? $(e.target).prop("files")[0].name.substring(0, 68) + "..."
+                : $(e.target).prop("files")[0].name
+            : "Seleccionar archivo...";
+        $(e.target).next().text(fileName);
+    });
+
+    $(".datalist-input").on("click", function (e) {
+        e.stopPropagation();
+        const list = $(this).closest(".datalist").find("ul");
+        list.css("display", list.css("display") === "none" ? "block" : "none");
+    });
+
+    $(".datalist li:not(.not-selectable)").on("click", function () {
+        const input = $(this).closest(".datalist").find(".datalist-input");
+        input.val($(this).text()).trigger("input");
+        $(this).closest("ul").css("display", "none");
+    });
+
+    $(".datalist i").on("click", function () {
+        const input = $(this).closest(".datalist").find(".datalist-input");
+        input.val("").trigger("input");
+        $(this).removeClass("fa-times").addClass("fa-search");
+    });
+});
+
 /**
  * @param {string} name
  */
@@ -34,9 +69,9 @@ function setupBtns(name) {
     $("#" + name).on("click", function () {
         $(".alert").remove();
         $(".forms-result").hide();
+
         $(".subSectionAFI").hide();
         $(".custom-file-input").val("").next().text("Seleccionar archivo...");
-
         $(".sectionsAFI button").removeClass("btn-primary").addClass("btn-outline-primary");
         $(this).removeClass("btn-outline-primary").addClass("btn-primary");
         const div = name.split("-").slice(1).join("-");
@@ -88,6 +123,7 @@ function filterTableByCarrer(filter, tableName) {
 
     if (tableBody.find("#notFound").length > 0) tableBody.find("#notFound").remove();
     filter = filter.toUpperCase();
+
     if (filter === "") {
         if (rows) Array.from(rows).forEach((row) => (row.style.display = ""));
         return;

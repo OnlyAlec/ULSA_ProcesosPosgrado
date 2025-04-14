@@ -31,7 +31,8 @@ $(document).ready(function () {
 
     $("#btn-consultar").on("click", function () {
         const button = $(this);
-        let tableBody = $("#tableStudents tbody");
+        const tableContainer = $("#tableStudents");
+        const tableBody = tableContainer.find("tbody");
 
         $.ajax({
             url: "",
@@ -39,6 +40,7 @@ $(document).ready(function () {
             data: { action: "getTableStudents" },
             beforeSend: function () {
                 button.prop("disabled", true);
+                tableContainer.hide();
                 tableBody.empty();
             },
             success: function (response) {
@@ -57,6 +59,7 @@ $(document).ready(function () {
                         '<tr><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
                     );
                 }
+                tableContainer.show();
             },
             error: function (xhr) {
                 const errorMsg = "Error al procesar la solicitud";
@@ -76,21 +79,41 @@ $(document).ready(function () {
     }
 });
 
-function showSection(section) {
-    document.querySelectorAll(".section").forEach((div) => div.classList.add("d-none"));
-    document.getElementById("section-" + section).classList.remove("d-none");
-
-    document
-        .querySelectorAll(".btn-group button")
-        .forEach((btn) => btn.classList.remove("btn-dark"));
-    document
-        .querySelectorAll(".btn-group button")
-        .forEach((btn) => btn.classList.add("btn-primary"));
-    document.getElementById("btn-" + section).classList.add("btn-dark");
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-    showSection("crear");
+$(function () {
+    $(".custom-file-input").on("change", function (e) {
+        const fileName = $(e.target).prop("files")[0]?.name
+            ? $(e.target).prop("files")[0].name.length > 70
+                ? $(e.target).prop("files")[0].name.substring(0, 68) + "..."
+                : $(e.target).prop("files")[0].name
+            : "Seleccionar archivo...";
+        $(e.target).next().text(fileName);
+    });
 });
 
-window.showSection = showSection;
+function setupBtnsGA(name) {
+    if (!name) {
+        throw new Error("Missing name - setupBtnsGA");
+    }
+
+    $("#" + name).on("click", function () {
+        $(".alert").remove();
+        $(".forms-result").hide();
+        $(".sectionsGA button").removeClass("btn-primary").addClass("btn-outline-primary");
+        $(this).removeClass("btn-outline-primary").addClass("btn-primary");
+
+        const div = name.split("-").slice(1).join("-");
+        hideSectionsGA();
+        $("#" + div).show();
+    });
+}
+
+function hideSectionsGA() {
+    $(".sectionGA").each(function () {
+        $(this).hide();
+    });
+}
+
+// Llamadas para inicializar
+setupBtnsGA("btn-crear");
+setupBtnsGA("btn-consultar");
+setupBtnsGA("btn-eliminar");
