@@ -266,19 +266,19 @@ function createExcel($students, $programCount)
     if (!is_dir($graphsDir)) {
         mkdir($graphsDir, 0777, true);
     }
-    
+
     // Gráfica de Maestrías
     $tempFile = tempnam(sys_get_temp_dir(), 'data_');
     file_put_contents($tempFile, json_encode($masters));
     $escapedTempFile = escapeshellarg($tempFile);
     $type = escapeshellarg('maestrias');
     $escapedGraphsDir = escapeshellarg($graphsDir);
-    
+
     exec("node ASSETS_PATH/js/AFI/generate_chart.js $escapedTempFile $type $escapedGraphsDir");
-    
+
     $sheet3 = $newSpreadsheet->createSheet();
     $sheet3->setTitle('Gráfica de Maestrías');
-    
+
     $imagePath = "$graphsDir/chart_maestrias.png";
     if (file_exists($imagePath)) {
         $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
@@ -286,18 +286,18 @@ function createExcel($students, $programCount)
         $drawing->setCoordinates('A1');
         $drawing->setWorksheet($sheet3);
     }
-    
+
     // Gráfica de Especialidades
     $tempFile = tempnam(sys_get_temp_dir(), 'data_');
     file_put_contents($tempFile, json_encode($specialties));
     $escapedTempFile = escapeshellarg($tempFile);
     $type = escapeshellarg('especialidades');
-    
+
     exec("node ASSETS_PATH/js/AFI/generate_chart.js $escapedTempFile $type $escapedGraphsDir");
-    
+
     $sheet4 = $newSpreadsheet->createSheet();
     $sheet4->setTitle('Gráfica de Especialidades');
-    
+
     $imagePath = "$graphsDir/chart_especialidades.png";
     if (file_exists($imagePath)) {
         $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
