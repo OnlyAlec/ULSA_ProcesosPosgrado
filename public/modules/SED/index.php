@@ -82,6 +82,8 @@ get_head("SED");
             </ul>
         </div>
         <br>
+
+        <!-- FILTROS POR TIPO DE PROGRAMA Y ÁREA ESPECÍFICA + BOTÓN CARGA EXCEL -->
         <div class="row align-items-center">
             <div class="col-12 row">
                 <div class="form-box col-10" style="margin-bottom: 0;">
@@ -99,7 +101,6 @@ get_head("SED");
                         </div>
                     </div>
                 </div>
-
                 <div class="col-2">
                     <a href="load_excel.php">
                         <button type="button" class="btn btn-outline-primary w-100">Cargar Excel</button>
@@ -124,7 +125,22 @@ get_head("SED");
                 <div class="col-2"></div>
             </div>
         </div>
+
+        <!-- FILTROS PARA ALUMNOS POR SU ESTADO SED -->
+        <div class="form-group row justify-content-center mt-3">
+            <button id="removeFilter" class="btn btn-outline-success mr-2" style="width: 230px;">
+                <i class="fas fa-users"></i> Todos
+            </button>
+            <button id="onlyConfirm" class="btn btn-outline-primary mr-2" style="width: 230px;">
+                <i class="fas fa-check-double"></i> Solamente confirmados
+            </button>
+            <button id="onlyMissing" class="btn btn-outline-danger" style="width: 230px;">
+                <i class="fas fa-times-circle"></i> Solamente faltantes
+            </button>
+        </div>
         <br>
+
+        <!-- TABLA DE ALUMNOS -->
         <table class="table table-white table-nostriped" id="studentsTable">
             <thead class="thead-dark">
                 <tr>
@@ -144,20 +160,15 @@ get_head("SED");
                         <tr data-carrer="<?= $student->getProgram() ?>">
                             <td class="text-center"><input type="checkbox" class="studentCheckbox"
                                     style="width: 20px; height: 20px;"></td>
-                            <th><?= $student->getUlsaId() ?></th>
+                            <td><?= $student->getUlsaId() ?></td>
                             <td><?= ucwords($student->getName()) . " " . ucwords($student->getLastName()) ?></td>
                             <td><?= $student->getEmail() ?></td>
                             <td>
                                 <div class="d-flex" style="gap: 8px;">
-                                    <?php
-                                    $btnClass = $student->getSed() ? 'btn-success' : 'btn-danger';
-                                    ?>
+                                    <?php $btnClass = $student->getSed() ? 'btn-danger' : 'btn-success'; ?>
                                     <button class="btn <?= $btnClass ?> btn-sm text-white changeSED border-0 flex-fill"
                                         data-student-id="<?= $student->getUlsaId() ?>">
-                                        <?= $student->getSed()
-                                            ? '<i class="fas fa-check-square fa-2x"></i>'
-                                            : '<i class="fas fa-minus-square fa-2x"></i>'
-                                            ?>
+                                        <?= $student->getSed() ? '<i class="fas fa-minus-square fa-2x"></i>' : '<i class="fas fa-check-square fa-2x"></i>' ?>
                                     </button>
                                     <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill"
                                         data-student-id="<?= $student->getUlsaId() ?>">
@@ -167,7 +178,8 @@ get_head("SED");
                             </td>
                         </tr>
                     <?php endforeach;
-                } ?>
+                }
+                ?>
             </tbody>
         </table>
         <br>

@@ -248,11 +248,10 @@ get_header("Avisos de Fechas Importantes");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                                foreach (getMastersPrograms() as $master) {
-                                    $master = ucfirst(strtolower($master->getName()));
-                                    echo "<option value='$master'>$master</option>";
-                                }
-?>
+                    foreach (getMastersPrograms() as $master) {
+                        $master = $master->getName();
+                        echo "<li>$master</li>";
+                    } ?>
                         </ul>
                     </div>
                 </div>
@@ -264,9 +263,10 @@ get_header("Avisos de Fechas Importantes");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                        foreach (getSpecialtyPrograms() as $special) {
-                            echo "<li>$special->getProgram()</li>";
-                        } ?>
+                    foreach (getSpecialtyPrograms() as $special) {
+                        $special = $special->getName();
+                        echo "<li>$special</li>";
+                    } ?>
                         </ul>
                     </div>
                 </div>
@@ -312,9 +312,10 @@ get_header("Avisos de Fechas Importantes");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                        foreach (getMastersPrograms() as $master) {
-                            echo "<li>$master->getMaster();</li>";
-                        } ?>
+                    foreach (getMastersPrograms() as $master) {
+                        $master = $master->getName();
+                        echo "<li>$master</li>";
+                    } ?>
                         </ul>
                     </div>
                 </div>
@@ -326,9 +327,10 @@ get_header("Avisos de Fechas Importantes");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                        foreach (getSpecialtyPrograms() as $special) {
-                            echo "<li>$special->getProgram()</li>";
-                        } ?>
+                    foreach (getSpecialtyPrograms() as $special) {
+                        $special = $special->getName();
+                        echo "<li>$special</li>";
+                    } ?>
                         </ul>
                     </div>
                 </div>
