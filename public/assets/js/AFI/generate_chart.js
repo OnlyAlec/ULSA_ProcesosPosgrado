@@ -43,12 +43,12 @@ const { ChartJSNodeCanvas } = require("chartjs-node-canvas");
                     {
                         label: "Alumnos Sin Firmar",
                         data: partialData,
-                        backgroundColor: "rgba(211, 31, 31, 0.88)",
+                        backgroundColor: "#001D68",
                     },
                     {
                         label: "Total de Alumnos",
                         data: totalData,
-                        backgroundColor: "rgba(90, 211, 255, 0.6)",
+                        backgroundColor: "#D21034",
                     },
                 ],
             },
