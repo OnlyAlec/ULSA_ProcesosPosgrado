@@ -150,8 +150,7 @@ get_header("Seguimiento de Evaluación Docente");
                 <?php
                     if (empty($studentsDB = getStudents())) {
                         echo '<tr><td colspan="5" class="text-center">No hay alumnos registrados.</td></tr>';
-                    } 
-                    else {
+                    } else {
                         foreach ($studentsDB as $student): ?>
                             <tr data-carrer="<?= $student->getProgram() ?>">
                                 <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td> 
@@ -171,8 +170,8 @@ get_header("Seguimiento de Evaluación Docente");
                                 </td>
                             </tr>
                         <?php endforeach;
-                    } 
-                ?>
+                    }
+?>
             </tbody>
         </table>
         <br>
