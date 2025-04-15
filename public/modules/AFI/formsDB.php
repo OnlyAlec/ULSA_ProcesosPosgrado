@@ -267,16 +267,16 @@ function createExcel($students, $programCount)
     $scriptPath = '../../assets/js/AFI/generate_chart.js';
     $sheet3 = $newSpreadsheet->createSheet();
     $sheet3->setTitle('Gráficas');
-    
+
     // Gráfica de Maestrías
     $tempFile = tempnam(sys_get_temp_dir(), 'data_');
     file_put_contents($tempFile, json_encode($masters));
     $escapedTempFile = escapeshellarg($tempFile);
     $type = escapeshellarg('maestrias');
     $escapedGraphsDir = escapeshellarg($graphsDir);
-    
+
     exec("node $scriptPath $escapedTempFile $type $escapedGraphsDir");
-    
+
     $imagePath = "$graphsDir/chart_maestrias.png";
     if (file_exists($imagePath)) {
         $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
@@ -292,9 +292,9 @@ function createExcel($students, $programCount)
     $escapedTempFile = escapeshellarg($tempFile);
     $type = escapeshellarg('especialidades');
     $escapedGraphsDir = escapeshellarg($graphsDir);
-    
+
     exec("node $scriptPath $escapedTempFile $type $escapedGraphsDir");
-    
+
     $imagePath = "$graphsDir/chart_especialidades.png";
     if (file_exists($imagePath)) {
         $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
@@ -349,4 +349,3 @@ function _updateInDB($studentsConfirm, $studentsNotConfirm)
         updateStudentFieldBoolean($student->getUlsaId(), 'afi', true);
     }
 }
-
