@@ -5,11 +5,6 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
 
-use PhpOffice\PhpSpreadsheet\Chart\Chart;
-use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
-use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
-use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
-use PhpOffice\PhpSpreadsheet\Chart\Title;
 
 function init_process($filePath)
 {
@@ -264,8 +259,14 @@ function createExcel($students, $programCount)
     //* Add Graphs
     $graphsDir = GRAPHS_DIR;
     if (!is_dir($graphsDir)) {
-        mkdir($graphsDir, 0777, true);
+        if (!mkdir($graphsDir, 0755, true)) {
+            throw new RuntimeException('Error creating graphs directory.');
+        }
     }
+
+    $scriptPath = '../../assets/js/AFI/generate_chart.js';
+    $sheet3 = $newSpreadsheet->createSheet();
+    $sheet3->setTitle('Gráficas');
     
     // Gráfica de Maestrías
     $tempFile = tempnam(sys_get_temp_dir(), 'data_');
@@ -274,10 +275,7 @@ function createExcel($students, $programCount)
     $type = escapeshellarg('maestrias');
     $escapedGraphsDir = escapeshellarg($graphsDir);
     
-    exec("node ASSETS_PATH/js/AFI/generate_chart.js $escapedTempFile $type $escapedGraphsDir");
-    
-    $sheet3 = $newSpreadsheet->createSheet();
-    $sheet3->setTitle('Gráfica de Maestrías');
+    exec("node $scriptPath $escapedTempFile $type $escapedGraphsDir");
     
     $imagePath = "$graphsDir/chart_maestrias.png";
     if (file_exists($imagePath)) {
@@ -286,24 +284,22 @@ function createExcel($students, $programCount)
         $drawing->setCoordinates('A1');
         $drawing->setWorksheet($sheet3);
     }
-    
+
     // Gráfica de Especialidades
     $tempFile = tempnam(sys_get_temp_dir(), 'data_');
     file_put_contents($tempFile, json_encode($specialties));
     $escapedTempFile = escapeshellarg($tempFile);
     $type = escapeshellarg('especialidades');
+    $escapedGraphsDir = escapeshellarg($graphsDir);
     
-    exec("node ASSETS_PATH/js/AFI/generate_chart.js $escapedTempFile $type $escapedGraphsDir");
-    
-    $sheet4 = $newSpreadsheet->createSheet();
-    $sheet4->setTitle('Gráfica de Especialidades');
+    exec("node $scriptPath $escapedTempFile $type $escapedGraphsDir");
     
     $imagePath = "$graphsDir/chart_especialidades.png";
     if (file_exists($imagePath)) {
         $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
         $drawing->setPath($imagePath);
-        $drawing->setCoordinates('A1');
-        $drawing->setWorksheet($sheet4);
+        $drawing->setCoordinates('P1');
+        $drawing->setWorksheet($sheet3);
     }
 
     //* Save File
@@ -353,54 +349,3 @@ function _updateInDB($studentsConfirm, $studentsNotConfirm)
     }
 }
 
-function createBarChart($sheet, $title, $dataArray)
-{
-    $row = 1;
-    $sheet->setCellValue("A{$row}", "Programa");
-    $sheet->setCellValue("B{$row}", "No firmaron");
-
-    foreach ($dataArray as $program => $count) {
-        $row++;
-        $sheet->setCellValue("A{$row}", $program);
-        $sheet->setCellValue("B{$row}", $count);
-    }
-
-    $endRow = $row;
-
-    $categories = [new DataSeriesValues('String', "'{$sheet->getTitle()}'!A2:A{$endRow}", null, count($dataArray))];
-    $values = [new DataSeriesValues('Number', "'{$sheet->getTitle()}'!B2:B{$endRow}", null, count($dataArray))];
-
-    // Crear la serie de datos
-    $series = new DataSeries(
-        DataSeries::TYPE_BARCHART,
-        DataSeries::GROUPING_CLUSTERED,
-        range(0, count($values) - 1),
-        [],
-        $categories,
-        $values
-    );
-
-    $plotArea = new PlotArea(null, [$series]);
-    $chartTitle = new Title($title);
-
-    $chart = new Chart(
-        $title,
-        $chartTitle,
-        null,
-        $plotArea,
-        true,
-        DataSeries::EMPTY_AS_GAP
-    );
-
-    // Posicionar la gráfica en la hoja
-    $chart->setTopLeftPosition("D1");
-    $chart->setBottomRightPosition("L15");
-
-    // Agregar la gráfica a la hoja
-    $sheet->addChart($chart);
-
-    // Ajustar el tamaño de las celdas
-    foreach (range('A', 'B') as $col) {
-        $sheet->getColumnDimension($col)->setAutoSize(true);
-    }
-}
