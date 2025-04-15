@@ -198,8 +198,8 @@ $("#confirmChanges").on("click", function () {
                 $(".studentCheckbox:checked").each(function () {
                     let icon = $(this).closest("tr").find(".changeSED i");
                     let button = icon.closest("button");
-                    icon.removeClass("fa-minus-square").addClass("fa-check-square");
-                    button.removeClass("btn-danger").addClass("btn-success");
+                    icon.removeClass("fa-check-square").addClass("fa-minus-square");
+                    button.removeClass("btn-success").addClass("btn-danger");
                 });
 
                 $("#programType").val("");
@@ -226,7 +226,7 @@ $(".changeSED").on("click", function () {
     let icon = $(this).find("i");
     let button = icon.closest("button");
     let studentID = $(this).data("student-id");
-    let newState = icon.hasClass("fa-minus-square") ? 1 : 0;
+    let newState = icon.hasClass("fa-check-square") ? 1 : 0;
 
     $.ajax({
         url: "",
@@ -235,11 +235,11 @@ $(".changeSED").on("click", function () {
         success: function (response) {
             if (response.success) {
                 if (newState) {
-                    icon.removeClass("fa-minus-square").addClass("fa-check-square");
-                    button.removeClass("btn-danger").addClass("btn-success");
-                } else {
                     icon.removeClass("fa-check-square").addClass("fa-minus-square");
                     button.removeClass("btn-success").addClass("btn-danger");
+                } else {
+                    iicon.removeClass("fa-minus-square").addClass("fa-check-square");
+                    button.removeClass("btn-danger").addClass("btn-success");
                 }
             } else {
                 alert("ERROR: Error al actualizar el estado SED.");
@@ -302,7 +302,7 @@ $("#generateReport").on("click", function () {
         let studentID = $(this).find("td").eq(1).text();
         let fullName = $(this).find("td").eq(2).text();
         let email = $(this).find("td").eq(3).text();
-        let sedStatus = $(this).find(".changeSED i").hasClass("fa-check-square") ? true : false;
+        let sedStatus = $(this).find(".changeSED i").hasClass("fa-minus-square") ? true : false;
         let carrer = $(this).data("carrer");
 
         fullName = fullName.replace(/(?:^|\s)\S/g, (match) => match.toUpperCase());
@@ -333,4 +333,99 @@ $("#generateReport").on("click", function () {
             displayMessage($(".sectionsSED"), errorMsg, "error");
         },
     });
+});
+
+$("#onlyMissing").on("click", function () {    
+    const tableBody = $("#studentsTable").find("tbody");
+    const rows = tableBody.find("tr");
+    let found = false;
+
+    $("#programType").val("");
+    $("#programArea").val("");
+    $("#filterArea").hide();
+
+    $(".studentCheckbox").prop("checked", false);
+    $("#confirmChanges").prop("disabled", true);
+    $("#selectedCount").text("0");
+    $("#selectAll").prop("checked", false);
+
+    tableBody.find("tr.noResults").remove();
+
+    rows.each(function () {
+        const icon = $(this).find(".changeSED i");
+
+        if(icon.hasClass("fa-check-square")) {
+            $(this).show();
+            found = true;
+        }
+        else {
+            $(this).hide();
+        }
+    });
+
+    if (!found) {
+        tableBody.append (
+            '<tr class="noResults"><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
+        )
+    } 
+});
+
+$("#onlyConfirm").on("click", function () {
+    const tableBody = $("#studentsTable").find("tbody");
+    const rows = tableBody.find("tr");
+    let found = false;
+
+    $("#programType").val("");
+    $("#programArea").val("");
+    $("#filterArea").hide();
+
+    $(".studentCheckbox").prop("checked", false);
+    $("#confirmChanges").prop("disabled", true);
+    $("#selectedCount").text("0");
+    $("#selectAll").prop("checked", false);
+
+    tableBody.find("tr.noResults").remove();
+
+    rows.each(function () {
+        const icon = $(this).find(".changeSED i");
+
+        if(icon.hasClass("fa-minus-square")) {
+            $(this).show();
+            found = true;
+        }
+        else {
+            $(this).hide();
+        }
+    });
+
+    if (!found) {
+        tableBody.append (
+            '<tr class="noResults"><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
+        )
+    }
+});
+
+$("#removeFilter").on("click", function () {
+    const tableBody = $("#studentsTable").find("tbody");
+    const rows = tableBody.find("tr");
+
+    $("#programType").val("");
+    $("#programArea").val("");
+    $("#filterArea").hide();
+
+    $(".studentCheckbox").prop("checked", false);
+    $("#confirmChanges").prop("disabled", true);
+    $("#selectedCount").text("0");
+    $("#selectAll").prop("checked", false); 
+
+    tableBody.find("tr.noResults").remove();
+    
+    rows.each(function () {
+        $(this).show();
+    });
+
+    if (tableBody.find("tr:visible").length == 0)
+        tableBody.append(
+            '<tr><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
+        );
 });
