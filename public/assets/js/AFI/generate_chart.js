@@ -10,8 +10,8 @@ const { ChartJSNodeCanvas } = require("chartjs-node-canvas");
         const type = args[1];
         const outputDir = args[2];
 
-        const title = type === 'maestrias' ? 'Maestrías' : 'Especialidades';
-        
+        const title = type === "maestrias" ? "Maestrías" : "Especialidades";
+
         // Lectura del archivo JSON
         const data = await fs.readFile(filePath, "utf-8");
         const dataset = JSON.parse(data);
@@ -19,14 +19,16 @@ const { ChartJSNodeCanvas } = require("chartjs-node-canvas");
         // Configuración de la gráfica
         const width = 800;
         const height = 600;
-        const chartJSNodeCanvas = new ChartJSNodeCanvas({width, height});
+        const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
 
         const labels = Object.keys(dataset);
-        const formattedLabels = labels.map(label => {
+        const formattedLabels = labels.map((label) => {
             if (!label || typeof label !== "string") return ["(Sin nombre)"];
-            const capitalizedLabel = label.trim().split(' ')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                .join(' ');
+            const capitalizedLabel = label
+                .trim()
+                .split(" ")
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(" ");
 
             return capitalizedLabel.trim().split(/\s+/);
         });
@@ -66,7 +68,7 @@ const { ChartJSNodeCanvas } = require("chartjs-node-canvas");
                             maxRotation: 0,
                             minRotation: 0,
                             autoSkip: false,
-                            font: {size: 12},
+                            font: { size: 12 },
                         },
                     },
                     y: {
