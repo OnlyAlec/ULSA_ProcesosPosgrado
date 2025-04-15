@@ -1,65 +1,92 @@
-const fs = require("fs");
+const fs = require("fs").promises;
 const path = require("path");
 const { ChartJSNodeCanvas } = require("chartjs-node-canvas");
 
-// Argumentos: archivo JSON, tipo, carpeta de salida
-const args = process.argv.slice(2);
-const filePath = args[0];
-const type = args[1];
-const outputDir = args[2] || __dirname;
+(async () => {
+    try {
+        // Argumentos: archivo JSON con los datos a graficar, tipo (maestría o especialidad), carpeta de salida de la imagen
+        const args = process.argv.slice(2);
+        const filePath = args[0];
+        const type = args[1];
+        const outputDir = args[2];
 
-fs.readFile(filePath, "utf-8", async (err, data) => {
-    if (err) throw err;
+        const title = type === 'maestrias' ? 'Maestrías' : 'Especialidades';
+        
+        // Lectura del archivo JSON
+        const data = await fs.readFile(filePath, "utf-8");
+        const dataset = JSON.parse(data);
 
-    const dataset = JSON.parse(data);
+        // Configuración de la gráfica
+        const width = 800;
+        const height = 600;
+        const chartJSNodeCanvas = new ChartJSNodeCanvas({width, height});
 
-    const width = 800;
-    const height = 600;
-    const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height });
+        const labels = Object.keys(dataset);
+        const formattedLabels = labels.map(label => {
+            if (!label || typeof label !== "string") return ["(Sin nombre)"];
+            const capitalizedLabel = label.trim().split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
 
-    const labels = Object.keys(dataset);
-    const partialData = labels.map((k) => dataset[k].partial);
-    const totalData = labels.map((k) => dataset[k].total);
+            return capitalizedLabel.trim().split(/\s+/);
+        });
+        const partialData = labels.map((k) => dataset[k].partial);
+        const totalData = labels.map((k) => dataset[k].total);
 
-    const config = {
-        type: "bar",
-        data: {
-            labels,
-            datasets: [
-                {
-                    label: "Parciales",
-                    data: partialData,
-                    backgroundColor: "rgba(211, 31, 31, 0.88)",
-                },
-                {
-                    label: "Totales",
-                    data: totalData,
-                    backgroundColor: "rgba(90, 211, 255, 0.6)",
-                },
-            ],
-        },
-        options: {
-            plugins: {
-                title: {
-                    display: true,
-                    text: `Gráfica de ${type}`,
-                    font: { size: 20 },
-                },
+        const config = {
+            type: "bar",
+            data: {
+                labels: formattedLabels,
+                datasets: [
+                    {
+                        label: "Alumnos Sin Firmar",
+                        data: partialData,
+                        backgroundColor: "rgba(211, 31, 31, 0.88)",
+                    },
+                    {
+                        label: "Total de Alumnos",
+                        data: totalData,
+                        backgroundColor: "rgba(90, 211, 255, 0.6)",
+                    },
+                ],
             },
-        },
-    };
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `Gráfica de ${title}`,
+                        font: { size: 20 },
+                    },
+                },
+                responsive: true,
+                scales: {
+                    x: {
+                        stacked: false,
+                        ticks: {
+                            maxRotation: 0,
+                            minRotation: 0,
+                            autoSkip: false,
+                            font: {size: 12},
+                        },
+                    },
+                    y: {
+                        beginAtZero: true,
+                    },
+                },
+                barThickness: 40,
+                categoryPercentage: 0.6,
+                barPercentage: 0.9,
+            },
+        };
 
-    const imageBuffer = await chartJSNodeCanvas.renderToBuffer(config);
+        const imageBuffer = await chartJSNodeCanvas.renderToBuffer(config);
+        const imagePath = path.join(outputDir, `chart_${type}.png`);
+        await fs.writeFile(imagePath, imageBuffer);
 
-    if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
+        // Eliminar archivo temporal
+        await fs.unlink(filePath);
+    } catch (err) {
+        console.error("Error:", err.message);
+        process.exit(1);
     }
-
-    const imagePath = path.join(outputDir, `chart_${type}.png`);
-    fs.writeFileSync(imagePath, imageBuffer);
-
-    fs.unlink(filePath, (err) => {
-        if (err) console.error("Error al eliminar el archivo temporal:", err);
-        else console.log("Archivo temporal eliminado");
-    });
-});
+})();
