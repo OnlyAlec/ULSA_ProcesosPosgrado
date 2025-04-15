@@ -25,7 +25,7 @@ function changeStatusSEDGroup($studentIDs)
     }
 
     if ($error) {
-        throw new RuntimeException("");
+        throw new RuntimeException("Error updating SED status");
     }
 
     return "";
