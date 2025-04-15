@@ -285,6 +285,7 @@ function createExcel($students, $programCount)
         $drawing->setWorksheet($sheet3);
     }
 
+
     // Gráfica de Especialidades
     $tempFile = tempnam(sys_get_temp_dir(), 'data_');
     file_put_contents($tempFile, json_encode($specialties));
