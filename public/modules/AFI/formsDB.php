@@ -1,6 +1,7 @@
 <?php
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
 
@@ -218,6 +219,10 @@ function createExcel($students, $programCount)
     $sheet2->getStyle('A1:D1')->getFont()->setBold(true);
 
     $rowIndex = 2;
+
+    $masters = [];
+    $specialties = [];
+
 
     $masters = [];
     $specialties = [];

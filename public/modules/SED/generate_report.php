@@ -95,7 +95,6 @@ function generateReport($students, $filename)
     if (!empty($studentsByEvaluation['EVALUATED'])) {
         addNewPage($pdf);
         $countEvaluated = 0;
-        $countEvaluated = 0;
         $pdf->SetFont('IndivisaSans', '', 14);
         $pdf->Cell(0, 10, mb_convert_encoding('Alumnos que realizaron la Evaluación Docente', 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
         $pdf->Ln(5);
@@ -120,9 +119,6 @@ function generateReport($students, $filename)
     $percentage = round(($countEvaluated / count($students)) * 100, 2);
     addNewPage($pdf);
     $pdf->SetFont('IndivisaSans', '', 14);
-    $pdf->Cell(0, 10, mb_convert_encoding('Números de Alumnos que realizaron la evaluación: ' . $countEvaluated, 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
-    $pdf->Cell(0, 10, mb_convert_encoding('Números de Alumnos que no han realizado la evaluación: ' . (count($students) - $countEvaluated), 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
-    $pdf->Cell(0, 10, mb_convert_encoding('Total de Alumnos: ' . count($students), 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
     $pdf->Cell(0, 10, mb_convert_encoding('Números de Alumnos que realizaron la evaluación: ' . $countEvaluated, 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
     $pdf->Cell(0, 10, mb_convert_encoding('Números de Alumnos que no han realizado la evaluación: ' . (count($students) - $countEvaluated), 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
     $pdf->Cell(0, 10, mb_convert_encoding('Total de Alumnos: ' . count($students), 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
