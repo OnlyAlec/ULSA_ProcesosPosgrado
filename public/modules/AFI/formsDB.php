@@ -4,7 +4,6 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
 
-
 function init_process($filePath)
 {
     ErrorList::clear();
