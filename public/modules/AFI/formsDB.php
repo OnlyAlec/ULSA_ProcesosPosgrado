@@ -264,7 +264,7 @@ function createExcel($students, $programCount)
         }
     }
 
-    $scriptPath = '../../assets/js/AFI/generate_chart.js';
+    $scriptPath = '../../../includes/generate_chart.js';
     $sheet3 = $newSpreadsheet->createSheet();
     $sheet3->setTitle('Gráficas');
 
