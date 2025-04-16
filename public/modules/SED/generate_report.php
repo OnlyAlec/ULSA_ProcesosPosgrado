@@ -102,7 +102,6 @@ function generateReport($students, $filename)
         foreach ($studentsByEvaluation['EVALUATED'] as $programName => $programStudents) {
             addTable($pdf, $programName, $programStudents);
             $countEvaluated = $countEvaluated + count($programStudents);
-            $countEvaluated = $countEvaluated + count($programStudents);
         }
     }
 
