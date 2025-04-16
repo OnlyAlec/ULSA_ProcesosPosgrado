@@ -65,6 +65,8 @@ get_head("SED");
 get_header("Seguimiento de Evaluación Docente");
 ?>
     <main class="container content marco">
+        
+        <!-- PÁRRAFO INFORMATIVO -->
         <div class="sectionsSED">
             <h3>Lista de alumnos</h3>
             <p>
@@ -77,6 +79,8 @@ get_header("Seguimiento de Evaluación Docente");
             </ul>
         </div>
         <br>
+
+        <!-- FILTROS POR TIPO DE PROGRAMA Y ÁREA ESPECÍFICA + BOTÓN CARGA EXCEL -->
         <div class="row align-items-center">
             <div class="col-12 row">
                 <div class="form-box col-10" style="margin-bottom: 0;">
@@ -93,7 +97,6 @@ get_header("Seguimiento de Evaluación Docente");
                         </div>
                     </div>
                 </div>
-
                 <div class="col-2">
                     <a href="load_excel.php">
                         <button type="button" class="btn btn-outline-primary w-100">Cargar Excel</button>
@@ -117,7 +120,22 @@ get_header("Seguimiento de Evaluación Docente");
                 <div class="col-2"></div>
             </div>
         </div>
+
+        <!-- FILTROS PARA ALUMNOS POR SU ESTADO SED -->
+        <div class="form-group row justify-content-center mt-3">
+            <button id="removeFilter" class="btn btn-outline-success mr-2" style="width: 230px;">
+                <i class="fas fa-users"></i> Todos
+            </button>
+            <button id="onlyConfirm" class="btn btn-outline-primary mr-2" style="width: 230px;">
+                <i class="fas fa-check-double"></i> Solamente confirmados
+            </button>
+            <button id="onlyMissing" class="btn btn-outline-danger" style="width: 230px;">
+                <i class="fas fa-times-circle"></i> Solamente faltantes
+            </button>
+        </div>
         <br>
+
+        <!-- TABLA DE ALUMNOS -->
         <table class="table table-white table-nostriped" id="studentsTable">
             <thead class="thead-dark">
                 <tr>
@@ -125,44 +143,41 @@ get_header("Seguimiento de Evaluación Docente");
                     <th>Clave ULSA</th>
                     <th>Nombre Completo</th>
                     <th>Correo</th>
-                    <th>Estatus SED</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="studentsTable">
                 <?php
                     if (empty($studentsDB = getStudents())) {
-                        echo '<tr><td colspan="5">No hay alumnos registrados.</td></tr>';
+                        echo '<tr><td colspan="5" class="text-center">No hay alumnos registrados.</td></tr>';
                     } else {
                         foreach ($studentsDB as $student): ?>
-                        <tr data-carrer="<?= $student->getProgram() ?>">
-                            <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
-                            <td><?= $student->getUlsaId() ?></td>
-                            <td><?= ucwords($student->getName()). " " . ucwords($student->getLastName()) ?></td>
-                            <td><?= $student->getEmail() ?></td>
-                            <td>
-                                <div class="d-flex" style="gap: 8px;">
-                                    <?php
-                    $btnClass = $student->getSed() ? 'btn-success' : 'btn-danger';
-                            ?>
-                                    <button class="btn <?= $btnClass ?> btn-sm text-white changeSED border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
-                                        <?= $student->getSed()
-                                    ? '<i class="fas fa-check-square fa-2x"></i>'
-                                    : '<i class="fas fa-minus-square fa-2x"></i>'
-                            ?>
-                                    </button>
-                                    <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
-                                        <i class="fas fa-paper-plane fa-lg"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach;
-                    } ?>
+                            <tr data-carrer="<?= $student->getProgram() ?>">
+                                <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td> 
+                                <td><?= $student->getUlsaId() ?></td>
+                                <td><?= ucwords($student->getName()). " " . ucwords($student->getLastName()) ?></td>
+                                <td><?= $student->getEmail() ?></td>
+                                <td>
+                                    <div class="d-flex" style="gap: 8px;">
+                                        <?php $btnClass = $student->getSed() ? 'btn-danger' : 'btn-success'; ?>
+                                        <button class="btn <?= $btnClass ?> btn-sm text-white changeSED border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
+                                            <?= $student->getSed() ? '<i class="fas fa-minus-square fa-2x"></i>' : '<i class="fas fa-check-square fa-2x"></i>' ?>
+                                        </button>
+                                        <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
+                                            <i class="fas fa-paper-plane fa-lg"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach;
+                    }
+?>
             </tbody>
         </table>
+        <br>
 
+        <!-- BOTONES INFERIORES -->
         <div class="d-flex justify-content-between">
-
             <button id="confirmChanges" class="btn btn-outline-success w-50" style="width: 200px;" disabled>
                 <span>Confirmar Cambios</span>
             </button>
@@ -170,10 +185,12 @@ get_header("Seguimiento de Evaluación Docente");
                 <span>Generar Reporte</span>
             </button>
         </div>
-
+        
+        <!-- NUMERO DE ALUMNOS SELECCIONADOS EN CHECKBOXES -->
         <div id="selectedCountContainer">
-            <p style="margin-top:15px; font-size: 20px; font-weight: bold;">Alumnos seleccionados: <span
-                    id="selectedCount">0</span></p>
+            <p style="margin-top:15px; font-size: 20px; font-weight: bold;">Alumnos seleccionados: 
+                <span id="selectedCount">0</span>
+            </p>
         </div>
     </main>
 

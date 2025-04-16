@@ -249,7 +249,8 @@ get_header("Avisos de Fechas Importantes");
                         <ul style="display: none;">
                             <?php
                     foreach (getMastersPrograms() as $master) {
-                        echo "<li>$master->getMaster()</li>";
+                        $master = $master->getName();
+                        echo "<li>$master</li>";
                     } ?>
                         </ul>
                     </div>
@@ -263,7 +264,8 @@ get_header("Avisos de Fechas Importantes");
                         <ul style="display: none;">
                             <?php
                     foreach (getSpecialtyPrograms() as $special) {
-                        echo "<li>$special->getProgram()</li>";
+                        $special = $special->getName();
+                        echo "<li>$special</li>";
                     } ?>
                         </ul>
                     </div>
@@ -311,7 +313,8 @@ get_header("Avisos de Fechas Importantes");
                         <ul style="display: none;">
                             <?php
                     foreach (getMastersPrograms() as $master) {
-                        echo "<li>$master->getMaster();</li>";
+                        $master = $master->getName();
+                        echo "<li>$master</li>";
                     } ?>
                         </ul>
                     </div>
@@ -325,7 +328,8 @@ get_header("Avisos de Fechas Importantes");
                         <ul style="display: none;">
                             <?php
                     foreach (getSpecialtyPrograms() as $special) {
-                        echo "<li>$special->getProgram()</li>";
+                        $special = $special->getName();
+                        echo "<li>$special</li>";
                     } ?>
                         </ul>
                     </div>
