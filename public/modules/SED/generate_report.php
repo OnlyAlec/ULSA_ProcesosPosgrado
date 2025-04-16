@@ -28,7 +28,7 @@ function addNewPage($pdf)
 {
     $pdf->AddPage();
     $pdf->Image(PUBLIC_DIR . ASSETS_PATH . '/img/logo_lasalle.png', 10, 10, 45, 15.3, 'png');
-    $pdf->SetFont('Helvetica', '', 15);
+    $pdf->SetFont('IndivisaSans', '', 15);
     $pdf->Cell(0, 40, 'Reporte de Evaluaciones Docentes', 0, 1, 'R');
 }
 
@@ -36,7 +36,7 @@ function addTable($pdf, $titleTable, $students)
 {
     $pdf->Ln(5);
 
-    $pdf->SetFont('Helvetica', '', 12);
+    $pdf->SetFont('IndivisaSans', '', 12);
 
     // Encabezado de la tabla
     $pdf->SetFillColor(200, 220, 255);
@@ -53,7 +53,7 @@ function addTable($pdf, $titleTable, $students)
             addNewPage($pdf); // Añadir una página si se acerca al final
         }
 
-        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetFont('IndivisaTextSans', '', 10);
         $pdf->Cell(130, 10, mb_convert_encoding($student->fullName, 'ISO-8859-1', 'UTF-8'), 1, 0, 'L');
         $pdf->Cell(60, 10, $student->id, 1, 1, 'C');
     }
