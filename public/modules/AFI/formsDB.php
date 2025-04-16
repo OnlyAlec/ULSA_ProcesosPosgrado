@@ -312,7 +312,8 @@ function _updateInDB($studentsConfirm, $studentsNotConfirm)
     }
 }
 
-function generateChartAndInsert(array $data, string $type, string $scriptPath, string $graphsDir, string $cell, $sheet){
+function generateChartAndInsert(array $data, string $type, string $scriptPath, string $graphsDir, string $cell, $sheet)
+{
     $tempFile = tempnam(sys_get_temp_dir(), 'data_');
     file_put_contents($tempFile, json_encode($data));
 
@@ -329,5 +330,5 @@ function generateChartAndInsert(array $data, string $type, string $scriptPath, s
         $drawing->setPath($imagePath);
         $drawing->setCoordinates($cell);
         $drawing->setWorksheet($sheet);
-    }  
+    }
 }
