@@ -5,7 +5,6 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/utilities/util.php";
 
-
 function init_process($filePath)
 {
     ErrorList::clear();
@@ -268,40 +267,8 @@ function createExcel($students, $programCount)
     $sheet3 = $newSpreadsheet->createSheet();
     $sheet3->setTitle('Gráficas');
 
-    // Gráfica de Maestrías
-    $tempFile = tempnam(sys_get_temp_dir(), 'data_');
-    file_put_contents($tempFile, json_encode($masters));
-    $escapedTempFile = escapeshellarg($tempFile);
-    $type = escapeshellarg('maestrias');
-    $escapedGraphsDir = escapeshellarg($graphsDir);
-
-    exec("node $scriptPath $escapedTempFile $type $escapedGraphsDir");
-
-    $imagePath = "$graphsDir/chart_maestrias.png";
-    if (file_exists($imagePath)) {
-        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-        $drawing->setPath($imagePath);
-        $drawing->setCoordinates('A1');
-        $drawing->setWorksheet($sheet3);
-    }
-
-
-    // Gráfica de Especialidades
-    $tempFile = tempnam(sys_get_temp_dir(), 'data_');
-    file_put_contents($tempFile, json_encode($specialties));
-    $escapedTempFile = escapeshellarg($tempFile);
-    $type = escapeshellarg('especialidades');
-    $escapedGraphsDir = escapeshellarg($graphsDir);
-
-    exec("node $scriptPath $escapedTempFile $type $escapedGraphsDir");
-
-    $imagePath = "$graphsDir/chart_especialidades.png";
-    if (file_exists($imagePath)) {
-        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-        $drawing->setPath($imagePath);
-        $drawing->setCoordinates('P1');
-        $drawing->setWorksheet($sheet3);
-    }
+    generateChartAndInsert($masters, 'maestrias', $scriptPath, $graphsDir, 'A1', $sheet3);
+    generateChartAndInsert($specialties, 'especialidades', $scriptPath, $graphsDir, 'P1', $sheet3);
 
     //* Save File
     if (!file_exists(XLSX_DIR)) {
@@ -348,4 +315,24 @@ function _updateInDB($studentsConfirm, $studentsNotConfirm)
     foreach ($studentsConfirm as $student) {
         updateStudentFieldBoolean($student->getUlsaId(), 'afi', true);
     }
+}
+
+function generateChartAndInsert(array $data, string $type, string $scriptPath, string $graphsDir, string $cell, $sheet){
+    $tempFile = tempnam(sys_get_temp_dir(), 'data_');
+    file_put_contents($tempFile, json_encode($data));
+
+    $process = new \Symfony\Component\Process\Process(['node', $scriptPath, $tempFile, $type, $graphsDir]);
+    $process->run();
+
+    if (!$process->isSuccessful()) {
+        throw new \Symfony\Component\Process\Exception\ProcessFailedException($process);
+    }
+
+    $imagePath = "$graphsDir/chart_{$type}.png";
+    if (file_exists($imagePath)) {
+        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+        $drawing->setPath($imagePath);
+        $drawing->setCoordinates($cell);
+        $drawing->setWorksheet($sheet);
+    }  
 }
