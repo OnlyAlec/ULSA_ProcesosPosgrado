@@ -108,7 +108,7 @@ function generateReport($students, $filename)
 
     if (!empty($studentsByEvaluation['NOT_EVALUATED'])) {
         addNewPage($pdf);
-        $pdf->SetFont('Helvetica', '', 14);
+        $pdf->SetFont('IndivisaSans', '', 14);
         $pdf->Cell(0, 10, mb_convert_encoding('Alumnos que no han realizado la Evaluación Docente', 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
         $pdf->Ln(5);
 
