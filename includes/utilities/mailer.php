@@ -75,12 +75,14 @@ class Mailer
                 $this->url = "$this->redirection?token=" . urlencode($token);
             }
 
+            $nameParts = preg_split('/\s+/', $this->contact->getName());
+            $formattedName = implode(' ', array_map('ucfirst', $nameParts));
             $lastNameParts = preg_split('/\s+/', $this->contact->getLastName());
             $formattedLastName = implode(' ', array_map('ucfirst', $lastNameParts));
 
             $dataReplace = [
                 "header" => "Gestión de Procesos de Posgrado",
-                "name" => ucfirst($this->contact->getName()) . " " . $formattedLastName,
+                "name" => "$formattedName $formattedLastName",
                 "url" => $this->url ?? "",
             ];
 
@@ -89,7 +91,7 @@ class Mailer
             }
 
             $base = $this->getTemplateHTML();
-            $keys = array_map(fn ($key) => "-- " . strtoupper($key) . " --", array_keys($dataReplace));
+            $keys = array_map(fn($key) => "-- " . strtoupper($key) . " --", array_keys($dataReplace));
 
             $this->htmlContent = $this->convertMJMLToHTML($base);
             $this->htmlContent = str_replace($keys, array_values($dataReplace), $this->htmlContent);

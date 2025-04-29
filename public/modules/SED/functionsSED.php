@@ -3,6 +3,7 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once INCLUDES_DIR . '/utilities/database.php';
 require_once INCLUDES_DIR . '/utilities/mailer.php';
+require_once INCLUDES_DIR . '/utilities/util.php';
 
 function changeStatusSEDSingle($studentID, $newState)
 {
@@ -25,7 +26,7 @@ function changeStatusSEDGroup($studentIDs)
     }
 
     if ($error) {
-        throw new RuntimeException("");
+        throw new RuntimeException("Error updating SED status");
     }
 
     return "";
@@ -47,11 +48,16 @@ function sendEmailRemainder(Student $student)
     }
 
     if (!$currentDate) {
-        $currentDate = DateTime::createFromFormat('d/m/Y', end($dates));
+        $lastDate = end($dates);
+        $currentDate = DateTime::createFromFormat('d/m/Y', $lastDate);
+
+        if (!$currentDate) {
+            $currentDate = new DateTime();
+        }
     }
 
     setlocale(LC_TIME, 'es_ES.UTF-8');
-    $formattedDate = $currentDate->format('d \d\e F \d\e\l Y');
+    $formattedDate = $currentDate->format('d') . ' de ' . mesNombre((int) $currentDate->format('n')) . ' del ' . $currentDate->format('Y');
 
     $data = [
         "title" => "Aviso Importante Evaluación Docente",
@@ -59,7 +65,7 @@ function sendEmailRemainder(Student $student)
     ];
 
     $mailer->constructEmail($data);
-    return  $mailer->send();
+    return $mailer->send();
 }
 
 function getProgramsFiltered($action)
