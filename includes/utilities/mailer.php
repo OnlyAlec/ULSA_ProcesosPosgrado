@@ -91,7 +91,7 @@ class Mailer
             }
 
             $base = $this->getTemplateHTML();
-            $keys = array_map(fn($key) => "-- " . strtoupper($key) . " --", array_keys($dataReplace));
+            $keys = array_map(fn ($key) => "-- " . strtoupper($key) . " --", array_keys($dataReplace));
 
             $this->htmlContent = $this->convertMJMLToHTML($base);
             $this->htmlContent = str_replace($keys, array_values($dataReplace), $this->htmlContent);
