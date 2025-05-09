@@ -28,7 +28,7 @@ try {
             }
 
             if (!is_dir($uploadDir)) {
-                if (!mkdir($uploadDir, 0755, true)) {
+                if (!mkdir($uploadDir, 02775, true)) {
                     throw new RuntimeException('Error creating directory for XLSX files.');
                 }
             }
@@ -65,8 +65,8 @@ get_head("SED");
 
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header("Seguimiento de Evaluación Docente");
-?>
+    get_header("Seguimiento de Evaluación Docente");
+    ?>
 
     <main class="container content marco">
         <div>

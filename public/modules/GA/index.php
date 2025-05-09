@@ -31,7 +31,7 @@ try {
             }
 
             if (!is_dir($uploadDir)) {
-                if (!mkdir($uploadDir, 0755, true)) {
+                if (!mkdir($uploadDir, 02775, true)) {
                     throw new RuntimeException('Error creating directory for XLSX files.');
                 }
             }
@@ -63,7 +63,7 @@ try {
             $res = insertOneStudent($_POST["claveUlsa"], $_POST["nombre"], $_POST["apellidos"], $_POST["carrera"], $_POST["email"]);
 
         } elseif ($_POST["action"] === "getTableStudents") {
-            $res = array_values(array_map(fn ($student) => $student->getJSON(), getStudents()));
+            $res = array_values(array_map(fn($student) => $student->getJSON(), getStudents()));
         } elseif ($_POST["action"] === "deleteOneStudent") {
             if (!preg_match('/^\d{6}$/', $_POST["claveUlsaDelete"])) {
                 throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
@@ -106,30 +106,35 @@ get_head("GA");
 
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header("Gestión de Alumnos");
-?>
+    get_header("Gestión de Alumnos");
+    ?>
 
     <main class="container content marco">
         <div>
             <div class="d-flex justify-content-end align-items-center">
-                <a href="<?=$_SERVER['DOCUMENT_ROOT']?>" class="btn btn-outline-primary">Regresar</a>
+                <a href="<?= $_SERVER['DOCUMENT_ROOT'] ?>" class="btn btn-outline-primary">Regresar</a>
             </div>
             <br>
             <br>
             <div class="btn-group d-flex mb-4" role="group" id="button-group">
-                <button class="btn btn-dark flex-grow-1"    id="btn-crear" onclick="showSection('crear')">Registrar Alumnos</button>
-                <button class="btn btn-primary flex-grow-1" id="btn-consultar" onclick="showSection('consultar')">Consultar Alumnos</button>
-                <button class="btn btn-primary flex-grow-1" id="btn-eliminar" onclick="showSection('eliminar')" type="submit">Eliminar Alumnos</button>
+                <button class="btn btn-dark flex-grow-1" id="btn-crear" onclick="showSection('crear')">Registrar
+                    Alumnos</button>
+                <button class="btn btn-primary flex-grow-1" id="btn-consultar"
+                    onclick="showSection('consultar')">Consultar Alumnos</button>
+                <button class="btn btn-primary flex-grow-1" id="btn-eliminar" onclick="showSection('eliminar')"
+                    type="submit">Eliminar Alumnos</button>
             </div>
-            
+
             <div id="section-crear" class="section">
                 <h2>Carga de concentrado de alumnos en Excel:</h2>
                 <form action="" method="post" enctype="multipart/form-data" class="mt-4">
                     <input type="hidden" name="action" value="registerFromExcel">
                     <div class="mb-3">
                         <h4 for="gaExcelFile" class="form-label">Subir archivo Excel:</h4>
-                        <input type="file" class="form-control form-control-lg w-100 pb-5 pl-2" id="gaExcelFile" name="gaExcelFile" accept=".xls,.xlsx" required>
-                        <div id="emailHelp" class="form-text d-flex justify-content-end">Se sobreescribirá la base de datos.</div>
+                        <input type="file" class="form-control form-control-lg w-100 pb-5 pl-2" id="gaExcelFile"
+                            name="gaExcelFile" accept=".xls,.xlsx" required>
+                        <div id="emailHelp" class="form-text d-flex justify-content-end">Se sobreescribirá la base de
+                            datos.</div>
                     </div>
                     <div class="d-flex align-items-center">
                         <h4>Encabezados</h4>
@@ -141,27 +146,32 @@ get_header("Gestión de Alumnos");
                         <div class="row align-items-center mb-2">
                             <div class="col-6 d-flex">
                                 <label class="col-4" for="claveUlsaCol">Clave Ulsa:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="claveUlsaCol" name="claveUlsaCol" placeholder="Columna" maxlength="1">
+                                <input type="text" class="col-6 form-control w-auto" id="claveUlsaCol"
+                                    name="claveUlsaCol" placeholder="Columna" maxlength="1">
                             </div>
                             <div class="col-6 d-flex">
                                 <label class="col-4" for="nombreCol">Nombre(s):</label>
-                                <input type="text" class="col-6 form-control w-auto" id="nombreCol" name="nombreCol" placeholder="Columna" maxlength="1">
+                                <input type="text" class="col-6 form-control w-auto" id="nombreCol" name="nombreCol"
+                                    placeholder="Columna" maxlength="1">
                             </div>
                         </div>
                         <div class="row align-items-center mb-2">
                             <div class="col-6 d-flex">
                                 <label class="col-4" for="apellidosCol">Apellidos:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="apellidosCol" name="apellidosCol" placeholder="Columna" maxlength="1">
+                                <input type="text" class="col-6 form-control w-auto" id="apellidosCol"
+                                    name="apellidosCol" placeholder="Columna" maxlength="1">
                             </div>
                             <div class="col-6 d-flex">
                                 <label class="col-4" for="carreraCol">Carrera:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="carreraCol" name="carreraCol" placeholder="Columna" maxlength="1">
+                                <input type="text" class="col-6 form-control w-auto" id="carreraCol" name="carreraCol"
+                                    placeholder="Columna" maxlength="1">
                             </div>
                         </div>
                         <div class="row align-items-center mb-2">
                             <div class="col-6 d-flex">
                                 <label class="col-4" for="emailCol">Email:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="emailCol" name="emailCol" placeholder="Columna" maxlength="1">
+                                <input type="text" class="col-6 form-control w-auto" id="emailCol" name="emailCol"
+                                    placeholder="Columna" maxlength="1">
                             </div>
                         </div>
                     </div>
@@ -172,7 +182,7 @@ get_header("Gestión de Alumnos");
                         <button type="submit" class="btn btn-primary">Cargar Excel</button>
                     </div>
                 </form>
-                
+
                 <br>
                 <hr>
 
@@ -190,27 +200,32 @@ get_header("Gestión de Alumnos");
                         <div class="row align-items-center mb-2">
                             <div class="col-6 d-flex">
                                 <label class="col-4" for="claveUlsa">Clave Ulsa:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="claveUlsa" name="claveUlsa" placeholder="Clave Ulsa">
+                                <input type="text" class="col-6 form-control w-auto" id="claveUlsa" name="claveUlsa"
+                                    placeholder="Clave Ulsa">
                             </div>
                             <div class="col-6 d-flex">
                                 <label class="col-4" for="nombre">Nombre(s):</label>
-                                <input type="text" class="col-6 form-control w-auto" id="nombre" name="nombre" placeholder="Nombre(s)">
+                                <input type="text" class="col-6 form-control w-auto" id="nombre" name="nombre"
+                                    placeholder="Nombre(s)">
                             </div>
                         </div>
                         <div class="row align-items-center mb-2">
                             <div class="col-6 d-flex">
                                 <label class="col-4" for="apellidos">Apellidos:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="apellidos" name="apellidos" placeholder="Apellidos">
+                                <input type="text" class="col-6 form-control w-auto" id="apellidos" name="apellidos"
+                                    placeholder="Apellidos">
                             </div>
                             <div class="col-6 d-flex">
                                 <label class="col-4" for="carrera">Carrera:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="carrera" name="carrera" placeholder="Carrera">
+                                <input type="text" class="col-6 form-control w-auto" id="carrera" name="carrera"
+                                    placeholder="Carrera">
                             </div>
                         </div>
                         <div class="row align-items-center mb-2">
                             <div class="col-6 d-flex">
                                 <label class="col-4" for="email">Email:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="email" name="email" placeholder="Correo electrónico">
+                                <input type="text" class="col-6 form-control w-auto" id="email" name="email"
+                                    placeholder="Correo electrónico">
                             </div>
                         </div>
                     </div>
@@ -226,7 +241,7 @@ get_header("Gestión de Alumnos");
             <div id="section-consultar" class="section d-none">
                 <h2>Consultar Alumnos</h2>
                 <table id="tableStudents" class="table">
-                <thead>
+                    <thead>
                         <tr>
                             <th scope="col">Clave ULSA</th>
                             <th scope="col">Nombre Completo</th>
@@ -254,14 +269,15 @@ get_header("Gestión de Alumnos");
                         <div class="row align-items-center mb-2">
                             <div class="col-6 d-flex">
                                 <label class="col-4" for="claveUlsaDelete">Clave Ulsa:</label>
-                                <input type="text" class="col-6 form-control w-auto" id="claveUlsaDelete" name="claveUlsaDelete" placeholder="Clave Ulsa" maxlength="6">
+                                <input type="text" class="col-6 form-control w-auto" id="claveUlsaDelete"
+                                    name="claveUlsaDelete" placeholder="Clave Ulsa" maxlength="6">
                             </div>
-                    </div>
+                        </div>
 
-                    <br>
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary">Eliminar alumno</button>
-                    </div>
+                        <br>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">Eliminar alumno</button>
+                        </div>
                 </form>
 
                 <br>
@@ -277,7 +293,7 @@ get_header("Gestión de Alumnos");
                 </form>
 
             </div>
-            
+
         </div>
     </main>
 

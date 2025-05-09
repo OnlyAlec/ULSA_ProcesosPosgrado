@@ -21,7 +21,7 @@ function init_process($filePath)
         $missingStudents = filterMissingStudents($studentsExcel, $studentsDB);
         $programCount = getProgramCount($studentsDB, $missingStudents);
         $outputFile = createExcel($missingStudents, $programCount);
-        $studentsArray = array_map(fn ($student) => $student->getJSON(), $missingStudents);
+        $studentsArray = array_map(fn($student) => $student->getJSON(), $missingStudents);
         _updateInDB($studentsExcel, $missingStudents);
 
         return [
@@ -244,7 +244,7 @@ function createExcel($students, $programCount)
 
     //* Save File
     if (!file_exists(XLSX_DIR)) {
-        if (!mkdir(XLSX_DIR, 0755, true)) {
+        if (!mkdir(XLSX_DIR, 02775, true)) {
             throw new RuntimeException('Error creating directory for XLSX files.');
         }
     }
