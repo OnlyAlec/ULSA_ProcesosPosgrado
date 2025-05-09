@@ -46,13 +46,15 @@ jobs:
                   target: ${{ secrets.SSH_PATH }}
                   rm: false
 
-            - name: Change ownership to nginx
+            - name: Change ownership and permissions to nginx
               run: |
                   ssh -i ~/.ssh/deploy_key \
                   -o StrictHostKeyChecking=no \
                   -p ${{ secrets.PORT }} \
-                  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-                  "sudo /usr/bin/chown -R nginx:nginx ${{ secrets.SSH_PATH }}"
+                  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+                  sudo /usr/bin/chown -R nginx:nginx ${{ secrets.SSH_PATH }}
+                  sudo /usr/bin/chmod -R 2775 ${{ secrets.SSH_PATH }}/public
+                  EOF
 
             - name: Restore .env
               run: |
