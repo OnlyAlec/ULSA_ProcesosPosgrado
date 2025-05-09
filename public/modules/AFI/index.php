@@ -16,7 +16,7 @@ try {
 
             switch ($_POST['action']) {
                 case 'getTableStudents':
-                    $res = array_values(array_map(fn ($student) => $student->getJSON(), getStudents()));
+                    $res = array_values(array_map(fn($student) => $student->getJSON(), getStudents()));
                     break;
                 case 'getMissing':
                     //? Not in use
@@ -54,7 +54,7 @@ try {
 
                 if (in_array($ext, $allowedExtensions)) {
                     if (!is_dir($uploadDir)) {
-                        if (!mkdir($uploadDir, 0755, true)) {
+                        if (!mkdir($uploadDir, 02775, true)) {
                             throw new RuntimeException('Error creating upload directory.');
                         }
                     }
@@ -76,7 +76,7 @@ try {
 
                 if (in_array($ext1, $allowedExtensions) && in_array($ext2, $allowedExtensions)) {
                     if (!is_dir($uploadDir)) {
-                        if (!mkdir($uploadDir, 0755, true)) {
+                        if (!mkdir($uploadDir, 02775, true)) {
                             throw new RuntimeException('Error creating directory for XLSX files.');
                         }
                     }
@@ -112,8 +112,8 @@ get_head("AFI");
 
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header("Avisos de Fechas Importantes");
-?>
+    get_header("Avisos de Fechas Importantes");
+    ?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
@@ -248,10 +248,9 @@ get_header("Avisos de Fechas Importantes");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                    foreach (getMastersPrograms() as $master) {
-                        $master = $master->getName();
-                        echo "<li>$master</li>";
-                    } ?>
+                            foreach (getMastersPrograms() as $master) {
+                                echo "<li>$master->getMaster()</li>";
+                            } ?>
                         </ul>
                     </div>
                 </div>
@@ -263,10 +262,9 @@ get_header("Avisos de Fechas Importantes");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                    foreach (getSpecialtyPrograms() as $special) {
-                        $special = $special->getName();
-                        echo "<li>$special</li>";
-                    } ?>
+                            foreach (getSpecialtyPrograms() as $special) {
+                                echo "<li>$special->getProgram()</li>";
+                            } ?>
                         </ul>
                     </div>
                 </div>
@@ -312,10 +310,9 @@ get_header("Avisos de Fechas Importantes");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                    foreach (getMastersPrograms() as $master) {
-                        $master = $master->getName();
-                        echo "<li>$master</li>";
-                    } ?>
+                            foreach (getMastersPrograms() as $master) {
+                                echo "<li>$master->getMaster();</li>";
+                            } ?>
                         </ul>
                     </div>
                 </div>
@@ -327,10 +324,9 @@ get_header("Avisos de Fechas Importantes");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                    foreach (getSpecialtyPrograms() as $special) {
-                        $special = $special->getName();
-                        echo "<li>$special</li>";
-                    } ?>
+                            foreach (getSpecialtyPrograms() as $special) {
+                                echo "<li>$special->getProgram()</li>";
+                            } ?>
                         </ul>
                     </div>
                 </div>
