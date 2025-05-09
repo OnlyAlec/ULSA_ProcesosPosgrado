@@ -16,7 +16,7 @@ try {
 
             switch ($_POST['action']) {
                 case 'getTableStudents':
-                    $res = array_values(array_map(fn($student) => $student->getJSON(), getStudents()));
+                    $res = array_values(array_map(fn ($student) => $student->getJSON(), getStudents()));
                     break;
                 case 'getMissing':
                     //? Not in use
@@ -112,8 +112,8 @@ get_head("AFI");
 
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-    get_header("Avisos de Fechas Importantes");
-    ?>
+get_header("Avisos de Fechas Importantes");
+?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
