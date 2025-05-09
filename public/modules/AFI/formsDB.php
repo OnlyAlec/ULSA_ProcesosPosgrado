@@ -21,7 +21,7 @@ function init_process($filePath)
         $missingStudents = filterMissingStudents($studentsExcel, $studentsDB);
         $programCount = getProgramCount($studentsDB, $missingStudents);
         $outputFile = createExcel($missingStudents, $programCount);
-        $studentsArray = array_map(fn($student) => $student->getJSON(), $missingStudents);
+        $studentsArray = array_map(fn ($student) => $student->getJSON(), $missingStudents);
         _updateInDB($studentsExcel, $missingStudents);
 
         return [

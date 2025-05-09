@@ -16,7 +16,7 @@ try {
 
             switch ($_POST['action']) {
                 case 'getTableStudents':
-                    $res = array_values(array_map(fn($student) => $student->getJSON(), getStudents()));
+                    $res = array_values(array_map(fn ($student) => $student->getJSON(), getStudents()));
                     break;
                 case 'getMissing':
                     //? Not in use
@@ -112,8 +112,8 @@ get_head("AFI");
 
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-    get_header("Avisos de Fechas Importantes");
-    ?>
+get_header("Avisos de Fechas Importantes");
+?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
@@ -248,9 +248,9 @@ get_head("AFI");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                            foreach (getMastersPrograms() as $master) {
-                                echo "<li>$master->getMaster()</li>";
-                            } ?>
+                        foreach (getMastersPrograms() as $master) {
+                            echo "<li>$master->getMaster()</li>";
+                        } ?>
                         </ul>
                     </div>
                 </div>
@@ -262,9 +262,9 @@ get_head("AFI");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                            foreach (getSpecialtyPrograms() as $special) {
-                                echo "<li>$special->getProgram()</li>";
-                            } ?>
+                        foreach (getSpecialtyPrograms() as $special) {
+                            echo "<li>$special->getProgram()</li>";
+                        } ?>
                         </ul>
                     </div>
                 </div>
@@ -310,9 +310,9 @@ get_head("AFI");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                            foreach (getMastersPrograms() as $master) {
-                                echo "<li>$master->getMaster();</li>";
-                            } ?>
+                        foreach (getMastersPrograms() as $master) {
+                            echo "<li>$master->getMaster();</li>";
+                        } ?>
                         </ul>
                     </div>
                 </div>
@@ -324,9 +324,9 @@ get_head("AFI");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                            foreach (getSpecialtyPrograms() as $special) {
-                                echo "<li>$special->getProgram()</li>";
-                            } ?>
+                        foreach (getSpecialtyPrograms() as $special) {
+                            echo "<li>$special->getProgram()</li>";
+                        } ?>
                         </ul>
                     </div>
                 </div>
