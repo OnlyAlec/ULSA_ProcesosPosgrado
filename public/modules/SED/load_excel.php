@@ -65,8 +65,8 @@ get_head("SED");
 
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header("Seguimiento de Evaluación Docente");
-?>
+    get_header("Seguimiento de Evaluación Docente");
+    ?>
 
     <main class="container content marco">
         <div>
