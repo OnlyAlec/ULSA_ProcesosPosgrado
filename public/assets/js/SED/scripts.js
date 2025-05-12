@@ -1,6 +1,6 @@
-window.displayMessage = displayMessage;
+$(function () {
+    window.displayMessage = displayMessage;
 
-$(document).ready(function () {
     $('form').submit(function (e) {
         e.preventDefault();
         const form = $(this);
