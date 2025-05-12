@@ -8,5 +8,13 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.73"
+    },
+    "scripts": {
+        "format:prettier": "npx prettier --write . --config .prettierrc --ignore-path .prettierignore",
+        "format:phpcsfixer": "PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix --allow-risky=yes --config=.php-cs-fixer.dist.php",
+        "format": [
+            "@format:prettier",
+            "@format:phpcsfixer"
+        ]
     }
 }
