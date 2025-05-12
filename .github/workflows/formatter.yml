@@ -69,6 +69,6 @@ jobs:
             - name: Run Prettier JS/HTML/CSS/JSON formatting
               uses: creyD/prettier_action@v4.3
               with:
-                  commit_message: style: Fix Prettier styling 🎨
+                  commit_message: Fix Prettier styling 🎨
                   prettier_options: --write . --ignore-path .prettierignore --config .prettierrc --ignore-unknown
                   github_token: ${{ secrets.GITHUB_TOKEN }}
