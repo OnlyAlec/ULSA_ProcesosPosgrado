@@ -1,6 +1,6 @@
 <?php
 
-require_once VENDOR_DIR . "/autoload.php";
+require_once VENDOR_DIR . '/autoload.php';
 
 use GuzzleHttp\Client;
 use Brevo\Client\Configuration;
@@ -21,34 +21,26 @@ class Brevo
 
     public function __construct()
     {
-        $config = Configuration::getDefaultConfiguration()->setApiKey('api-key', $_ENV['BREVO_API_KEY']);
-        $path = (DIRECTORY_SEPARATOR === '\\')
-            ? str_replace('/', '\\', VENDOR_DIR . '\cacert.pem')
-            : str_replace('\\', '/', VENDOR_DIR . '\cacert.pem');
+        $config = Configuration::getDefaultConfiguration()->setApiKey(
+            'api-key',
+            $_ENV['BREVO_API_KEY'],
+        );
+        $path =
+            DIRECTORY_SEPARATOR === '\\'
+                ? str_replace('/', '\\', VENDOR_DIR . '\cacert.pem')
+                : str_replace('\\', '/', VENDOR_DIR . '\cacert.pem');
         $client = new Client([
-            'verify' => $path
+            'verify' => $path,
         ]);
 
-        $this->apiEmailCampaigns = new \Brevo\Client\Api\EmailCampaignsApi(
-            $client,
-            $config
-        );
-        $this->apiLists = new \Brevo\Client\Api\ListsApi(
-            $client,
-            $config
-        );
-        $this->apiContacts = new \Brevo\Client\Api\ContactsApi(
-            $client,
-            $config
-        );
+        $this->apiEmailCampaigns = new \Brevo\Client\Api\EmailCampaignsApi($client, $config);
+        $this->apiLists = new \Brevo\Client\Api\ListsApi($client, $config);
+        $this->apiContacts = new \Brevo\Client\Api\ContactsApi($client, $config);
         $this->apiTransactionalEmails = new \Brevo\Client\Api\TransactionalEmailsApi(
             $client,
-            $config
+            $config,
         );
-        $this->apiSenders = new \Brevo\Client\Api\SendersApi(
-            $client,
-            $config
-        );
+        $this->apiSenders = new \Brevo\Client\Api\SendersApi($client, $config);
 
         $this->getSender();
     }
@@ -86,7 +78,7 @@ class Brevo
             'subject' => $subject,
             'sender' => new \Brevo\Client\Model\SendSmtpEmailSender(['id' => $this->sender['id']]),
             'to' => [['name' => $name, 'email' => $email]],
-            'htmlContent' => $content
+            'htmlContent' => $content,
         ]);
         return $this->_sendEmailTransaccional($sendSmtpEmail);
     }

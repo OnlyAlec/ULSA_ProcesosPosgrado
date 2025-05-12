@@ -11,7 +11,7 @@
     max-height: 64px;
 }
 body {
-    font-family: "indivisa-text", Arial;
+    font-family: 'indivisa-text', Arial;
     font-size: 16px !important;
     color: #001d68;
     background-color: white;
@@ -47,7 +47,7 @@ body {
     padding: 0 15px;
 }
 .menu-list .sistema:not(:last-child):after {
-    content: "|";
+    content: '|';
     margin-left: 10px;
     margin-right: 10px;
 }
@@ -68,7 +68,7 @@ h1 {
     margin-bottom: 40px;
 }
 .subtitle:before {
-    content: "";
+    content: '';
     position: absolute;
     bottom: -8px;
     left: 0;
@@ -181,7 +181,7 @@ h1 {
     color: #969696;
 }
 .form-box > .form-group > label:before {
-    content: "";
+    content: '';
     position: absolute;
     top: -8px;
     right: 0px;
@@ -238,7 +238,7 @@ select:disabled {
 }
 
 .barra-right:before {
-    content: "";
+    content: '';
     position: absolute;
     top: -8px;
     right: 0px;
@@ -445,7 +445,7 @@ header .logotipo {
     margin-right: 0;
 }
 header .logotipo:before {
-    content: "";
+    content: '';
     display: table;
 }
 header .logotipo img,
@@ -554,10 +554,10 @@ aside .logotipo img {
     padding-left: 20px;
 }
 .btn.arrow:after {
-    content: "\e905";
+    content: '\e905';
     font-size: 14px;
     position: absolute;
-    font-family: "ingfont";
+    font-family: 'ingfont';
     right: 14px;
     margin-top: 3px;
     font-weight: bold;
@@ -619,14 +619,14 @@ footer .footerTop .logotipo h3 {
     float: right;
     text-align: right;
     font-size: 25px;
-    font-family: "indivisa-text";
+    font-family: 'indivisa-text';
 }
 footer .footerTop .logotipo h3 span {
     display: block;
 }
 footer .footerTop .menuFooter h3 {
     font-size: 12px;
-    font-family: "indivisa-text";
+    font-family: 'indivisa-text';
     color: #fff !important;
 }
 footer .footerTop .menuFooter ul {

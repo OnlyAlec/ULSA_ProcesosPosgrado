@@ -1,8 +1,8 @@
 <?php
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
-require_once VENDOR_DIR . "/autoload.php";
-require_once INCLUDES_DIR . "/utilities/util.php";
+require_once VENDOR_DIR . '/autoload.php';
+require_once INCLUDES_DIR . '/utilities/util.php';
 
 function init_process($filePath)
 {
@@ -14,7 +14,7 @@ function init_process($filePath)
     $outputFile = null;
 
     try {
-        if (empty($studentsDB = getStudents())) {
+        if (empty(($studentsDB = getStudents()))) {
             return [];
         }
 
@@ -30,7 +30,7 @@ function init_process($filePath)
             'excel' => filePathToUrl($outputFile),
             'totalDB' => count($studentsDB),
             'totalFiltered' => count($studentsArray),
-            'graphData' => getGraphData($missingStudents)
+            'graphData' => getGraphData($missingStudents),
         ];
     } catch (RuntimeException $e) {
         throw new RuntimeException($e->getMessage());
@@ -55,12 +55,12 @@ function processExcel($filePath)
     }
 
     //^ Obtener datos y pasar a clase
-    $claveColumn = $headerMap["clave ulsa (sin al, sólo las 6 cifras)"];
-    $apellidoPColumn = $headerMap["apellido paterno"];
-    $apellidoMColumn = $headerMap["apellido materno"];
-    $nombreColumn = $headerMap["nombre(s)"];
-    $tipoColumn = $headerMap["tipo de programa (especialidad o maestría)"];
-    $areaColumn = $headerMap["Área de programa (especialidad en ó maestría en)"];
+    $claveColumn = $headerMap['clave ulsa (sin al, sólo las 6 cifras)'];
+    $apellidoPColumn = $headerMap['apellido paterno'];
+    $apellidoMColumn = $headerMap['apellido materno'];
+    $nombreColumn = $headerMap['nombre(s)'];
+    $tipoColumn = $headerMap['tipo de programa (especialidad o maestría)'];
+    $areaColumn = $headerMap['Área de programa (especialidad en ó maestría en)'];
 
     $students = [];
     $dataRows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
@@ -72,7 +72,7 @@ function processExcel($filePath)
                 strtolower(trim($row[$apellidoMColumn]) . ' ' . trim($row[$apellidoPColumn])),
                 $row[$claveColumn],
                 strtolower($row[$tipoColumn] . ' ' . $row[$areaColumn]),
-                "",
+                '',
             );
         } catch (InvalidArgumentException $e) {
             ErrorList::add($e->getMessage());
@@ -86,12 +86,12 @@ function processExcel($filePath)
 function _validateExcel($headerMap)
 {
     $requiredHeaders = [
-        "clave ulsa (sin al, sólo las 6 cifras)",
-        "apellido paterno",
-        "apellido materno",
-        "nombre(s)",
-        "tipo de programa (especialidad o maestría)",
-        "Área de programa (especialidad en ó maestría en)"
+        'clave ulsa (sin al, sólo las 6 cifras)',
+        'apellido paterno',
+        'apellido materno',
+        'nombre(s)',
+        'tipo de programa (especialidad o maestría)',
+        'Área de programa (especialidad en ó maestría en)',
     ];
 
     foreach ($requiredHeaders as $header) {
@@ -123,7 +123,7 @@ function getProgramCount($db, $filtered)
     return [
         'total' => $totalCounts,
         'filtered' => $filteredCounts,
-        'programs' => $allPrograms
+        'programs' => $allPrograms,
     ];
 }
 
@@ -135,10 +135,7 @@ function filterMissingStudents($studentsExcel, $studentsDB)
         if ($excelStudent->getUlsaId() !== null) {
             $excelById[$excelStudent->getUlsaId()] = true;
         } else {
-            $nameKey = implode('|', [
-                $excelStudent->getLastName(),
-                $excelStudent->getName()
-            ]);
+            $nameKey = implode('|', [$excelStudent->getLastName(), $excelStudent->getName()]);
             $excelByName[$nameKey] = true;
         }
     }
@@ -149,10 +146,7 @@ function filterMissingStudents($studentsExcel, $studentsDB)
         $existsInExcel = isset($excelById[$ulsaId]);
 
         if (!$existsInExcel) {
-            $nameKey = implode('|', [
-                $student->getLastName(),
-                $student->getName()
-            ]);
+            $nameKey = implode('|', [$student->getLastName(), $student->getName()]);
             $existsInExcel = isset($excelByName[$nameKey]);
         }
 
@@ -168,13 +162,7 @@ function createExcel($students, $programCount)
 {
     $newSpreadsheet = new PhpOffice\PhpSpreadsheet\Spreadsheet();
     $sheet1 = $newSpreadsheet->getActiveSheet();
-    $headers = [
-        "Apellidos",
-        "Nombre(s)",
-        "Clave Ulsa",
-        "Programa",
-        "Correo institucional"
-    ];
+    $headers = ['Apellidos', 'Nombre(s)', 'Clave Ulsa', 'Programa', 'Correo institucional'];
 
     //* Format
     $sheet1->setTitle('Estudiantes sin confirmar AFI');
@@ -184,11 +172,7 @@ function createExcel($students, $programCount)
         $sheet1->getStyle($cell)->getFont()->setBold(true);
     }
 
-    $sheet1->fromArray(
-        [$headers],
-        null,
-        'A1'
-    );
+    $sheet1->fromArray([$headers], null, 'A1');
     $dataRows = [];
     foreach ($students as $student) {
         $dataRows[] = [
@@ -196,7 +180,7 @@ function createExcel($students, $programCount)
             $student->getName(),
             $student->getUlsaId(),
             $student->getProgram(),
-            $student->getEmail()
+            $student->getEmail(),
         ];
     }
     $sheet1->fromArray($dataRows, null, 'A2');
@@ -205,7 +189,6 @@ function createExcel($students, $programCount)
     foreach (range('A', 'E') as $col) {
         $sheet1->getColumnDimension($col)->setAutoSize(true);
     }
-
 
     $sheet2 = $newSpreadsheet->createSheet();
     $sheet2->setTitle('Conteos por Programa');
@@ -223,12 +206,11 @@ function createExcel($students, $programCount)
     $specialties = [];
 
     foreach ($programCount['programs'] as $program) {
-
         $sheet2->setCellValue("A{$rowIndex}", $program);
 
         $partial = $programCount['filtered'][$program] ?? 0;
         $total = $programCount['total'][$program] ?? 0;
-        $percentage = ($total > 0) ? ($partial / $total) * 100 : 0;
+        $percentage = $total > 0 ? ($partial / $total) * 100 : 0;
 
         $sheet2->setCellValue("B{$rowIndex}", $partial);
         $sheet2->setCellValue("C{$rowIndex}", $total);
@@ -285,7 +267,7 @@ function getGraphData($filteredStudents)
 {
     $data = [
         'maestria' => [],
-        'especialidad' => []
+        'especialidad' => [],
     ];
 
     foreach ($filteredStudents as $student) {
@@ -312,12 +294,24 @@ function _updateInDB($studentsConfirm, $studentsNotConfirm)
     }
 }
 
-function generateChartAndInsert(array $data, string $type, string $scriptPath, string $graphsDir, string $cell, $sheet)
-{
+function generateChartAndInsert(
+    array $data,
+    string $type,
+    string $scriptPath,
+    string $graphsDir,
+    string $cell,
+    $sheet,
+) {
     $tempFile = tempnam(sys_get_temp_dir(), 'data_');
     file_put_contents($tempFile, json_encode($data));
 
-    $process = new \Symfony\Component\Process\Process(['node', $scriptPath, $tempFile, $type, $graphsDir]);
+    $process = new \Symfony\Component\Process\Process([
+        'node',
+        $scriptPath,
+        $tempFile,
+        $type,
+        $graphsDir,
+    ]);
     $process->run();
 
     if (!$process->isSuccessful()) {

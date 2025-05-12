@@ -52,14 +52,4 @@ class Program
     {
         $this->type = $type;
     }
-
-    public function toArray(): array
-    {
-        return [
-            'id' => $this->id,
-            'name' => $this->getName(),
-            'type' => $this->type
-        ];
-    }
-
 }
