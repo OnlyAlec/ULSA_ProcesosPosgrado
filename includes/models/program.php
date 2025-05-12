@@ -52,5 +52,4 @@ class Program
     {
         $this->type = $type;
     }
-
 }

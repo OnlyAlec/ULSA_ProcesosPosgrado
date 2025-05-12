@@ -10,7 +10,7 @@ function responseOK($data)
     return json_encode([
         'success' => true,
         'data' => $data,
-        'errors' => ErrorList::getAll()
+        'errors' => ErrorList::getAll(),
     ]);
 }
 
@@ -22,7 +22,7 @@ function responseBadRequest($data)
     return json_encode([
         'success' => false,
         'data' => $data,
-        'errors' => ErrorList::getAll()
+        'errors' => ErrorList::getAll(),
     ]);
 }
 
@@ -34,6 +34,6 @@ function responseInternalError($data)
     return json_encode([
         'success' => false,
         'data' => $data,
-        'errors' => ErrorList::getAll()
+        'errors' => ErrorList::getAll(),
     ]);
 }

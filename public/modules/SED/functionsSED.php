@@ -8,10 +8,10 @@ require_once INCLUDES_DIR . '/utilities/util.php';
 function changeStatusSEDSingle($studentID, $newState)
 {
     if (updateStudentFieldBoolean($studentID, 'sed', $newState) == 0) {
-        throw new RuntimeException("Error updating SED status");
+        throw new RuntimeException('Error updating SED status');
     }
 
-    return "";
+    return '';
 }
 
 function changeStatusSEDGroup($studentIDs)
@@ -26,16 +26,16 @@ function changeStatusSEDGroup($studentIDs)
     }
 
     if ($error) {
-        throw new RuntimeException("Error updating SED status");
+        throw new RuntimeException('Error updating SED status');
     }
 
-    return "";
+    return '';
 }
 
 function sendEmailRemainder(Student $student)
 {
-    $mailer = new Mailer($student, "¡No olvides contestar la Evaluación Docente!", "remainderSED");
-    $dates = [getConfig("dateFirstAFI"), getConfig("dateSecondAFI"), getConfig("dateThirdAFI")];
+    $mailer = new Mailer($student, '¡No olvides contestar la Evaluación Docente!', 'remainderSED');
+    $dates = [getConfig('dateFirstAFI'), getConfig('dateSecondAFI'), getConfig('dateThirdAFI')];
     $dateNow = date('d/m/Y');
     $currentDate = null;
 
@@ -57,11 +57,16 @@ function sendEmailRemainder(Student $student)
     }
 
     setlocale(LC_TIME, 'es_ES.UTF-8');
-    $formattedDate = $currentDate->format('d') . ' de ' . mesNombre((int) $currentDate->format('n')) . ' del ' . $currentDate->format('Y');
+    $formattedDate =
+        $currentDate->format('d') .
+        ' de ' .
+        mesNombre((int) $currentDate->format('n')) .
+        ' del ' .
+        $currentDate->format('Y');
 
     $data = [
-        "title" => "Aviso Importante Evaluación Docente",
-        "fecha" => $formattedDate,
+        'title' => 'Aviso Importante Evaluación Docente',
+        'fecha' => $formattedDate,
     ];
 
     $mailer->constructEmail($data);
@@ -82,6 +87,6 @@ function getProgramsFiltered($action)
             return array_unique(array_merge($masters, $specialty), SORT_REGULAR);
         }
     } catch (Exception $e) {
-        return ["error" => "Error: " . $e->getMessage()];
+        return ['error' => 'Error: ' . $e->getMessage()];
     }
 }

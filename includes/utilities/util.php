@@ -5,80 +5,102 @@
  */
 
 function fechaGuion($fechaTxt)
-{//convierte fecha a guiones
+{
+    //convierte fecha a guiones
     $fechaTxt = trim($fechaTxt);
-    if (substr($fechaTxt, 2, 1) == "/" && substr($fechaTxt, 5, 1) == "/") {// dd/mm/aaaa
-        $fechaArr = explode("/", $fechaTxt);
-        return $fechaArr[2] . "-" . $fechaArr[1] . "-" . $fechaArr[0];
+    if (substr($fechaTxt, 2, 1) == '/' && substr($fechaTxt, 5, 1) == '/') {
+        // dd/mm/aaaa
+        $fechaArr = explode('/', $fechaTxt);
+        return $fechaArr[2] . '-' . $fechaArr[1] . '-' . $fechaArr[0];
     }
-    if (substr($fechaTxt, 4, 1) == "-" && substr($fechaTxt, 7, 1) == "-") {// aaaa-mm-dd
+    if (substr($fechaTxt, 4, 1) == '-' && substr($fechaTxt, 7, 1) == '-') {
+        // aaaa-mm-dd
         return $fechaTxt;
     }
-    return "";
+    return '';
 }
 function fechaSlash($fechaTxt)
-{//convierte fecha a /
+{
+    //convierte fecha a /
     $fechaTxt = trim($fechaTxt);
-    if (substr($fechaTxt, 2, 1) == "/" && substr($fechaTxt, 5, 1) == "/") {// dd/mm/aaaa
+    if (substr($fechaTxt, 2, 1) == '/' && substr($fechaTxt, 5, 1) == '/') {
+        // dd/mm/aaaa
         return $fechaTxt;
     }
-    if (substr($fechaTxt, 4, 1) == "-" && substr($fechaTxt, 7, 1) == "-") {// aaaa-mm-dd
-        $fechaArr = explode("-", $fechaTxt);
-        return $fechaArr[2] . "/" . $fechaArr[1] . "/" . $fechaArr[0];
+    if (substr($fechaTxt, 4, 1) == '-' && substr($fechaTxt, 7, 1) == '-') {
+        // aaaa-mm-dd
+        $fechaArr = explode('-', $fechaTxt);
+        return $fechaArr[2] . '/' . $fechaArr[1] . '/' . $fechaArr[0];
     }
-    return "";
+    return '';
 }
 
 function fechaTexto($fechaTxt, $showYear = true)
-{//convierte fecha a cadena de texto
+{
+    //convierte fecha a cadena de texto
     $fechaTxt = trim($fechaTxt);
-    if (substr($fechaTxt, 2, 1) == "/" && substr($fechaTxt, 5, 1) == "/") {// dd/mm/aaaa
-        $fechaArr = explode("/", $fechaTxt);
+    if (substr($fechaTxt, 2, 1) == '/' && substr($fechaTxt, 5, 1) == '/') {
+        // dd/mm/aaaa
+        $fechaArr = explode('/', $fechaTxt);
         if ($showYear) {
-            return intval($fechaArr[0]) . " de " . mesNombre($fechaArr[1]) . " de " . $fechaArr[2];
+            return intval($fechaArr[0]) . ' de ' . mesNombre($fechaArr[1]) . ' de ' . $fechaArr[2];
         } else {
-            return intval($fechaArr[0]) . " de " . mesNombre($fechaArr[1]);
+            return intval($fechaArr[0]) . ' de ' . mesNombre($fechaArr[1]);
         }
     }
-    if (substr($fechaTxt, 4, 1) == "-" && substr($fechaTxt, 7, 1) == "-") {// aaaa-mm-dd
-        $fechaArr = explode("-", $fechaTxt);
+    if (substr($fechaTxt, 4, 1) == '-' && substr($fechaTxt, 7, 1) == '-') {
+        // aaaa-mm-dd
+        $fechaArr = explode('-', $fechaTxt);
         if ($showYear) {
-            return intval($fechaArr[2]) . " de " . mesNombre($fechaArr[1]) . " de " . $fechaArr[0];
+            return intval($fechaArr[2]) . ' de ' . mesNombre($fechaArr[1]) . ' de ' . $fechaArr[0];
         } else {
-            return intval($fechaArr[2]) . " de " . mesNombre($fechaArr[1]);
+            return intval($fechaArr[2]) . ' de ' . mesNombre($fechaArr[1]);
         }
     }
-    return "";
+    return '';
 }
 
 function mesNombre($num)
 {
-    $meses = [1 => "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+    $meses = [
+        1 => 'enero',
+        'febrero',
+        'marzo',
+        'abril',
+        'mayo',
+        'junio',
+        'julio',
+        'agosto',
+        'septiembre',
+        'octubre',
+        'noviembre',
+        'diciembre',
+    ];
     return $meses[intval($num)];
 }
 
 function diaNombre($num)
 {
-    $dias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+    $dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
     return $dias[intval($num)];
 }
 
-function horaMin($arr, $campo = "Horario_hora")
+function horaMin($arr, $campo = 'Horario_hora')
 {
-    $min = "";
+    $min = '';
     foreach ($arr as $horario) {
-        if ($min == "" || date('H:i', strtotime($horario[$campo])) < date('H:i', strtotime($min))) {
+        if ($min == '' || date('H:i', strtotime($horario[$campo])) < date('H:i', strtotime($min))) {
             $min = $horario[$campo];
         }
     }
     return date('H:i', strtotime($min));
 }
 
-function horaMax($arr, $campo = "Horario_hora_final")
+function horaMax($arr, $campo = 'Horario_hora_final')
 {
-    $max = "";
+    $max = '';
     foreach ($arr as $horario) {
-        if ($max == "" || date('H:i', strtotime($horario[$campo])) > date('H:i', strtotime($max))) {
+        if ($max == '' || date('H:i', strtotime($horario[$campo])) > date('H:i', strtotime($max))) {
             $max = $horario[$campo];
         }
     }
@@ -103,13 +125,17 @@ function quitaNumeros($words)
 function quitaLetras($words)
 {
     $words = strtoupper($words);
-    return preg_replace("/[^0-9]/", "", $words);
+    return preg_replace('/[^0-9]/', '', $words);
 }
 
 function getIniciales($materia)
 {
     $ret = '';
-    $materia = str_ireplace(["Á", "É", "Í", "Ó", "Ú", "Ñ", "Ä", "Ë", "Ï", "Ö", "Ü", "Â", "Ê", "Î", "Ô", "Û", "Ã"], ["A", "E", "I", "O", "U", "N", "A", "E", "I", "O", "U", "A", "E", "I", "O", "U", "A"], utf8_encode($materia));
+    $materia = str_ireplace(
+        ['Á', 'É', 'Í', 'Ó', 'Ú', 'Ñ', 'Ä', 'Ë', 'Ï', 'Ö', 'Ü', 'Â', 'Ê', 'Î', 'Ô', 'Û', 'Ã'],
+        ['A', 'E', 'I', 'O', 'U', 'N', 'A', 'E', 'I', 'O', 'U', 'A', 'E', 'I', 'O', 'U', 'A'],
+        utf8_encode($materia),
+    );
     foreach (explode(' ', $materia) as $word) {
         if (ctype_alpha($word[0])) {
             $ret .= $word[0];
@@ -127,7 +153,7 @@ function filePathToUrl($filePath)
 {
     $filePath = realpath($filePath);
     if (!file_exists($filePath)) {
-        return "#";
+        return '#';
     }
 
     $docRoot = realpath($_SERVER['DOCUMENT_ROOT']);
@@ -136,7 +162,7 @@ function filePathToUrl($filePath)
         $relativePath = str_replace('\\', '/', substr($filePath, strlen($docRoot)));
         return BASE_URL . $relativePath;
     }
-    return "#";
+    return '#';
 }
 
 function capitalizeExcept(string $word, array $exception)
@@ -145,7 +171,9 @@ function capitalizeExcept(string $word, array $exception)
     $result = [];
 
     foreach ($words as $w) {
-        $result[] = (!in_array(strtolower($w), $exception)) ? ucfirst(strtolower($w)) : strtolower($w);
+        $result[] = !in_array(strtolower($w), $exception)
+            ? ucfirst(strtolower($w))
+            : strtolower($w);
     }
 
     return implode(' ', $result);

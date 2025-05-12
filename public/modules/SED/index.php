@@ -1,8 +1,8 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
-require_once INCLUDES_DIR . "/utilities/database.php";
-require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
-require_once INCLUDES_DIR . "/models/student.php";
+require_once INCLUDES_DIR . '/utilities/database.php';
+require_once INCLUDES_DIR . '/utilities/responseHTTP.php';
+require_once INCLUDES_DIR . '/models/student.php';
 
 ob_start();
 
@@ -35,7 +35,10 @@ try {
                     }
                     break;
                 case '':
-                    $res = array_map(fn ($program) => $program->getName(), getProgramsFiltered($_POST['action']));
+                    $res = array_map(
+                        fn ($program) => $program->getName(),
+                        getProgramsFiltered($_POST['action']),
+                    );
                     break;
                 default:
                     throw new RuntimeException('Not valid action!');
@@ -43,11 +46,11 @@ try {
         }
 
         echo responseOK($res);
-        exit;
+        exit();
     }
 } catch (RuntimeException $e) {
     echo responseInternalError($e->getMessage());
-    exit;
+    exit();
 }
 
 ob_end_flush();
@@ -57,12 +60,13 @@ ob_end_flush();
 
 <?php
 require_once INCLUDES_DIR . '/templates/head.php';
-get_head("SED");
+get_head('SED');
 ?>
 
 <body style="display: block;">
-    <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header("Seguimiento de Evaluación Docente");
+    <?php
+    require_once INCLUDES_DIR . '/templates/header.php';
+get_header('Seguimiento de Evaluación Docente');
 ?>
     <main class="container content marco">
         
@@ -147,21 +151,26 @@ get_header("Seguimiento de Evaluación Docente");
                 </tr>
             </thead>
             <tbody id="studentsTable">
-                <?php
-                    if (empty($studentsDB = getStudents())) {
-                        echo '<tr><td colspan="5" class="text-center">No hay alumnos registrados.</td></tr>';
-                    } else {
-                        foreach ($studentsDB as $student): ?>
+                <?php if (empty(($studentsDB = getStudents()))) {
+                    echo '<tr><td colspan="5" class="text-center">No hay alumnos registrados.</td></tr>';
+                } else {
+                    foreach ($studentsDB as $student): ?>
                             <tr data-carrer="<?= $student->getProgram() ?>">
                                 <td class="text-center"><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td> 
                                 <td><?= $student->getUlsaId() ?></td>
-                                <td><?= ucwords($student->getName()). " " . ucwords($student->getLastName()) ?></td>
+                                <td><?= ucwords($student->getName()) .
+                                    ' ' .
+                                    ucwords($student->getLastName()) ?></td>
                                 <td><?= $student->getEmail() ?></td>
                                 <td>
                                     <div class="d-flex" style="gap: 8px;">
-                                        <?php $btnClass = $student->getSed() ? 'btn-danger' : 'btn-success'; ?>
+                                        <?php $btnClass = $student->getSed()
+                                            ? 'btn-danger'
+                                            : 'btn-success'; ?>
                                         <button class="btn <?= $btnClass ?> btn-sm text-white changeSED border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
-                                            <?= $student->getSed() ? '<i class="fas fa-minus-square fa-2x"></i>' : '<i class="fas fa-check-square fa-2x"></i>' ?>
+                                            <?= $student->getSed()
+                                                ? '<i class="fas fa-minus-square fa-2x"></i>'
+                                                : '<i class="fas fa-check-square fa-2x"></i>' ?>
                                         </button>
                                         <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
                                             <i class="fas fa-paper-plane fa-lg"></i>
@@ -170,8 +179,7 @@ get_header("Seguimiento de Evaluación Docente");
                                 </td>
                             </tr>
                         <?php endforeach;
-                    }
-?>
+                } ?>
             </tbody>
         </table>
         <br>

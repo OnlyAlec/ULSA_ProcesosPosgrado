@@ -3,13 +3,13 @@
 
 <?php
 require_once INCLUDES_DIR . '/templates/head.php';
-get_head("AFI");
+get_head('AFI');
 ?>
 
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header("Homepage");
+get_header('Homepage');
 ?>
 
     <main class="container content marco">
@@ -33,7 +33,7 @@ if (!is_dir($modules_dir)) {
 
     // Filter and sort modules
     foreach ($modules as $module) {
-        if ($module !== "." && $module !== ".." && is_dir("$modules_dir/$module")) {
+        if ($module !== '.' && $module !== '..' && is_dir("$modules_dir/$module")) {
             $valid_modules[] = $module;
         }
     }
@@ -43,9 +43,16 @@ if (!is_dir($modules_dir)) {
 
     // Display modules
     foreach ($valid_modules as $module) {
-        $module_path = htmlspecialchars(BASE_URL . "/modules/$module/index.php", ENT_QUOTES, 'UTF-8');
+
+        $module_path = htmlspecialchars(
+            BASE_URL . "/modules/$module/index.php",
+            ENT_QUOTES,
+            'UTF-8',
+        );
         $name = $module_info[$module]['name'] ?? ucfirst($module);
-        $description = $module_info[$module]['description'] ?? 'This is a description of the module';
+        $description =
+            $module_info[$module]['description'] ??
+            'This is a description of the module';
         $icon = $module_info[$module]['icon'] ?? 'fas fa-cube';
         ?>
                     <div class="col-md-4 col-sm-6 col-12 mb-4">
