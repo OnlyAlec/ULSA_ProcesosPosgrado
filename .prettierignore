@@ -1,5 +1,8 @@
-vendor/**
 .vscode/**
+.github/**
+
+vendor/**
+node_modules/**
 
 composer.json
 composer.lock
