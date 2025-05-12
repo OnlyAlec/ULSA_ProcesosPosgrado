@@ -72,21 +72,3 @@ function sendEmailRemainder(Student $student)
     $mailer->constructEmail($data);
     return $mailer->send();
 }
-
-function getProgramsFiltered($action)
-{
-    try {
-        $masters = getMastersPrograms();
-        $specialty = getSpecialtyPrograms();
-
-        if ($action === 'getMasters') {
-            return $masters;
-        } elseif ($action === 'getSpecialty') {
-            return $specialty;
-        } else {
-            return array_unique(array_merge($masters, $specialty), SORT_REGULAR);
-        }
-    } catch (Exception $e) {
-        return ['error' => 'Error: ' . $e->getMessage()];
-    }
-}

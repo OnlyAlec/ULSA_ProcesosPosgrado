@@ -88,6 +88,7 @@ function generateReport($students, $filename)
     $pdf = new Fpdf();
     $reportsDir = __DIR__ . '/reports/';
     if (!is_dir($reportsDir)) {
+        // TODO: Cambiar permisos de la carpeta 02775
         if (!mkdir($reportsDir, 0755, true)) {
             throw new RuntimeException('Error creating reports directory.');
         }
