@@ -62,13 +62,13 @@ jobs:
               uses: actions/setup-node@v4
               with:
                 node-version: '20'
+                cache: 'npm'
 
             - name: Install npm dependencies
-              run: npm install
+              run: npm ci
 
-            - name: Run Prettier JS/HTML/CSS/JSON formatting
+            - name: Run Prettier and Commit Changes
               uses: creyD/prettier_action@v4.3
               with:
-                  commit_message: Fix Prettier styling 🎨
-                  prettier_options: --write . --ignore-path .prettierignore --config .prettierrc --ignore-unknown
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  commit_message: 'Fix Prettier styling 🎨'
+                  prettier_options: '--write . --ignore-path .prettierignore --config .prettierrc --ignore-unknown'
