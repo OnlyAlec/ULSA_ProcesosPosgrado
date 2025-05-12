@@ -21,10 +21,10 @@ try {
                     $res = changeStatusSEDGroup($_POST['studentIDS']);
                     break;
                 case 'getMasters':
-                    $res = array_map(fn ($program) => $program->getName(), getMastersPrograms());
+                    $res = array_map(fn($program) => $program->getName(), getMastersPrograms());
                     break;
                 case 'getSpecialty':
-                    $res = array_map(fn ($program) => $program->getName(), getSpecialtyPrograms());
+                    $res = array_map(fn($program) => $program->getName(), getSpecialtyPrograms());
                     break;
                 case 'sendEmail':
                     $student = getStudentByUlsaID($_POST['studentID']);
@@ -36,7 +36,7 @@ try {
                     break;
                 case '':
                     $res = array_map(
-                        fn ($program) => $program->getName(),
+                        fn($program) => $program->getName(),
                         getProgramsFiltered($_POST['action']),
                     );
                     break;
@@ -66,8 +66,8 @@ get_head('SED');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Seguimiento de Evaluación Docente');
-?>
+    get_header('Seguimiento de Evaluación Docente');
+    ?>
     <main class="container content marco">
         
         <!-- PÁRRAFO INFORMATIVO -->
