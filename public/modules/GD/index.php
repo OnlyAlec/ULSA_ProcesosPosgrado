@@ -70,12 +70,11 @@ try {
 
         } elseif ($_POST["action"] === "deleteAllProfessors") {
             $res = deleteAllProfessors();
-        }
-        elseif ($_POST["action"] === "getProfessorDetails") {
+        } elseif ($_POST["action"] === "getProfessorDetails") {
             if (!preg_match('/^\d{6}$/', $_POST["ulsaID"])) {
                 throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
             }
-        
+
             $res = getProfessorSubjectsAndProgramsByUlsaID($_POST["ulsaID"]);
         }
 
