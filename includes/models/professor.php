@@ -85,7 +85,6 @@ class ProfessorBase
 
 class Professor extends ProfessorBase
 {
-
     public function getJSON()
     {
         $json = parent::getJSON();
