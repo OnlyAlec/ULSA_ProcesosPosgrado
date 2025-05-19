@@ -42,6 +42,10 @@ try {
 
             $res = restartDatabaseFromExcel("$uploadDir$fileName", $_POST["claveUlsaCol"], $_POST["nombreCol"], $_POST["apellidosCol"], $_POST["carreraCol"], $_POST["emailCol"]);
 
+        } elseif ($_POST["action"] === "getPrograms") {
+            $programs = getPrograms();
+            $res = array_map(fn($program) => $program->getName(), $programs);
+
         } elseif ($_POST["action"] === "registerOneStudent") {
 
             if (!preg_match('/^\d{6}$/', $_POST["claveUlsa"])) {
@@ -59,16 +63,15 @@ try {
             if (!filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)) {
                 throw new RuntimeException('Correo electronico invalido.');
             }
-
             $res = insertOneStudent($_POST["claveUlsa"], $_POST["nombre"], $_POST["apellidos"], $_POST["carrera"], $_POST["email"]);
 
         } elseif ($_POST["action"] === "getTableStudents") {
             $res = array_values(array_map(fn ($student) => $student->getJSON(), getStudents()));
+        
         } elseif ($_POST["action"] === "deleteOneStudent") {
             if (!preg_match('/^\d{6}$/', $_POST["claveUlsaDelete"])) {
                 throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
             }
-
             $res = deleteOneStudent($_POST["claveUlsaDelete"]);
 
         } elseif ($_POST["action"] === "deleteAllStudents") {
@@ -215,8 +218,12 @@ get_header("Gestión de Alumnos");
 
                     <div class="form-group row mb-4">
                         <label for="carrera" class="col-md-3 col-form-label">Carrera:</label>
-                        <div class="col-md-8 ml-2">
-                            <input type="text" class="form-control w-auto" id="carrera" name="carrera" placeholder="Carrera">
+                        <div class="col-md-3 ml-4 datalist">
+                            <input type="text" id="carrera" name="carrera" class="datalist-input w-100" placeholder="Seleccionar" readonly>
+                            <i class="fas fa-search icono filter"></i>
+                            <ul style="display: none;" id="carreraOptions">
+
+                            </ul>
                         </div>
                     </div>
 

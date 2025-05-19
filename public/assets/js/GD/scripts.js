@@ -43,12 +43,18 @@ $(document).ready(function () {
                 tableBody.empty();
             },
             success: function (response) {
+                console.log(response);
                 if (response.data) {
                     response.data.forEach((professor) => {
                         let row = `<tr>
                                 <td>${professor.ulsaID}</td>
                                 <td>${professor.firstName} ${professor.lastName}</td>
                                 <td>${professor.email}</td>
+                                <td class="text-center">
+                                <button class='btn-view btn btn-sm btn-outline-primary' data-id='${professor.ulsaID}'>
+                                    <i class='fas fa-eye'></i>
+                                </button>
+                                </td>
                             </tr>`;
                         tableBody.append(row);
                     });
@@ -75,6 +81,56 @@ $(document).ready(function () {
         newDiv.innerHTML = message;
         pos.before(newDiv);
     }
+
+    $(document).on('click', '.btn-view', function() {
+        const button = $(this);
+        const icon = button.find('i');
+        const professorId = $(this).data('id');
+        const row = $(this).closest('tr');
+        const existingCard = row.next('.professor-card');
+
+        if (existingCard.length) {
+            existingCard.remove();
+            icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        } else {
+            $.ajax({
+                url: '',
+                type: 'POST',
+                data: { action: 'getProfessorDetails', ulsaID: professorId },
+                success: function(response) {
+                    let res = typeof response === "string" ? JSON.parse(response) : response;
+                    let content = 'Sin materias asignadas';
+                    if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+                        content = '<ul style="list-style: none; padding-left: 0;">';
+                        res.data.forEach(item => {
+                            content += `<li style="padding: 6px 0; border-bottom: 1px solid #ddd;">
+                                        <strong>Programa:</strong> ${item.program_name}<br>
+                                        <strong>Materia:</strong> ${item.subject_name}
+                                        </li>`;
+                        });
+                        content += '</ul>';
+                    }
+                
+                    const card = `
+                    <tr class='professor-card'>
+                    <td colspan='4'>
+                        <div class='card shadow-sm border-0' style='padding: 1.5rem; background-color: #f9f9f9; border-radius: 0.75rem;'>
+                        <h5 class='mb-3'>Materias asignadas</h5>
+                        ${content}
+                        </div>
+                    </td>
+                    </tr>`;
+                    row.after(card);
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                },
+                error: function() {
+                    const card = `<tr class='professor-card'><td colspan='4'><div class='card'>Error al obtener los detalles del profesor.</div></td></tr>`;
+                    row.after(card);
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                }
+            });
+        }
+    });
 });
 
 $(function () {

@@ -344,6 +344,8 @@ function getProgramByID(int $id): Program
     return new Program($row['id'], $row['career']);
 }
 
+
+
 // !FIXME: Catch errors
 function getProgramByName(string $name): Program
 {
@@ -508,5 +510,31 @@ function updateToken(int $studentID, string $token)
         return false;
     } catch (\PDOException $e) {
         throw new \RuntimeException("Error update token: {$e->getMessage()}");
+    }
+}
+
+function getProfessorSubjectsAndProgramsByUlsaID($ulsaID)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "SELECT s.name AS subject_name, p.career AS program_name
+                  FROM program_subject ps
+                  JOIN professor pr ON ps.professor_id = pr.id
+                  JOIN public.user u ON pr.user_id = u.id
+                  JOIN subject s ON ps.subject_id = s.id
+                  JOIN program p ON ps.program_id = p.id
+                  WHERE u.ulsa_id = :ulsa_id";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':ulsa_id', $ulsaID);
+        $stmt->execute();
+
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (empty($results)) {
+            ErrorList::add("No subjects or programs found for professor with ULSA ID $ulsaID");
+            return [];
+        }
+        return $results;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting subjects and programs by ULSA ID: " . $e->getMessage());
     }
 }

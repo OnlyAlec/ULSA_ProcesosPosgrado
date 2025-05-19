@@ -71,6 +71,13 @@ try {
         } elseif ($_POST["action"] === "deleteAllProfessors") {
             $res = deleteAllProfessors();
         }
+        elseif ($_POST["action"] === "getProfessorDetails") {
+            if (!preg_match('/^\d{6}$/', $_POST["ulsaID"])) {
+                throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
+            }
+        
+            $res = getProfessorSubjectsAndProgramsByUlsaID($_POST["ulsaID"]);
+        }
 
         echo responseOK($res);
         exit;
@@ -231,6 +238,7 @@ get_header("Gestión de Profesores");
                             <th scope="col">Clave</th>
                             <th scope="col">Nombre Completo</th>
                             <th scope="col">Correo</th>
+                            <th scope="col">Materias</th>
                         </tr>
                     </thead>
                     <tbody>
