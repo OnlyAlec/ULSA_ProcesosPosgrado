@@ -5,23 +5,22 @@ require_once INCLUDES_DIR . "/utilities/util.php";
 require_once INCLUDES_DIR . "/utilities/handleErrors.php";
 
 
-function restartDatabaseFromExcel($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $careerColumn, $emailColumn)
+function restartDatabaseFromExcel($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $emailColumn)
 {
     ErrorList::clear();
 
     $ulsaIdColumn   = strtoupper($ulsaIdColumn);
     $nameColumn     = strtoupper($nameColumn);
     $lastnameColumn = strtoupper($lastnameColumn);
-    $careerColumn   = strtoupper($careerColumn);
     $emailColumn    = strtoupper($emailColumn);
 
     try {
 
-        $data = loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $careerColumn, $emailColumn);
+        $data = loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $emailColumn);
         if (empty($data['ulsa_ids'])) {
             throw new RuntimeException('El archivo Excel no contiene datos validos.');
         }
-        clearDatabaseTables();
+        deleteFromUsers();
         insertDataIntoDatabase($data);
 
         return [
@@ -33,41 +32,30 @@ function restartDatabaseFromExcel($filePath, $ulsaIdColumn, $nameColumn, $lastna
     }
 }
 
-function insertOneStudent($ulsaId, $name, $lastname, $career, $email)
+function insertOneProfessor($ulsaId, $name, $lastname, $email)
 {
     ErrorList::clear();
 
     $ulsaId   = trim($ulsaId);
     $name     = trim($name);
     $lastname = trim($lastname);
-    $career   = trim($career);
     $email    = trim($email);
 
     try {
         $db = getDatabaseConnection();
-        $stmt = $db->prepare("SELECT id FROM program WHERE career = :career");
-        $stmt->execute([':career' => $career]);
-        $careerId = $stmt->fetchColumn();
 
-        if (!$careerId) {
-            $stmt = $db->prepare("INSERT INTO program (career) VALUES (:career) RETURNING id");
-            $stmt->execute([':career' => $career]);
-            $careerId = $db->lastInsertId();
-        }
-
-        $stmt = $db->prepare("INSERT INTO name (first_name, last_name) VALUES (:first_name, :last_name) RETURNING id");
+        $stmt = $db->prepare("INSERT INTO public.user (first_name, last_name, ulsa_id, email) VALUES (:first_name, :last_name, :ulsa_id, :email) RETURNING id");
         $stmt->execute([
             ':first_name' => $name,
-            ':last_name' => $lastname
-        ]);
-        $nameId = $db->lastInsertId();
-
-        $stmt = $db->prepare("INSERT INTO student (ulsa_id, name_id, program_id, email) VALUES (:ulsa_id, :name_id, :program_id, :email)");
-        $stmt->execute([
+            ':last_name' => $lastname,
             ':ulsa_id' => $ulsaId,
-            ':name_id' => $nameId,
-            ':program_id' => $careerId,
             ':email' => $email
+        ]);
+        $userId = $stmt->fetchColumn();
+
+        $stmt = $db->prepare("INSERT INTO professor (user_id) VALUES (:user_id)");
+        $stmt->execute([
+            ':user_id' => $userId,
         ]);
 
         return [
@@ -80,16 +68,16 @@ function insertOneStudent($ulsaId, $name, $lastname, $career, $email)
     }
 }
 
-function deleteOneStudent($ulsaId)
+function deleteOneProfessor($ulsaId)
 {
     ErrorList::clear();
     try {
         $db = getDatabaseConnection();
-        $stmt = $db->prepare("DELETE FROM student WHERE ulsa_id = (:ulsaId)");
+        $stmt = $db->prepare("DELETE FROM public.user WHERE ulsa_id = (:ulsaId)");
         $stmt->execute([':ulsaId' => $ulsaId]);
 
         if ($stmt->rowCount() === 0) {
-            throw new RuntimeException("No se encontro ningun estudiante con el ID proporcionado.");
+            throw new RuntimeException("No se encontro ningun profesor con el ID proporcionado.");
         }
 
         return [
@@ -101,11 +89,11 @@ function deleteOneStudent($ulsaId)
     }
 }
 
-function deleteAllStudents()
+function deleteAllProfessors()
 {
     ErrorList::clear();
     try {
-        clearDatabaseTables();
+        deleteFromUsers();
         return [
             'success' => true,
             'errors' => ErrorList::getAll()
@@ -115,7 +103,7 @@ function deleteAllStudents()
     }
 }
 
-function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $careerColumn, $emailColumn)
+function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $emailColumn)
 {
     $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
     $reader->setReadDataOnly(true);
@@ -126,7 +114,6 @@ function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $
         'ulsa_ids'    => [],
         'first_names' => [],
         'last_names'  => [],
-        'careers'     => [],
         'emails'      => []
     ];
 
@@ -136,7 +123,6 @@ function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $
         $ulsaId    = trim($sheet->getCell("{$ulsaIdColumn}{$rowIndex}")->getValue());
         $firstName = trim($sheet->getCell("{$nameColumn}{$rowIndex}")->getValue());
         $lastName  = trim($sheet->getCell("{$lastnameColumn}{$rowIndex}")->getValue());
-        $career    = trim($sheet->getCell("{$careerColumn}{$rowIndex}")->getValue());
         $email     = trim($sheet->getCell("{$emailColumn}{$rowIndex}")->getValue());
 
         if (!preg_match('/^\d{6}$/', $ulsaId)) {
@@ -151,10 +137,6 @@ function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $
             ErrorList::add("Fila {$rowIndex}: Apellidos invalidos.\n");
             continue;
         }
-        if (empty($career)) {
-            ErrorList::add("Fila {$rowIndex}: Carrera vacia.\n");
-            continue;
-        }
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             ErrorList::add("Fila {$rowIndex}: Correo electrOnico invalido.\n");
             continue;
@@ -163,21 +145,18 @@ function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $
         $data['ulsa_ids'][]    = intval($ulsaId);
         $data['first_names'][] = $firstName;
         $data['last_names'][]  = $lastName;
-        $data['careers'][]     = $career;
         $data['emails'][]      = $email;
     }
 
     return $data;
 }
 
-function clearDatabaseTables()
+function deleteFromUsers()
 {
     try {
         $db = getDatabaseConnection();
         $db->beginTransaction();
-        $db->exec("DELETE FROM student");
-        $db->exec("DELETE FROM name");
-        $db->exec("DELETE FROM program");
+        $db->exec("DELETE FROM public.user WHERE id IN (SELECT user_id FROM professor)");
         $db->commit();
     } catch (PDOException $e) {
         $db->rollBack();
@@ -191,34 +170,24 @@ function insertDataIntoDatabase($data)
         $db = getDatabaseConnection();
         $db->beginTransaction();
 
-        // Insertar carreras únicas
-        $careers = array_unique($data['careers']);
-        $careerIds = [];
-        foreach ($careers as $career) {
-            $stmt = $db->prepare("INSERT INTO program (career) VALUES (:career) RETURNING id");
-            $stmt->execute([':career' => $career]);
-            $careerIds[$career] = $db->lastInsertId();
-        }
-
         // Insertar nombres y apellidos
-        $nameIds = [];
+        $userIds = [];
         for ($i = 0; $i < count($data['first_names']); $i++) {
-            $stmt = $db->prepare("INSERT INTO name (first_name, last_name) VALUES (:first_name, :last_name) RETURNING id");
+            $stmt = $db->prepare("INSERT INTO public.user (first_name, last_name, ulsa_id, email) VALUES (:first_name, :last_name, :ulsa_id, :email) RETURNING id");
             $stmt->execute([
                 ':first_name' => $data['first_names'][$i],
-                ':last_name' => $data['last_names'][$i]
+                ':last_name' => $data['last_names'][$i],
+                ':ulsa_id' => $data['ulsa_ids'][$i],
+                ':email' => $data['emails'][$i]
             ]);
-            $nameIds[] = $db->lastInsertId();
+            $userIds[] = $db->lastInsertId();
         }
 
         // Insertar estudiantes
         for ($i = 0; $i < count($data['ulsa_ids']); $i++) {
-            $stmt = $db->prepare("INSERT INTO student (ulsa_id, name_id, program_id, email) VALUES (:ulsa_id, :name_id, :program_id, :email)");
+            $stmt = $db->prepare("INSERT INTO professor (user_id) VALUES (:user_id)");
             $stmt->execute([
-                ':ulsa_id' => $data['ulsa_ids'][$i],
-                ':name_id' => $nameIds[$i],
-                ':program_id' => $careerIds[$data['careers'][$i]],
-                ':email' => $data['emails'][$i]
+                ':user_id' => $userIds[$i],
             ]);
         }
         $db->commit();

@@ -13,5 +13,15 @@
         "name": "Gestión de Alumnos",
         "description": "Registro, consulta y eliminación de alumnos. Módulo adicional para la versión beta.",
         "icon": "fas fa-solid fa-users"
+    },
+    "GD": {
+        "name": "Gestión de Docentes",
+        "description": "Registro, consulta y eliminación de docentes.",
+        "icon": "fas fa-solid fa-calculator"
+    },
+    "FA": {
+        "name": "Firma de Actas",
+        "description": "Firma de actas de calificaciones finales.",
+        "icon": "fas fa-solid fa-pen-nib"
     }
 }

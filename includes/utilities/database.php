@@ -3,6 +3,7 @@
 require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/models/program.php";
 require_once INCLUDES_DIR . "/models/student.php";
+require_once INCLUDES_DIR . "/models/professor.php";
 
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
 $dotenv->load();
@@ -34,15 +35,15 @@ function getStudents()
     $studentsDB = [];
     $db = getDatabaseConnection();
     $query = "SELECT s.id,
-                LOWER(n.last_name) AS last_name, 
-                LOWER(n.first_name) AS first_name, 
-                s.ulsa_id, 
+                LOWER(u.last_name) AS last_name, 
+                LOWER(u.first_name) AS first_name, 
+                u.ulsa_id, 
                 LOWER(TRIM(p.career)) AS career, 
-                s.email AS ulsa_email, 
+                u.email AS ulsa_email, 
                 s.sed,
                 s.afi
               FROM student s
-              JOIN name n ON s.name_id = n.id 
+              JOIN public.user u ON s.user_id = u.id 
               JOIN program p ON s.program_id = p.id";
     $stmt = $db->prepare($query);
     $stmt->execute();
@@ -118,6 +119,7 @@ function getStudentByUlsaID($ID)
     }
 }
 
+
 function getStudentByID($ID)
 {
     try {
@@ -156,6 +158,121 @@ function getStudentByID($ID)
         return $student;
     } catch (\PDOException $e) {
         throw new \RuntimeException("Error getting student by ID:" . $e->getMessage());
+    } catch (\InvalidArgumentException $e) {
+        ErrorList::add($e->getMessage());
+        return null;
+    }
+}
+
+/**
+ * @return Professor[]
+ */
+function getProfessors()
+{
+    $professorsDB = [];
+    $db = getDatabaseConnection();
+    $query = 'SELECT p.id,
+                LOWER(u.last_name) AS last_name, 
+                LOWER(u.first_name) AS first_name, 
+                u.ulsa_id, 
+                u.email AS ulsa_email 
+              FROM professor p
+              JOIN public.user u ON p.user_id = u.id';
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        try {
+            $professor = new Professor(
+                $row['first_name'],
+                $row['last_name'],
+                $row['ulsa_id'],
+                $row['ulsa_email'],
+                $row['id'],
+            );
+            $professorsDB[] = $professor;
+        } catch (InvalidArgumentException $e) {
+            ErrorList::add($e->getMessage());
+            continue;
+        }
+    }
+
+    if (count($professorsDB) > 0) {
+        return $professorsDB;
+    }
+    ErrorList::add("No professors found");
+    return [];
+}
+
+function getProfessorByUlsaID($ID)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "SELECT p.id,
+                LOWER(u.last_name) AS last_name,
+                LOWER(u.first_name) AS first_name,
+                u.ulsa_id,
+                u.email AS ulsa_email
+              FROM professor p
+              JOIN public.user u ON p.user_id = u.id
+              WHERE u.ulsa_id = :ulsa_id";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':ulsa_id', $ID);
+        $stmt->execute();
+
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($res === false) {
+            ErrorList::add("No professor found with ID $ID");
+            return false;
+        }
+
+        $professor = new Professor(
+            $res['first_name'],
+            $res['last_name'],
+            $res['ulsa_id'],
+            $res['ulsa_email'],
+            $res['id']
+        );
+        return $professor;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting pofessor by Ulsa ID:". $e->getMessage());
+    } catch (\InvalidArgumentException $e) {
+        ErrorList::add($e->getMessage());
+        return false;
+    }
+}
+
+function getProfessorByID($ID)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "SELECT p.id,
+                LOWER(u.last_name) AS last_name,
+                LOWER(u.first_name) AS first_name,
+                u.ulsa_id,
+                u.email AS ulsa_email
+              FROM professor p
+              JOIN public.user u ON p.user_id = u.id
+              WHERE p.id = :ID";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':ID', $ID);
+        $stmt->execute();
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($res === false) {
+            return null;
+        }
+
+        $professor = new Professor(
+            $res['first_name'],
+            $res['last_name'],
+            $res['ulsa_id'],
+            $res['ulsa_email'],
+            $res['id']
+        );
+        return $professor;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting professo by ID:" . $e->getMessage());
     } catch (\InvalidArgumentException $e) {
         ErrorList::add($e->getMessage());
         return null;
