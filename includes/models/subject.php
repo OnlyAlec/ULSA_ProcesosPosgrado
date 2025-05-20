@@ -1,25 +1,14 @@
 <?php
 
-class Program
+class Subject
 {
     private int $id;
     private string $name;
-    private string $type;
 
     public function __construct($id, $name)
     {
         $this->id = $id;
         $this->name = $name;
-        $this->type = $this->getTypeInit($name);
-    }
-
-    private function getTypeInit($name)
-    {
-        if (stripos(strtolower($name), 'maestría') !== false) {
-            return 'Maestría';
-        } else {
-            return 'Doctorado';
-        }
     }
 
     public function getId(): int
@@ -40,17 +29,6 @@ class Program
     public function setName(string $name): void
     {
         $this->name = $name;
-        $this->type = $this->getTypeInit($name);
-    }
-
-    public function getType(): string
-    {
-        return $this->type;
-    }
-
-    public function setType(string $type): void
-    {
-        $this->type = $type;
     }
 
     public function toArray(): array
@@ -58,7 +36,6 @@ class Program
         return [
             'id' => $this->id,
             'name' => $this->getName(),
-            'type' => $this->type
         ];
     }
 

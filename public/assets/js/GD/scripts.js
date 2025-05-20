@@ -85,7 +85,8 @@ $(document).ready(function () {
     $(document).on('click', '.btn-view', function() {
         const button = $(this);
         const icon = button.find('i');
-        const professorId = $(this).data('id');
+        const professorUlsaId = $(this).data('id');
+        let professorId = '';
         const row = $(this).closest('tr');
         const existingCard = row.next('.professor-card');
 
@@ -96,17 +97,28 @@ $(document).ready(function () {
             $.ajax({
                 url: '',
                 type: 'POST',
-                data: { action: 'getProfessorDetails', ulsaID: professorId },
+                data: { action: 'getProfessorDetails', ulsaID: professorUlsaId },
                 success: function(response) {
                     let res = typeof response === "string" ? JSON.parse(response) : response;
                     let content = 'Sin materias asignadas';
                     if (res.success && Array.isArray(res.data) && res.data.length > 0) {
                         content = '<ul style="list-style: none; padding-left: 0;">';
                         res.data.forEach(item => {
+                            professorId = item.professor_id;
                             content += `<li style="padding: 6px 0; border-bottom: 1px solid #ddd;">
-                                        <strong>Programa:</strong> ${item.program_name}<br>
-                                        <strong>Materia:</strong> ${item.subject_name}
-                                        </li>`;
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                <strong>Programa:</strong> ${item.program_name}<br>
+                                <strong>Materia:</strong> ${item.subject_name}
+                                </div>
+                                <button class='btn-delete btn btn-sm btn-outline-danger' 
+                                        data-professor-id='${item.professor_id}' 
+                                        data-subject-id='${item.subject_id}' 
+                                        data-program-id='${item.program_id}'>
+                                <i class='fas fa-trash'></i>
+                                </button>
+                            </div>
+                            </li>`;
                         });
                         content += '</ul>';
                     }
@@ -115,8 +127,13 @@ $(document).ready(function () {
                     <tr class='professor-card'>
                     <td colspan='4'>
                         <div class='card shadow-sm border-0' style='padding: 1.5rem; background-color: #f9f9f9; border-radius: 0.75rem;'>
-                        <h5 class='mb-3'>Materias asignadas</h5>
-                        ${content}
+                            <h5 class='mb-3'>Materias asignadas</h5>
+                            ${content}
+                            <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 10px;">
+                                <button class='btn-add btn btn-sm btn-outline-success' data-professor-id='${professorId}'>
+                                    <i class='fas fa-plus'></i>
+                                </button>
+                            </div>
                         </div>
                     </td>
                     </tr>`;
@@ -130,6 +147,144 @@ $(document).ready(function () {
                 }
             });
         }
+    });
+
+    $(document).on('click', '.btn-delete', function() {
+        const button = $(this);
+        const professorId = button.data('professor-id');
+        const subjectId = button.data('subject-id');
+        const programId = button.data('program-id');
+        const listItem = button.closest('li');
+
+        $.ajax({
+            url: '',
+            type: 'POST',
+            data: { action: 'deleteProgramSubject', professorId: professorId, subjectId: subjectId, programId: programId },
+            success: function(response) {
+                let res = typeof response === "string" ? JSON.parse(response) : response;
+                if (res.success === true) {
+                    listItem.remove();
+                } else {
+                    alert('Error al eliminar el registro.');
+                }
+            },
+            error: function() {
+                alert('Error al procesar la solicitud de eliminación.');
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-add', function() {
+        const button = $(this);
+        const card = button.closest('.card');
+        const newRow = `
+        <li class='new-assignment'>
+            <div class="select-group">
+                <label class="form-label fw-bold text-primary">Programa</label>
+                <select class='form-select program-select shadow-sm'>
+                    <option value=''>Seleccionar programa</option>
+                </select>
+            </div>
+            
+            <div class="select-group">
+                <label class="form-label fw-bold text-primary">Materia</label>
+                <select class='form-select subject-select shadow-sm'>
+                    <option value=''>Seleccionar materia</option>
+                </select>
+            </div>
+        
+            <div class="button-container">
+                <button class='btn-ok btn btn-primary btn-sm' disabled>
+                    <i class='fas fa-check me-1'></i>Confirmar
+                </button>
+            </div>
+        </li>`;
+
+        card.find('ul').append(newRow);
+
+        // Llenar las opciones de programas y materias
+        $.ajax({
+            url: '',
+            type: 'POST',
+            data: { action: 'getPrograms' },
+            success: function(response) {
+                let res = typeof response === "string" ? JSON.parse(response) : response;
+                if (res.success) {
+                    const programSelect = card.find('.program-select');
+                    res.data.forEach(program => {
+                        programSelect.append(`<option value='${program.id}'>${program.name}</option>`);
+                    });
+                }
+            }
+        });
+
+        $.ajax({
+            url: '',
+            type: 'POST',
+            data: { action: 'getSubjects' },
+            success: function(response) {
+                let res = typeof response === "string" ? JSON.parse(response) : response;
+                if (res.success) {
+                    const subjectSelect = card.find('.subject-select');
+                    res.data.forEach(subject => {
+                        subjectSelect.append(`<option value='${subject.id}'>${subject.name}</option>`);
+                    });
+                }
+            }
+        });
+
+        // Habilitar o deshabilitar el botón OK
+        card.on('change', '.program-select, .subject-select', function() {
+            const programSelected = card.find('.program-select').val();
+            const subjectSelected = card.find('.subject-select').val();
+            const okButton = card.find('.btn-ok');
+            if (programSelected && subjectSelected) {
+                okButton.prop('disabled', false);
+            } else {
+                okButton.prop('disabled', true);
+            }
+        });
+
+        // Manejar el clic en el botón OK
+        card.on('click', '.btn-ok', function() {
+            const programId = card.find('.program-select').val();
+            const subjectId = card.find('.subject-select').val();
+            const professorId = button.data('professor-id');
+            const listItem = $(this).closest('li');
+
+            $.ajax({
+                url: '',
+                type: 'POST',
+                data: { action: 'addProgramSubject', professorId: professorId, subjectId: subjectId, programId: programId },
+                success: function(response) {
+                    let res = typeof response === "string" ? JSON.parse(response) : response;
+                   
+                    if (res.success) {
+                        listItem.remove();
+                        const newRow = `<li style='padding: 6px 0; border-bottom: 1px solid #ddd;'>
+                            <div style='display: flex; justify-content: space-between; align-items: center;'>
+                                <div>
+                                <strong>Programa:</strong> ${res.data.program.name}<br>
+                                <strong>Materia:</strong> ${res.data.subject.name}
+                                </div>
+                                <button class='btn-delete btn btn-sm btn-outline-danger' 
+                                        data-professor-id='${professorId}' 
+                                        data-subject-id='${subjectId}' 
+                                        data-program-id='${programId}'>
+                                <i class='fas fa-trash'></i>
+                                </button>
+                            </div>
+                        </li>`;
+                        card.find('ul').append(newRow);
+                    } else {
+                        alert('Error al asignar la materia y programa.');
+                    }
+                },
+                error: function() {
+                    alert('Error al procesar la solicitud de asignación.');
+                }
+            });
+        });
     });
 });
 

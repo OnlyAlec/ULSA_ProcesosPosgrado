@@ -4,6 +4,7 @@ require_once VENDOR_DIR . "/autoload.php";
 require_once INCLUDES_DIR . "/models/program.php";
 require_once INCLUDES_DIR . "/models/student.php";
 require_once INCLUDES_DIR . "/models/professor.php";
+require_once INCLUDES_DIR . "/models/subject.php";
 
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
 $dotenv->load();
@@ -345,6 +346,19 @@ function getProgramByID(int $id): Program
 }
 
 
+function getSubjectByID(int $id)
+{
+    $db = getDatabaseConnection();
+
+    $query = "SELECT * FROM subject WHERE id = :id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->execute();
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return new Subject($row['id'], $row['name']);
+}
+
 
 // !FIXME: Catch errors
 function getProgramByName(string $name): Program
@@ -517,7 +531,7 @@ function getProfessorSubjectsAndProgramsByUlsaID($ulsaID)
 {
     try {
         $db = getDatabaseConnection();
-        $query = "SELECT s.name AS subject_name, p.career AS program_name
+        $query = "SELECT s.name AS subject_name, p.career AS program_name, pr.id AS professor_id, s.id AS subject_id, p.id AS program_id
                   FROM program_subject ps
                   JOIN professor pr ON ps.professor_id = pr.id
                   JOIN public.user u ON pr.user_id = u.id
@@ -536,5 +550,60 @@ function getProfessorSubjectsAndProgramsByUlsaID($ulsaID)
         return $results;
     } catch (\PDOException $e) {
         throw new \RuntimeException("Error getting subjects and programs by ULSA ID: " . $e->getMessage());
+    }
+}
+
+function deleteProgramSubject($professorId, $subjectId, $programId)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "DELETE FROM program_subject WHERE professor_id = :professor_id AND subject_id = :subject_id AND program_id = :program_id";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':professor_id', $professorId);
+        $stmt->bindParam(':subject_id', $subjectId);
+        $stmt->bindParam(':program_id', $programId);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            return true;
+        }
+        return false;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error deleting program subject: " . $e->getMessage());
+    }
+}
+
+function getSubjects(): array
+{
+    $subjects = [];
+    $db = getDatabaseConnection();
+
+    $query = "SELECT * FROM subject";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $subjects[] = new Subject($row['id'], $row['name']);
+    }
+    return $subjects;
+}
+
+function addProgramSubject($professorId, $subjectId, $programId)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "INSERT INTO program_subject (professor_id, subject_id, program_id) VALUES (:professor_id, :subject_id, :program_id)";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':professor_id', $professorId);
+        $stmt->bindParam(':subject_id', $subjectId);
+        $stmt->bindParam(':program_id', $programId);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            return true;
+        }
+        return false;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error al asignar la materia al programa: " . $e->getMessage());
     }
 }
