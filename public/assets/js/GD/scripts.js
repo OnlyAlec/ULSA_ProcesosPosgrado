@@ -82,28 +82,28 @@ $(document).ready(function () {
         pos.before(newDiv);
     }
 
-    $(document).on('click', '.btn-view', function() {
+    $(document).on("click", ".btn-view", function () {
         const button = $(this);
-        const icon = button.find('i');
-        const professorUlsaId = $(this).data('id');
-        let professorId = '';
-        const row = $(this).closest('tr');
-        const existingCard = row.next('.professor-card');
+        const icon = button.find("i");
+        const professorUlsaId = $(this).data("id");
+        let professorId = "";
+        const row = $(this).closest("tr");
+        const existingCard = row.next(".professor-card");
 
         if (existingCard.length) {
             existingCard.remove();
-            icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            icon.removeClass("fa-eye-slash").addClass("fa-eye");
         } else {
             $.ajax({
-                url: '',
-                type: 'POST',
-                data: { action: 'getProfessorDetails', ulsaID: professorUlsaId },
-                success: function(response) {
+                url: "",
+                type: "POST",
+                data: { action: "getProfessorDetails", ulsaID: professorUlsaId },
+                success: function (response) {
                     let res = typeof response === "string" ? JSON.parse(response) : response;
-                    let content = 'Sin materias asignadas';
+                    let content = "Sin materias asignadas";
                     if (res.success && Array.isArray(res.data) && res.data.length > 0) {
                         content = '<ul style="list-style: none; padding-left: 0;">';
-                        res.data.forEach(item => {
+                        res.data.forEach((item) => {
                             professorId = item.professor_id;
                             content += `<li style="padding: 6px 0; border-bottom: 1px solid #ddd;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -120,9 +120,9 @@ $(document).ready(function () {
                             </div>
                             </li>`;
                         });
-                        content += '</ul>';
+                        content += "</ul>";
                     }
-                
+
                     const card = `
                     <tr class='professor-card'>
                     <td colspan='4'>
@@ -138,45 +138,50 @@ $(document).ready(function () {
                     </td>
                     </tr>`;
                     row.after(card);
-                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                    icon.removeClass("fa-eye").addClass("fa-eye-slash");
                 },
-                error: function() {
+                error: function () {
                     const card = `<tr class='professor-card'><td colspan='4'><div class='card'>Error al obtener los detalles del profesor.</div></td></tr>`;
                     row.after(card);
-                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
-                }
+                    icon.removeClass("fa-eye").addClass("fa-eye-slash");
+                },
             });
         }
     });
 
-    $(document).on('click', '.btn-delete', function() {
+    $(document).on("click", ".btn-delete", function () {
         const button = $(this);
-        const professorId = button.data('professor-id');
-        const subjectId = button.data('subject-id');
-        const programId = button.data('program-id');
-        const listItem = button.closest('li');
+        const professorId = button.data("professor-id");
+        const subjectId = button.data("subject-id");
+        const programId = button.data("program-id");
+        const listItem = button.closest("li");
 
         $.ajax({
-            url: '',
-            type: 'POST',
-            data: { action: 'deleteProgramSubject', professorId: professorId, subjectId: subjectId, programId: programId },
-            success: function(response) {
+            url: "",
+            type: "POST",
+            data: {
+                action: "deleteProgramSubject",
+                professorId: professorId,
+                subjectId: subjectId,
+                programId: programId,
+            },
+            success: function (response) {
                 let res = typeof response === "string" ? JSON.parse(response) : response;
                 if (res.success === true) {
                     listItem.remove();
                 } else {
-                    alert('Error al eliminar el registro.');
+                    alert("Error al eliminar el registro.");
                 }
             },
-            error: function() {
-                alert('Error al procesar la solicitud de eliminación.');
-            }
+            error: function () {
+                alert("Error al procesar la solicitud de eliminación.");
+            },
         });
     });
 
-    $(document).on('click', '.btn-add', function() {
+    $(document).on("click", ".btn-add", function () {
         const button = $(this);
-        const card = button.closest('.card');
+        const card = button.closest(".card");
         const newRow = `
         <li class='new-assignment'>
             <div class="select-group">
@@ -200,65 +205,74 @@ $(document).ready(function () {
             </div>
         </li>`;
 
-        card.find('ul').append(newRow);
+        card.find("ul").append(newRow);
 
         // Llenar las opciones de programas y materias
         $.ajax({
-            url: '',
-            type: 'POST',
-            data: { action: 'getPrograms' },
-            success: function(response) {
+            url: "",
+            type: "POST",
+            data: { action: "getPrograms" },
+            success: function (response) {
                 let res = typeof response === "string" ? JSON.parse(response) : response;
                 if (res.success) {
-                    const programSelect = card.find('.program-select');
-                    res.data.forEach(program => {
-                        programSelect.append(`<option value='${program.id}'>${program.name}</option>`);
+                    const programSelect = card.find(".program-select");
+                    res.data.forEach((program) => {
+                        programSelect.append(
+                            `<option value='${program.id}'>${program.name}</option>`
+                        );
                     });
                 }
-            }
+            },
         });
 
         $.ajax({
-            url: '',
-            type: 'POST',
-            data: { action: 'getSubjects' },
-            success: function(response) {
+            url: "",
+            type: "POST",
+            data: { action: "getSubjects" },
+            success: function (response) {
                 let res = typeof response === "string" ? JSON.parse(response) : response;
                 if (res.success) {
-                    const subjectSelect = card.find('.subject-select');
-                    res.data.forEach(subject => {
-                        subjectSelect.append(`<option value='${subject.id}'>${subject.name}</option>`);
+                    const subjectSelect = card.find(".subject-select");
+                    res.data.forEach((subject) => {
+                        subjectSelect.append(
+                            `<option value='${subject.id}'>${subject.name}</option>`
+                        );
                     });
                 }
-            }
+            },
         });
 
         // Habilitar o deshabilitar el botón OK
-        card.on('change', '.program-select, .subject-select', function() {
-            const programSelected = card.find('.program-select').val();
-            const subjectSelected = card.find('.subject-select').val();
-            const okButton = card.find('.btn-ok');
+        card.on("change", ".program-select, .subject-select", function () {
+            const programSelected = card.find(".program-select").val();
+            const subjectSelected = card.find(".subject-select").val();
+            const okButton = card.find(".btn-ok");
             if (programSelected && subjectSelected) {
-                okButton.prop('disabled', false);
+                okButton.prop("disabled", false);
             } else {
-                okButton.prop('disabled', true);
+                okButton.prop("disabled", true);
             }
         });
 
         // Manejar el clic en el botón OK
-        card.on('click', '.btn-ok', function() {
-            const programId = card.find('.program-select').val();
-            const subjectId = card.find('.subject-select').val();
-            const professorId = button.data('professor-id');
-            const listItem = $(this).closest('li');
+        card.on("click", ".btn-ok", function () {
+            const programId = card.find(".program-select").val();
+            const subjectId = card.find(".subject-select").val();
+            const professorId = button.data("professor-id");
+            const listItem = $(this).closest("li");
 
             $.ajax({
-                url: '',
-                type: 'POST',
-                data: { action: 'addProgramSubject', professorId: professorId, subjectId: subjectId, programId: programId },
-                success: function(response) {
+                url: "",
+                type: "POST",
+                data: {
+                    action: "addProgramSubject",
+                    professorId: professorId,
+                    subjectId: subjectId,
+                    programId: programId,
+                },
+                success: function (response) {
                     let res = typeof response === "string" ? JSON.parse(response) : response;
-                   
+
                     if (res.success) {
                         listItem.remove();
                         const newRow = `<li style='padding: 6px 0; border-bottom: 1px solid #ddd;'>
@@ -275,14 +289,14 @@ $(document).ready(function () {
                                 </button>
                             </div>
                         </li>`;
-                        card.find('ul').append(newRow);
+                        card.find("ul").append(newRow);
                     } else {
-                        alert('Error al asignar la materia y programa.');
+                        alert("Error al asignar la materia y programa.");
                     }
                 },
-                error: function() {
-                    alert('Error al procesar la solicitud de asignación.');
-                }
+                error: function () {
+                    alert("Error al procesar la solicitud de asignación.");
+                },
             });
         });
     });
