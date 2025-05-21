@@ -30,64 +30,75 @@ function getDatabaseConnection()
  */
 function getStudents()
 {
-    $studentsDB = [];
-    $db = getDatabaseConnection();
-    $query = 'SELECT s.id,
-                LOWER(n.last_name) AS last_name, 
-                LOWER(n.first_name) AS first_name, 
-                s.ulsa_id, 
-                LOWER(TRIM(p.career)) AS career, 
-                u.email AS ulsa_email, 
-                s.sed,
-                s.afi
-              FROM student s
-              JOIN name n ON s.name_id = n.id 
-              JOIN program p ON s.program_id = p.id';
-    $stmt = $db->prepare($query);
-    $stmt->execute();
+    try {
+        $studentsDB = [];
+        $db = getDatabaseConnection();
+        $query = 'SELECT s.id,
+                    LOWER(usr.last_name) AS last_name, 
+                    LOWER(usr.first_name) AS first_name, 
+                    usr.ulsa_id, 
+                    LOWER(TRIM(p.career)) AS career, 
+                    usr.email AS ulsa_email, 
+                    s.sed,
+                    s.afi
+                FROM public.user usr
+                JOIN student s ON s.user_id = usr.id 
+                JOIN program p ON s.program_id = p.id';
+        $stmt = $db->prepare($query);
+        $stmt->execute();
 
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        try {
-            $student = new Student(
-                $row['first_name'],
-                $row['last_name'],
-                $row['ulsa_id'],
-                $row['career'],
-                $row['ulsa_email'],
-                $row['id'],
-            );
-            $student->setSed($row['sed']);
-            $student->setAfi($row['afi']);
-            $studentsDB[] = $student;
-        } catch (InvalidArgumentException $e) {
-            ErrorList::add($e->getMessage());
-            continue;
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            try {
+                $student = new Student(
+                    $row['first_name'],
+                    $row['last_name'],
+                    $row['ulsa_id'],
+                    $row['career'],
+                    $row['ulsa_email'],
+                    $row['id'],
+                );
+                $student->setSed($row['sed']);
+                $student->setAfi($row['afi']);
+                $studentsDB[] = $student;
+            } catch (\InvalidArgumentException $e) {
+                ErrorList::add($e->getMessage());
+                continue;
+            }
         }
-    }
 
-    if (count($studentsDB) > 0) {
-        return $studentsDB;
+        if (count($studentsDB) > 0) {
+            return $studentsDB;
+        }
+
+        ErrorList::add('No students found');
+        return [];
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error al obtener estudiantes: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add("Error inesperado al obtener estudiantes: {$e->getMessage()}");
+        return [];
     }
-    ErrorList::add('No students found');
-    return [];
 }
 
-function getStudentByUlsaID($ID)
+/**
+ * @return Student | null
+ */
+function getStudentByUlsaID($ID): Student|null
 {
     try {
         $db = getDatabaseConnection();
         $query = 'SELECT s.id,
-                LOWER(n.last_name) AS last_name,
-                LOWER(n.first_name) AS first_name,
-                s.ulsa_id,
+                LOWER(usr.last_name) AS last_name,
+                LOWER(usr.first_name) AS first_name,
+                usr.ulsa_id,
                 LOWER(TRIM(p.career)) AS career,
-                s.email AS ulsa_email,
+                usr.email AS ulsa_email,
                 s.sed,
                 s.afi
               FROM student s
-              JOIN name n ON s.name_id = n.id
+              JOIN public.user usr ON s.user_id = usr.id
               JOIN program p ON s.program_id = p.id
-              WHERE s.ulsa_id = :ulsa_id';
+              WHERE usr.ulsa_id = :ulsa_id';
         $stmt = $db->prepare($query);
         $stmt->bindParam(':ulsa_id', $ID);
         $stmt->execute();
@@ -95,7 +106,7 @@ function getStudentByUlsaID($ID)
         $res = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($res === false) {
             ErrorList::add("No student found with ID $ID");
-            return false;
+            return null;
         }
 
         $student = new Student(
@@ -113,25 +124,27 @@ function getStudentByUlsaID($ID)
         throw new \RuntimeException('Error getting student by Ulsa ID:' . $e->getMessage());
     } catch (\InvalidArgumentException $e) {
         ErrorList::add($e->getMessage());
-        return false;
+        return null;
     }
 }
 
-
-function getStudentByID($ID)
+/**
+ * @return Student | null
+ */
+function getStudentByID($ID): Student|null
 {
     try {
         $db = getDatabaseConnection();
         $query = 'SELECT s.id,
-                LOWER(n.last_name) AS last_name,
-                LOWER(n.first_name) AS first_name,
-                s.ulsa_id,
+                LOWER(usr.last_name) AS last_name,
+                LOWER(usr.first_name) AS first_name,
+                usr.ulsa_id,
                 LOWER(TRIM(p.career)) AS career,
-                s.email AS ulsa_email,
+                usr.email AS ulsa_email,
                 s.sed,
                 s.afi
               FROM student s
-              JOIN name n ON s.name_id = n.id
+              JOIN public.user usr ON s.user_id = usr.id
               JOIN program p ON s.program_id = p.id
               WHERE s.id = :ID';
         $stmt = $db->prepare($query);
@@ -140,6 +153,7 @@ function getStudentByID($ID)
         $res = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($res === false) {
+            ErrorList::add("No student found with ID: $ID");
             return null;
         }
 
@@ -162,139 +176,220 @@ function getStudentByID($ID)
     }
 }
 
-// !FIXME: Catch errors
+/**
+ * @return Program[] | []
+ */
 function getMastersPrograms(): array
 {
-    $programsM = [];
-    $db = getDatabaseConnection();
+    try {
+        $programsM = [];
+        $db = getDatabaseConnection();
 
-    $query = "SELECT DISTINCT id, career FROM program WHERE LOWER(career) LIKE 'maestría%'";
-    $stmt = $db->prepare($query);
-    $stmt->execute();
+        $query = "SELECT DISTINCT id, career FROM program WHERE LOWER(career) LIKE 'maestría%'";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
 
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $programsM[] = new Program($row['id'], $row['career']);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $programsM[] = new Program($row['id'], $row['career']);
+        }
+
+        if (empty($programsM)) {
+            ErrorList::add('No master programs found');
+        }
+
+        return $programsM;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting master programs: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add($e->getMessage());
+        return [];
     }
-    return $programsM;
 }
 
-// !FIXME: Catch errors
+/**
+ * @return Program[] | []
+ */
 function getSpecialtyPrograms(): array
 {
-    $programsS = [];
-    $db = getDatabaseConnection();
+    try {
+        $programsS = [];
+        $db = getDatabaseConnection();
 
-    $query = "SELECT DISTINCT id, career FROM program WHERE LOWER(career) LIKE 'especialidad%'";
-    $stmt = $db->prepare($query);
-    $stmt->execute();
+        $query = "SELECT DISTINCT id, career FROM program WHERE LOWER(career) LIKE 'especialidad%'";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
 
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $programsS[] = new Program($row['id'], $row['career']);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $programsS[] = new Program($row['id'], $row['career']);
+        }
+
+        if (empty($programsS)) {
+            ErrorList::add('No specialty programs found');
+        }
+
+        return $programsS;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting specialty programs: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add($e->getMessage());
+        return [];
     }
-    return $programsS;
 }
 
-// !FIXME: Catch errors
 /**
- * @return Program[]
+ * @return Program[] | []
  */
 function getPrograms(): array
 {
-    $programDB = [];
-    $db = getDatabaseConnection();
+    try {
+        $programDB = [];
+        $db = getDatabaseConnection();
 
-    $query = 'SELECT * FROM program';
-    $stmt = $db->prepare($query);
-    $stmt->execute();
+        $query = 'SELECT * FROM program';
+        $stmt = $db->prepare($query);
+        $stmt->execute();
 
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $programDB[] = new Program($row['id'], $row['career']);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $programDB[] = new Program($row['id'], $row['career']);
+        }
+
+        if (empty($programDB)) {
+            ErrorList::add('No programs found');
+        }
+
+        return $programDB;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting programs: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add($e->getMessage());
+        return [];
     }
-    return $programDB;
 }
 
-// !FIXME: Catch errors
-function getProgramByID(int $id): Program
+/**
+ * @return Program[] | null
+ */
+function getProgramByID(int $id): Program|null
 {
-    $db = getDatabaseConnection();
+    try {
+        $db = getDatabaseConnection();
 
-    $query = 'SELECT * FROM program WHERE id = :id';
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(':id', $id);
-    $stmt->execute();
+        $query = 'SELECT * FROM program WHERE id = :id';
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
 
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return new Program($row['id'], $row['career']);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row === false) {
+            ErrorList::add("No program found with ID: $id");
+            return null;
+        }
+
+        return new Program($row['id'], $row['career']);
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting program by ID: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add($e->getMessage());
+        return null;
+    }
 }
 
-
-function getSubjectByID(int $id)
+/**
+ * @return Program | null
+ */
+function getProgramByName(string $name): Program|null
 {
-    $db = getDatabaseConnection();
+    try {
+        $db = getDatabaseConnection();
 
-    $query = "SELECT * FROM subject WHERE id = :id";
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(':id', $id);
-    $stmt->execute();
+        $query = 'SELECT * FROM program WHERE career = :name';
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':name', $name);
+        $stmt->execute();
 
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return new Subject($row['id'], $row['name']);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row === false) {
+            // Si no se encuentra un programa con ese nombre
+            ErrorList::add("No program found with name: $name");
+            return null;
+        }
+
+        return new Program($row['id'], $row['career']);
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting program by name: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add($e->getMessage());
+        return null;
+    }
 }
 
-
-// !FIXME: Catch errors
-function getProgramByName(string $name): Program
+/**
+ * @return string | null
+ */
+function getConfig(string $type): string|null
 {
-    $db = getDatabaseConnection();
+    try {
+        $db = getDatabaseConnection();
 
-    $query = 'SELECT * FROM program WHERE career = :name';
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(':name', $name);
-    $stmt->execute();
+        $query = 'SELECT data FROM configs WHERE type LIKE :type';
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':type', $type);
+        $stmt->execute();
 
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return new Program($row['id'], $row['career']);
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($res === false) {
+            ErrorList::add("No config found for type: $type");
+            return null;
+        }
+        return $res['data'];
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting config: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add($e->getMessage());
+        return null;
+    }
 }
 
-// !FIXME: Catch errors
-function getConfig(string $type)
-{
-    $db = getDatabaseConnection();
-
-    $query = "SELECT data FROM configs WHERE type LIKE '$type%'";
-    $stmt = $db->prepare($query);
-    $stmt->execute();
-
-    $res = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $res['data'] ?? '';
-}
-
-function getToken(int $studentID)
+/**
+ * @return string | null
+ */
+function getToken(int $userID): string|null
 {
     try {
         $db = getDatabaseConnection();
 
         $query = 'SELECT token
                   FROM email_token 
-                  WHERE student_id = :studentID;';
+                  WHERE user_id = :userID;';
 
         $stmt = $db->prepare($query);
-        $stmt->bindParam(':studentID', $studentID);
+        $stmt->bindParam(':userID', $userID);
         $stmt->execute();
         $res = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $res['token'] ?? '';
+        if ($res === false) {
+            ErrorList::add("No token found for user ID: $userID");
+            return null;
+        }
+
+        return $res['token'];
     } catch (\PDOException $e) {
         throw new \RuntimeException("Error getting token by student ID: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add("Error inesperado al obtener token: {$e->getMessage()}");
+        return null;
     }
 }
 
-function getStudentIDByToken(string $token)
+/**
+ * @return string | null
+ */
+function getStudentIDByToken(string $token): string|null
 {
     try {
         $db = getDatabaseConnection();
 
-        $query = 'SELECT student_id
+        $query = 'SELECT user_id
                   FROM email_token 
                   WHERE token = :token;';
 
@@ -303,43 +398,177 @@ function getStudentIDByToken(string $token)
         $stmt->execute();
         $res = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $res['student_id'] ?? '';
-    } catch (PDOException $e) {
+        if ($res === false) {
+            ErrorList::add("No user found with token: $token");
+            return null;
+        }
+
+        return $res['user_id'];
+    } catch (\PDOException $e) {
         throw new \RuntimeException("Error getting student by token: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add("Error inesperado al obtener estudiante por token: {$e->getMessage()}");
+        return null;
     }
 }
 
 //^ INSERTS
-function insertToken(int $studentID, string $token)
+/**
+ * @return int | bool
+ */
+function insertToken(int $userID, string $token, bool $returnID = false): int|bool
 {
     try {
         $db = getDatabaseConnection();
-        $query = 'INSERT INTO email_token (student_id, token)
-                  VALUES  (:studentID, :token)';
+        $db->beginTransaction();
+        $query = 'INSERT INTO email_token (user_id, token)
+                  VALUES  (:userID, :token)
+                  RETURNING id';
         $stmt = $db->prepare($query);
-        $stmt->bindParam(':studentID', $studentID);
+        $stmt->bindParam(':userID', $userID);
         $stmt->bindParam(':token', $token);
         $stmt->execute();
 
         if ($stmt->rowCount() > 0) {
-            return true;
+            $db->commit();
+            return $returnID ? $db->lastInsertId() : true;
         }
+
+        $db->rollBack();
+        ErrorList::add("No se pudo agregar el token para el usuario ID: $userID");
         return false;
     } catch (\PDOException $e) {
+        $db->rollBack();
         throw new \RuntimeException("Error create token: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        $db->rollBack();
+        ErrorList::add("Error inesperado al crear token: {$e->getMessage()}");
+        return false;
+    }
+}
+
+/**
+ * @return int | bool
+ */
+function insertProgram(string $name, bool $returnID = false): int|bool
+{
+    try {
+        $db = getDatabaseConnection();
+        $db->beginTransaction();
+        $query = 'INSERT INTO program (career)
+                  VALUES (:career)
+                  RETURNING id';
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':career', $name);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            $db->commit();
+            return $returnID ? $db->lastInsertId() : true;
+        }
+
+        $db->rollBack();
+        ErrorList::add("No se pudo agregar el programa: $name");
+        return false;
+    } catch (\PDOException $e) {
+        $db->rollBack();
+        throw new \RuntimeException("Error create program: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        $db->rollBack();
+        ErrorList::add("Error inesperado al crear programa: {$e->getMessage()}");
+        return false;
+    }
+}
+
+/**
+ * @return int | bool
+ */
+function insertUser(
+    int $ulsaID,
+    string $firstname,
+    string $lastname,
+    string $email,
+    bool $returnID = false,
+): int|bool {
+    try {
+        $db = getDatabaseConnection();
+        $db->beginTransaction();
+        $query = 'INSERT INTO public.user (ulsa_id, first_name, last_name, email)
+                  VALUES (:ulsa_id, :first_name, :last_name, :email)
+                  RETURNING id';
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':ulsa_id', $ulsaID);
+        $stmt->bindParam(':first_name', $firstname);
+        $stmt->bindParam(':last_name', $lastname);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            $db->commit();
+            return $returnID ? $db->lastInsertId() : true;
+        }
+
+        $db->rollBack();
+        ErrorList::add("No se pudo agregar al usuario: $firstname $lastname");
+        return false;
+    } catch (\PDOException $e) {
+        $db->rollBack();
+        throw new \RuntimeException("Error create user: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        $db->rollBack();
+        ErrorList::add("Error inesperado al crear usuario: {$e->getMessage()}");
+        return false;
+    }
+}
+
+/**
+ * @return int | bool
+ */
+function insertStudent(int $userID, int $programID, bool $returnID = false): int|bool
+{
+    try {
+        $db = getDatabaseConnection();
+        $db->beginTransaction();
+        $query = 'INSERT INTO student (user_id, program_id)
+                  VALUES (:user_id, :program_id)
+                  RETURNING id';
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':user_id', $userID);
+        $stmt->bindParam(':program_id', $programID);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            $db->commit();
+            return $returnID ? $db->lastInsertId() : true;
+        }
+
+        $db->rollBack();
+        ErrorList::add("No se pudo agregar al estudiante con ID: $userID");
+        return false;
+    } catch (\PDOException $e) {
+        $db->rollBack();
+        throw new \RuntimeException("Error create student: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        $db->rollBack();
+        ErrorList::add("Error inesperado al crear estudiante: {$e->getMessage()}");
+        return false;
     }
 }
 
 //^ UPDATES
-function updateStudentFieldBoolean($id, $field, $value)
+/**
+ * @return bool
+ */
+function updateStudentFieldBoolean($id, $field, $value): bool
 {
     try {
         $db = getDatabaseConnection();
         $value = (int) $value;
 
-        $query = "UPDATE student
+        $query = "UPDATE student s
                   SET $field = :value
-                  WHERE ulsa_id = :ulsa_id";
+                  FROM public.user usr
+                  WHERE s.user_id = usr.id AND usr.ulsa_id = :ulsa_id";
 
         $stmt = $db->prepare($query);
         $stmt->bindParam(':value', $value);
@@ -349,13 +578,23 @@ function updateStudentFieldBoolean($id, $field, $value)
         if ($stmt->rowCount() > 0) {
             return true;
         }
+
+        ErrorList::add("No se actualizó ningún registro con ULSA ID: $id");
         return false;
     } catch (\PDOException $e) {
-        throw new \RuntimeException("Error update student bool field: {$e->getMessage()}");
+        throw new \RuntimeException(
+            "Error al actualizar campo booleano de estudiante: {$e->getMessage()}",
+        );
+    } catch (\Exception $e) {
+        ErrorList::add("Error inesperado al actualizar campo: {$e->getMessage()}");
+        return false;
     }
 }
 
-function updateConfig(string $type, $value)
+/**
+ * @return bool
+ */
+function updateConfig(string $type, $value): bool
 {
     try {
         $db = getDatabaseConnection();
@@ -380,177 +619,88 @@ function updateConfig(string $type, $value)
         if ($stmt->rowCount() > 0) {
             return true;
         }
+
+        ErrorList::add("No se pudo actualizar la configuración: $type");
         return false;
     } catch (\PDOException $e) {
         throw new \RuntimeException("Error update config: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add("Error inesperado al actualizar configuración: {$e->getMessage()}");
+        return false;
     }
 }
 
-function updateToken(int $studentID, string $token)
+/**
+ * @return bool
+ */
+function updateToken(int $userID, string $token): bool
 {
     try {
         $db = getDatabaseConnection();
 
         $query = 'UPDATE email_token
                   SET token = :token
-                  WHERE student_id = :studentID;';
+                  WHERE user_id = :userID;';
 
         $stmt = $db->prepare($query);
         $stmt->bindParam(':token', $token);
-        $stmt->bindParam(':studentID', $studentID);
+        $stmt->bindParam(':userID', $userID);
         $stmt->execute();
 
         if ($stmt->rowCount() > 0) {
             return true;
         }
+        ErrorList::add("No se pudo actualizar el token para el usuario ID: $userID");
         return false;
     } catch (\PDOException $e) {
         throw new \RuntimeException("Error update token: {$e->getMessage()}");
-    }
-}
-
-function getProfessorSubjectsAndProgramsByUlsaID($ulsaID)
-{
-    try {
-        $db = getDatabaseConnection();
-        $query = "SELECT s.name AS subject_name, p.career AS program_name, pr.id AS professor_id, s.id AS subject_id, p.id AS program_id
-                  FROM program_subject ps
-                  JOIN professor pr ON ps.professor_id = pr.id
-                  JOIN public.user u ON pr.user_id = u.id
-                  JOIN subject s ON ps.subject_id = s.id
-                  JOIN program p ON ps.program_id = p.id
-                  WHERE u.ulsa_id = :ulsa_id";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':ulsa_id', $ulsaID);
-        $stmt->execute();
-
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        if (empty($results)) {
-            ErrorList::add("No subjects or programs found for professor with ULSA ID $ulsaID");
-            return [];
-        }
-        return $results;
-    } catch (\PDOException $e) {
-        throw new \RuntimeException("Error getting subjects and programs by ULSA ID: " . $e->getMessage());
-    }
-}
-
-function deleteProgramSubject($professorId, $subjectId, $programId)
-{
-    try {
-        $db = getDatabaseConnection();
-        $query = "DELETE FROM program_subject WHERE professor_id = :professor_id AND subject_id = :subject_id AND program_id = :program_id";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':professor_id', $professorId);
-        $stmt->bindParam(':subject_id', $subjectId);
-        $stmt->bindParam(':program_id', $programId);
-        $stmt->execute();
-
-        if ($stmt->rowCount() > 0) {
-            return true;
-        }
+    } catch (\Exception $e) {
+        ErrorList::add("Error inesperado al actualizar token: {$e->getMessage()}");
         return false;
-    } catch (\PDOException $e) {
-        throw new \RuntimeException("Error deleting program subject: " . $e->getMessage());
     }
 }
 
-function getSubjects(): array
-{
-    $subjects = [];
-    $db = getDatabaseConnection();
-
-    $query = "SELECT * FROM subject";
-    $stmt = $db->prepare($query);
-    $stmt->execute();
-
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $subjects[] = new Subject($row['id'], $row['name']);
-    }
-    return $subjects;
-}
-
-function addProgramSubject($professorId, $subjectId, $programId)
+//^ DELETES
+function deleteStudent(int $ulsaID)
 {
     try {
         $db = getDatabaseConnection();
-        $query = "INSERT INTO program_subject (professor_id, subject_id, program_id) VALUES (:professor_id, :subject_id, :program_id)";
+        $query = 'DELETE FROM public.user
+                  WHERE ulsa_id = (:ulsaId)';
         $stmt = $db->prepare($query);
-        $stmt->bindParam(':professor_id', $professorId);
-        $stmt->bindParam(':subject_id', $subjectId);
-        $stmt->bindParam(':program_id', $programId);
+        $stmt->bindParam(':ulsaId', $ulsaID);
         $stmt->execute();
 
-        if ($stmt->rowCount() > 0) {
-            return true;
+        if ($stmt->rowCount() === 0) {
+            return false;
         }
+
+        return true;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error delete student: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add("Error inesperado al borrar estudiante: {$e->getMessage()}");
         return false;
-    } catch (\PDOException $e) {
-        throw new \RuntimeException("Error al asignar la materia al programa: " . $e->getMessage());
     }
 }
 
-function getProgramSubjects()
-{
-    $db = getDatabaseConnection();
-    $query = "SELECT ps.id, ps.has_signed, ps.will_be_absent, s.name AS subject_name, p.career AS program_name, 
-                     CONCAT(u.first_name, ' ', u.last_name) AS professor_name
-              FROM program_subject ps
-              JOIN subject s ON ps.subject_id = s.id
-              JOIN program p ON ps.program_id = p.id
-              JOIN professor pr ON ps.professor_id = pr.id
-              JOIN public.user u ON pr.user_id = u.id";
-    $stmt = $db->prepare($query);
-    $stmt->execute();
-
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-function updateHasSigned($programSubjectId, $newState)
+function deleteAllStudents()
 {
     try {
         $db = getDatabaseConnection();
-        $query = "UPDATE program_subject SET has_signed = :newState WHERE id = :programSubjectId";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':newState', $newState, PDO::PARAM_BOOL);
-        $stmt->bindParam(':programSubjectId', $programSubjectId, PDO::PARAM_INT);
-        $stmt->execute();
+        $db->beginTransaction();
+        $db->exec('DELETE FROM student');
+        $db->exec('DELETE FROM name');
+        $db->exec('DELETE FROM program');
+        $db->commit();
 
-        return $stmt->rowCount() > 0;
+        return true;
     } catch (\PDOException $e) {
-        throw new \RuntimeException("Error updating has_signed: " . $e->getMessage());
-    }
-}
-
-function updateWillBeAbsent($programSubjectId, $newState)
-{
-    try {
-        $db = getDatabaseConnection();
-        $query = "UPDATE program_subject SET will_be_absent = :newState WHERE id = :programSubjectId";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':newState', $newState, PDO::PARAM_BOOL);
-        $stmt->bindParam(':programSubjectId', $programSubjectId, PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->rowCount() > 0;
-    } catch (\PDOException $e) {
-        throw new \RuntimeException("Error updating will_be_absent: " . $e->getMessage());
-    }
-}
-
-function insertComment($programSubjectId, $comment, $author)
-{
-    try {
-        $db = getDatabaseConnection();
-        $query = "INSERT INTO comments (comment, author, program_subject_id) VALUES (:comment, :author, :programSubjectId)";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':comment', $comment);
-        $stmt->bindParam(':author', $author);
-        $stmt->bindParam(':programSubjectId', $programSubjectId, PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->rowCount() > 0;
-    } catch (\PDOException $e) {
-        throw new \RuntimeException("Error inserting comment: " . $e->getMessage());
+        $db->rollBack();
+        throw new \RuntimeException("Error wipe students: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        $db->rollBack();
+        ErrorList::add("Error inesperado al limpiar estudiantes: {$e->getMessage()}");
+        return false;
     }
 }

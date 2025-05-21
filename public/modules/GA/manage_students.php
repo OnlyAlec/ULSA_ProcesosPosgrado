@@ -32,13 +32,10 @@ function restartDatabaseFromExcel(
         if (empty($data['ulsa_ids'])) {
             throw new RuntimeException('El archivo Excel no contiene datos validos.');
         }
-        clearDatabaseTables();
+        deleteAllStudents();
         insertDataIntoDatabase($data);
 
-        return [
-            'success' => true,
-            'errors' => ErrorList::getAll(),
-        ];
+        return 'Reinicio completado!';
     } catch (RuntimeException $e) {
         throw new RuntimeException(message: $e->getMessage());
     }
@@ -55,38 +52,19 @@ function insertOneStudent($ulsaId, $name, $lastname, $career, $email)
     $email = trim($email);
 
     try {
-        $db = getDatabaseConnection();
-        $stmt = $db->prepare('SELECT id FROM program WHERE career = :career');
-        $stmt->execute([':career' => $career]);
-        $careerId = $stmt->fetchColumn();
-
-        if (!$careerId) {
-            $stmt = $db->prepare('INSERT INTO program (career) VALUES (:career) RETURNING id');
-            $stmt->execute([':career' => $career]);
-            $careerId = $db->lastInsertId();
+        $user = getStudentByUlsaID($ulsaId);
+        if ($user) {
+            throw new RuntimeException(message: 'Estudiante ya existente');
         }
 
-        $stmt = $db->prepare(
-            'INSERT INTO name (first_name, last_name) VALUES (:first_name, :last_name) RETURNING id',
-        );
-        $stmt->execute([
-            ':first_name' => $name,
-            ':last_name' => $lastname,
-        ]);
-        $userId = $db->lastInsertId();
+        $career = getProgramByName($career);
+        $careerID = !$career ? insertProgram($career, true) : $career->getId();
+        $userID = insertUser($ulsaId, $name, $lastname, $email, true);
 
-        $stmt = $db->prepare(
-            'INSERT INTO student (ulsa_id, name_id, program_id, email) VALUES (:ulsa_id, :name_id, :program_id, :email)',
-        );
-        $stmt->execute([
-            ':program_id' => $careerId,
-            ':email' => $email,
-        ]);
-
-        return [
-            'success' => true,
-            'errors' => ErrorList::getAll(),
-        ];
+        if (!insertStudent($userID, $careerID)) {
+            throw new RuntimeException(message: 'Error en el registro');
+        }
+        return 'Registro correcto!';
     } catch (RuntimeException $e) {
         throw new RuntimeException(message: $e->getMessage());
     }
@@ -95,36 +73,13 @@ function insertOneStudent($ulsaId, $name, $lastname, $career, $email)
 function deleteOneStudent($ulsaId)
 {
     ErrorList::clear();
-    try {
-        $db = getDatabaseConnection();
-        $stmt = $db->prepare('DELETE FROM student WHERE ulsa_id = (:ulsaId)');
-        $stmt->execute([':ulsaId' => $ulsaId]);
+    $ulsaId = trim($ulsaId);
 
-        if ($stmt->rowCount() === 0) {
-            throw new RuntimeException('No se encontro ningun estudiante con el ID proporcionado.');
-        }
-
-        return [
-            'success' => true,
-            'errors' => ErrorList::getAll(),
-        ];
-    } catch (RuntimeException $e) {
-        throw new RuntimeException(message: $e->getMessage());
+    if (!deleteStudent($ulsaId)) {
+        throw new RuntimeException('No se encontro ningun estudiante con el ID proporcionado.');
     }
-}
 
-function deleteAllStudents()
-{
-    ErrorList::clear();
-    try {
-        clearDatabaseTables();
-        return [
-            'success' => true,
-            'errors' => ErrorList::getAll(),
-        ];
-    } catch (RuntimeException $e) {
-        throw new RuntimeException(message: $e->getMessage());
-    }
+    return 'Estudiante eliminado!';
 }
 
 function loadExcelData(
@@ -189,63 +144,30 @@ function loadExcelData(
     return $data;
 }
 
-function clearDatabaseTables()
-{
-    try {
-        $db = getDatabaseConnection();
-        $db->beginTransaction();
-        $db->exec('DELETE FROM student');
-        $db->exec('DELETE FROM name');
-        $db->exec('DELETE FROM program');
-        $db->commit();
-    } catch (PDOException $e) {
-        $db->rollBack();
-        ErrorList::add($e->getMessage());
-    }
-}
-
 function insertDataIntoDatabase($data)
 {
     try {
-        $db = getDatabaseConnection();
-        $db->beginTransaction();
-
-        // Insertar carreras únicas
         $careers = array_unique($data['careers']);
         $careerIds = [];
         foreach ($careers as $career) {
-            $stmt = $db->prepare('INSERT INTO program (career) VALUES (:career) RETURNING id');
-            $stmt->execute([':career' => $career]);
-            $careerIds[$career] = $db->lastInsertId();
+            $careerIds[$career] = insertProgram($career, true);
         }
 
-        // Insertar nombres y apellidos
-        $nameIds = [];
-        for ($i = 0; $i < count($data['first_names']); $i++) {
-            $stmt = $db->prepare(
-                'INSERT INTO name (first_name, last_name) VALUES (:first_name, :last_name) RETURNING id',
-            );
-            $stmt->execute([
-                ':first_name' => $data['first_names'][$i],
-                ':last_name' => $data['last_names'][$i],
-            ]);
-            $userIds[] = $db->lastInsertId();
-        }
-
-        // Insertar estudiantes
+        $usersIds = [];
         for ($i = 0; $i < count($data['ulsa_ids']); $i++) {
-            $stmt = $db->prepare(
-                'INSERT INTO student (ulsa_id, name_id, program_id, email) VALUES (:ulsa_id, :name_id, :program_id, :email)',
+            $usersIds[] = insertUser(
+                $data['ulsa_ids'][$i],
+                $data['first_names'][$i],
+                $data['last_names'][$i],
+                $data['emails'][$i],
+                true,
             );
-            $stmt->execute([
-                ':user_id' => $userIds[$i],
-                ':program_id' => $careerIds[$data['careers'][$i]],
-                ':email' => $data['emails'][$i],
-            ]);
         }
-        $db->commit();
+
+        for ($i = 0; $i < count($usersIds); $i++) {
+            insertStudent($usersIds[$i], $careerIds[$data['careers'][$i]]);
+        }
     } catch (PDOException $e) {
-        $db->rollBack();
-        ErrorList::add($e->getMessage());
+        throw new RuntimeException('No se pueden agregar nuevos datos');
     }
 }
