@@ -51,6 +51,7 @@ jobs:
 
     prettier:
         runs-on: ubuntu-latest
+        needs: php-cs-fixer
 
         permissions:
             contents: write
