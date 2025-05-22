@@ -86,6 +86,7 @@ function loadExcelStudents($filePath, $ulsaIdColumn, $nameColumn, $sedColumn)
                     carrer: ' ',
                     email: '',
                 );
+
                 $student->setSed($sedBool);
                 $students[] = $student;
             } catch (InvalidArgumentException $e) {

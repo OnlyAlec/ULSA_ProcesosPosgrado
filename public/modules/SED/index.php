@@ -66,7 +66,6 @@ get_head('SED');
     get_header('Seguimiento de Evaluación Docente');
     ?>
     <main class="container content marco">
-
         <!-- PÁRRAFO INFORMATIVO -->
         <div class="sectionsSED">
             <h3>Lista de alumnos</h3>
@@ -102,7 +101,7 @@ get_head('SED');
                         </div>
                     </div>
                 </div>
-
+              
                 <div id="filterArea" class="mt-1" style="display:none;">
                     <div class="form-box">
                         <div class="form-group row">
