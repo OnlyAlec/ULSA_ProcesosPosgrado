@@ -25,7 +25,7 @@ $(function () {
                 if (response.data) {
                     // @ts-ignore
                     response.data.forEach((student) => {
-                        let row = `<tr>
+                        let row = `<tr data-carrer="${student.carrer}">
                                 <th scope='row'>${student.ulsaID}</th>
                                 <td>${student.firstName} ${student.lastName}</td>
                                 <td>${student.carrer}</td>
@@ -61,7 +61,6 @@ $(function () {
                     );
                 }
                 tableContainer.show();
-                setupDatasets();
             },
             error: function (xhr) {
                 const errorMsg = 'Error al procesar la solicitud';
@@ -71,52 +70,6 @@ $(function () {
                 button.prop('disabled', false);
             },
         });
-    });
-
-    $('#onlyMissing').on('click', function () {
-        const tableContainer = $('#tableStudentsConfirm');
-        const tableBody = tableContainer.find('tbody');
-
-        tableBody
-            .find('tr')
-            .show()
-            .filter(function () {
-                return $(this).find('i').hasClass('fa-minus-square');
-            })
-            .hide();
-
-        if (tableBody.find('tr:visible').length == 0)
-            tableBody.append(
-                '<tr><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
-            );
-    });
-    $('#onlyConfirm').on('click', function () {
-        const tableContainer = $('#tableStudentsConfirm');
-        const tableBody = tableContainer.find('tbody');
-
-        tableBody
-            .find('tr')
-            .show()
-            .filter(function () {
-                return $(this).find('i').hasClass('fa-check-square');
-            })
-            .hide();
-
-        if (tableBody.find('tr:visible').length == 0)
-            tableBody.append(
-                '<tr><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
-            );
-    });
-    $('#removeFilter').on('click', function () {
-        const tableContainer = $('#tableStudentsConfirm');
-        const tableBody = tableContainer.find('tbody');
-
-        tableBody.find('tr').show();
-
-        if (tableBody.find('tr:visible').length == 0)
-            tableBody.append(
-                '<tr><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
-            );
     });
 });
 
