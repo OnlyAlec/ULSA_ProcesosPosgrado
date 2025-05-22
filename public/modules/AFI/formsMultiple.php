@@ -18,7 +18,7 @@ function process_multiple_excels($uploadDir, $filePath1, $filePath2)
         $missingStudents = filterMissingStudents($studentsForms, $studentsAll);
         $programCount = getProgramCount($studentsAll, $missingStudents);
         $outputFile = createExcel($missingStudents, $programCount);
-        $studentsArray = array_map(fn ($student) => $student->getJSON(), $missingStudents);
+        $studentsArray = array_map(fn($student) => $student->getJSON(), $missingStudents);
 
         return [
             'students' => $studentsArray,
