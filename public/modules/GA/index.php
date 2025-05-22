@@ -85,7 +85,7 @@ try {
                 $_POST['email'],
             );
         } elseif ($_POST['action'] === 'getTableStudents') {
-            $res = array_values(array_map(fn ($student) => $student->getJSON(), getStudents()));
+            $res = array_values(array_map(fn($student) => $student->getJSON(), getStudents()));
         } elseif ($_POST['action'] === 'deleteOneStudent') {
             if (!preg_match('/^\d{6}$/', $_POST['claveUlsaDelete'])) {
                 throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
@@ -115,8 +115,8 @@ get_head('GA');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Gestión de Alumnos');
-?>
+    get_header('Gestión de Alumnos');
+    ?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
