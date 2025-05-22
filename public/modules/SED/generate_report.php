@@ -3,7 +3,7 @@
 use Fpdf\fpdf;
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
-require_once VENDOR_DIR . "/autoload.php";
+require_once VENDOR_DIR . '/autoload.php';
 
 if (isset($_POST['students']) && isset($_POST['filename'])) {
     $studentsData = json_decode($_POST['students'], true);
@@ -54,7 +54,14 @@ function addTable($pdf, $titleTable, $students)
         }
 
         $pdf->SetFont('IndivisaTextSans', '', 10);
-        $pdf->Cell(130, 10, mb_convert_encoding($student->fullName, 'ISO-8859-1', 'UTF-8'), 1, 0, 'L');
+        $pdf->Cell(
+            130,
+            10,
+            mb_convert_encoding($student->fullName, 'ISO-8859-1', 'UTF-8'),
+            1,
+            0,
+            'L',
+        );
         $pdf->Cell(60, 10, $student->id, 1, 1, 'C');
     }
     $pdf->Ln(5);
@@ -64,7 +71,7 @@ function separateStudents($students)
 {
     $studentsEvaluation = [
         'EVALUATED' => [],
-        'NOT_EVALUATED' => []
+        'NOT_EVALUATED' => [],
     ];
 
     foreach ($students as $student) {
@@ -81,6 +88,7 @@ function generateReport($students, $filename)
     $pdf = new Fpdf();
     $reportsDir = __DIR__ . '/reports/';
     if (!is_dir($reportsDir)) {
+        // TODO: Cambiar permisos de la carpeta 02775
         if (!mkdir($reportsDir, 0755, true)) {
             throw new RuntimeException('Error creating reports directory.');
         }
@@ -96,7 +104,18 @@ function generateReport($students, $filename)
         addNewPage($pdf);
         $countEvaluated = 0;
         $pdf->SetFont('IndivisaSans', '', 14);
-        $pdf->Cell(0, 10, mb_convert_encoding('Alumnos que realizaron la Evaluación Docente', 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
+        $pdf->Cell(
+            0,
+            10,
+            mb_convert_encoding(
+                'Alumnos que realizaron la Evaluación Docente',
+                'ISO-8859-1',
+                'UTF-8',
+            ),
+            0,
+            1,
+            'L',
+        );
         $pdf->Ln(5);
 
         foreach ($studentsByEvaluation['EVALUATED'] as $programName => $programStudents) {
@@ -108,7 +127,18 @@ function generateReport($students, $filename)
     if (!empty($studentsByEvaluation['NOT_EVALUATED'])) {
         addNewPage($pdf);
         $pdf->SetFont('IndivisaSans', '', 14);
-        $pdf->Cell(0, 10, mb_convert_encoding('Alumnos que no han realizado la Evaluación Docente', 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
+        $pdf->Cell(
+            0,
+            10,
+            mb_convert_encoding(
+                'Alumnos que no han realizado la Evaluación Docente',
+                'ISO-8859-1',
+                'UTF-8',
+            ),
+            0,
+            1,
+            'L',
+        );
         $pdf->Ln(5);
 
         foreach ($studentsByEvaluation['NOT_EVALUATED'] as $programName => $programStudents) {
@@ -119,13 +149,53 @@ function generateReport($students, $filename)
     $percentage = round(($countEvaluated / count($students)) * 100, 2);
     addNewPage($pdf);
     $pdf->SetFont('IndivisaSans', '', 14);
-    $pdf->Cell(0, 10, mb_convert_encoding('Números de Alumnos que realizaron la evaluación: ' . $countEvaluated, 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
-    $pdf->Cell(0, 10, mb_convert_encoding('Números de Alumnos que no han realizado la evaluación: ' . (count($students) - $countEvaluated), 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
-    $pdf->Cell(0, 10, mb_convert_encoding('Total de Alumnos: ' . count($students), 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
-    $pdf->Cell(0, 10, mb_convert_encoding('Porcentaje de Cumplimiento: ' . $percentage . '%', 'ISO-8859-1', 'UTF-8'), 0, 1, 'L');
+    $pdf->Cell(
+        0,
+        10,
+        mb_convert_encoding(
+            'Números de Alumnos que realizaron la evaluación: ' . $countEvaluated,
+            'ISO-8859-1',
+            'UTF-8',
+        ),
+        0,
+        1,
+        'L',
+    );
+    $pdf->Cell(
+        0,
+        10,
+        mb_convert_encoding(
+            'Números de Alumnos que no han realizado la evaluación: ' .
+                (count($students) - $countEvaluated),
+            'ISO-8859-1',
+            'UTF-8',
+        ),
+        0,
+        1,
+        'L',
+    );
+    $pdf->Cell(
+        0,
+        10,
+        mb_convert_encoding('Total de Alumnos: ' . count($students), 'ISO-8859-1', 'UTF-8'),
+        0,
+        1,
+        'L',
+    );
+    $pdf->Cell(
+        0,
+        10,
+        mb_convert_encoding(
+            'Porcentaje de Cumplimiento: ' . $percentage . '%',
+            'ISO-8859-1',
+            'UTF-8',
+        ),
+        0,
+        1,
+        'L',
+    );
 
     $outputPath = $reportsDir . $filename . '.pdf';
     $pdf->Output('F', $outputPath);
     echo json_encode(['url' => "/modules/SED/reports/$filename.pdf"]);
-
 }

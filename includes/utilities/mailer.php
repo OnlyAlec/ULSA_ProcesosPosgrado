@@ -29,7 +29,7 @@ class Mailer
 
     private function getTemplateHTML(): string
     {
-        $baseHTML = file_get_contents(EMAIL_TEMPLATES_DIR . "/" . $this->template . ".mjml");
+        $baseHTML = file_get_contents(EMAIL_TEMPLATES_DIR . '/' . $this->template . '.mjml');
         if ($baseHTML === false) {
             throw new \RuntimeException('Error reading base template!');
         }
@@ -43,7 +43,7 @@ class Mailer
             $htmlObj = Mjml::new()->beautify()->convert($mjml, $options);
 
             if ($htmlObj->hasErrors()) {
-                $e = "";
+                $e = '';
                 foreach ($htmlObj->errors() as $error) {
                     $e .= $error->formattedMessage() . "\n";
                 }
@@ -51,7 +51,7 @@ class Mailer
             }
             return $htmlObj->html();
         } catch (\Throwable $th) {
-            throw new \RuntimeException("MJML conversion failed: " . $th->getMessage());
+            throw new \RuntimeException('MJML conversion failed: ' . $th->getMessage());
         }
     }
 
@@ -61,7 +61,7 @@ class Mailer
         if ($tokenDB == $token) {
             return true;
         }
-        return $tokenDB == "" ? insertToken($studentID, $token) : updateToken($studentID, $token);
+        return $tokenDB == '' ? insertToken($studentID, $token) : updateToken($studentID, $token);
     }
 
     public function constructEmail(array $dataAdditional)
@@ -81,9 +81,9 @@ class Mailer
             $formattedLastName = implode(' ', array_map('ucfirst', $lastNameParts));
 
             $dataReplace = [
-                "header" => "Gestión de Procesos de Posgrado",
-                "name" => "$formattedName $formattedLastName",
-                "url" => $this->url ?? "",
+                'header' => 'Gestión de Procesos de Posgrado',
+                'name' => "$formattedName $formattedLastName",
+                'url' => $this->url ?? '',
             ];
 
             if (!empty($dataAdditional)) {
@@ -91,7 +91,10 @@ class Mailer
             }
 
             $base = $this->getTemplateHTML();
-            $keys = array_map(fn ($key) => "-- " . strtoupper($key) . " --", array_keys($dataReplace));
+            $keys = array_map(
+                fn($key) => '-- ' . strtoupper($key) . ' --',
+                array_keys($dataReplace),
+            );
 
             $this->htmlContent = $this->convertMJMLToHTML($base);
             $this->htmlContent = str_replace($keys, array_values($dataReplace), $this->htmlContent);
@@ -103,14 +106,21 @@ class Mailer
 
     public function send()
     {
-        if ($res = $this->brevo->sendIndividualEmail($this->contact, $this->subject, $this->htmlContent) != "") {
+        if (
+            $res =
+                $this->brevo->sendIndividualEmail(
+                    $this->contact,
+                    $this->subject,
+                    $this->htmlContent,
+                ) != ''
+        ) {
             return [
-                "messageID" => $res,
-                "delivered" => "true",
-                "receipt" => $this->contact->getEmail()
+                'messageID' => $res,
+                'delivered' => 'true',
+                'receipt' => $this->contact->getEmail(),
             ];
         }
-        ErrorList::add("Error sending email to: " . $this->contact->getEmail());
+        ErrorList::add('Error sending email to: ' . $this->contact->getEmail());
         return [];
     }
 

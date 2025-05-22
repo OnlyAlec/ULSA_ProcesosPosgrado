@@ -1,39 +1,106 @@
 $(function () {
-    setupBtns("btn-forms");
-    setupBtns("btn-forms-msf");
-    setupBtns("btn-forms-lst");
+    function generateCharts(graphData) {
+        /**
+         * @param {string} canvasId
+         * @param {string} titleId
+         * @param {string[]} labels
+         * @param {any[]} values
+         * @param {string} label
+         * @param {string} backgroundColor
+         * @param {string} borderColor
+         */
+        function createChart(
+            canvasId,
+            titleId,
+            labels,
+            values,
+            chartLabel,
+            backgroundColor,
+            borderColor
+        ) {
+            $(`#${canvasId}`).remove();
+            $(`#${titleId}`).after(`<canvas id="${canvasId}"></canvas>`);
+            // @ts-ignore
+            new Chart(document.getElementById(canvasId), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: chartLabel,
+                            data: values,
+                            backgroundColor: backgroundColor,
+                            borderColor: borderColor,
+                            borderWidth: 1,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { title: { display: true, text: 'Programas' } },
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Cantidad de alumnos sin firmar' },
+                        },
+                    },
+                },
+            });
+        }
 
-    $(".formsForm").on("submit", function (e) {
+        createChart(
+            'especialidadGraph',
+            'especialidadTitle',
+            Object.keys(graphData.especialidad),
+            Object.values(graphData.especialidad),
+            'Alumnos sin firmar',
+            'rgba(255, 99, 132, 0.5)',
+            'rgba(255, 99, 132, 1)'
+        );
+
+        createChart(
+            'maestriaGraph',
+            'maestriaTitle',
+            Object.keys(graphData.maestria),
+            Object.values(graphData.maestria),
+            'Alumnos sin firmar',
+            'rgba(54, 162, 235, 0.5)',
+            'rgba(54, 162, 235, 1)'
+        );
+    }
+    setupBtns('btn-forms');
+
+    $('.formsForm').on('submit', function (e) {
         e.preventDefault();
         const form = $(this);
         // @ts-ignore
         const formData = new FormData(this);
-        const tableContainer = $("#forms-result");
-        const tableBody = $("#tableStudents").find("tbody");
+        const tableContainer = $('#forms-result');
+        const tableBody = $('#tableStudents').find('tbody');
 
         $.ajax({
-            url: "",
-            type: "POST",
+            url: '',
+            type: 'POST',
             data: formData,
             processData: false,
             contentType: false,
             beforeSend: function () {
                 tableContainer.hide();
-                $(".alert").remove();
+                $('.alert').remove();
                 tableBody.empty();
-                form.find("button").prop("disabled", true);
+                form.find('button').prop('disabled', true);
             },
             success: function (response) {
                 if (!response.success) {
-                    displayMessage(form, response.message, "error");
+                    displayMessage(form, response.message, 'error');
                     return;
                 }
 
-                displayMessage($(".subSectionAFI:visible"), "Archivo procesado correctamente");
+                displayMessage($('.subSectionAFI:visible'), 'Archivo procesado correctamente');
                 if (response.data && response.data.students && response.data.students.length > 0) {
                     // @ts-ignore
                     response.data.students.forEach((student) => {
-                        const row = `<tr>
+                        const row = `<tr data-carrer="${student.carrer}">
                                 <th scope='row'>${student.ulsaID}</th>
                                 <td>${student.firstName} ${student.lastName}</td>
                                 <td>${student.carrer}</td>
@@ -42,13 +109,13 @@ $(function () {
                         tableBody.append(row);
                     });
                     if (response.data.excel) {
-                        const downloadLink = $("#downloadExcel");
-                        downloadLink.attr("href", response.data.excel);
+                        const downloadLink = $('#downloadExcel');
+                        downloadLink.attr('href', response.data.excel);
                         downloadLink.show();
                     }
                     if (response.data.totalDB && response.data.totalFiltered) {
-                        $("#totalDB").text(response.data.totalDB);
-                        $("#totalFiltered").text(response.data.totalFiltered);
+                        $('#totalDB').text(response.data.totalDB);
+                        $('#totalFiltered').text(response.data.totalFiltered);
                     }
                     if (response.data.graphData) {
                         generateCharts(response.data.graphData);
@@ -58,87 +125,14 @@ $(function () {
                         '<tr><td colspan="4" class="text-center">No se encontraron alumnos faltantes</td></tr>'
                     );
                 tableContainer.show();
-                setupDatasets();
             },
             error: function (xhr) {
-                const errorMsg = "Error al procesar la solicitud";
-                displayMessage(form, errorMsg, "error");
+                const errorMsg = 'Error al procesar la solicitud';
+                displayMessage(form, errorMsg, 'error');
             },
             complete: function () {
-                form.find("button").prop("disabled", false);
+                form.find('button').prop('disabled', false);
             },
         });
     });
 });
-
-/**
- * @param {{ especialidad: { [s: string]: any; } | ArrayLike<any>; maestria: { [s: string]: any; } | ArrayLike<any>; }} graphData
- */
-function generateCharts(graphData) {
-    const especialidadLabels = Object.keys(graphData.especialidad);
-    const especialidadValues = Object.values(graphData.especialidad);
-
-    const maestriaLabels = Object.keys(graphData.maestria);
-    const maestriaValues = Object.values(graphData.maestria);
-
-    $("#especialidadGraph").remove();
-    $("#maestriaGraph").remove();
-    $("#especialidadTitle").after('<canvas id="especialidadGraph"></canvas>');
-    $("#maestriaTitle").after('<canvas id="maestriaGraph"></canvas>');
-
-    /* --> Especialidades */
-    // @ts-ignore
-    new Chart(document.getElementById("especialidadGraph"), {
-        type: "bar",
-        data: {
-            labels: especialidadLabels,
-            datasets: [
-                {
-                    label: "Alumnos sin firmar",
-                    data: especialidadValues,
-                    backgroundColor: "rgba(255, 99, 132, 0.5)",
-                    borderColor: "rgba(255, 99, 132, 1)",
-                    borderWidth: 1,
-                },
-            ],
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: { title: { display: true, text: "Programas" } },
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: "Cantidad de alumnos sin firmar" },
-                },
-            },
-        },
-    });
-
-    /* --> Maestrías */
-    // @ts-ignore
-    new Chart(document.getElementById("maestriaGraph"), {
-        type: "bar",
-        data: {
-            labels: maestriaLabels,
-            datasets: [
-                {
-                    label: "Alumnos sin firmar",
-                    data: maestriaValues,
-                    backgroundColor: "rgba(54, 162, 235, 0.5)",
-                    borderColor: "rgba(54, 162, 235, 1)",
-                    borderWidth: 1,
-                },
-            ],
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: { title: { display: true, text: "Programas" } },
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: "Cantidad de alumnos sin firmar" },
-                },
-            },
-        },
-    });
-}

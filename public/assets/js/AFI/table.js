@@ -43,22 +43,29 @@ $(function () {
         });
     }
 
-    function resetTableAndSelection() {
-        const table = $('#studentsTable');
-        const tbody = table.find('tbody');
-        tbody.find('tr').show();
+    function resetTableAndSelection(tableID = 'tableStudents') {
+        const $table = $('#' + tableID);
+        const $tbody = $table.find('tbody');
+        $tbody.find('tr').show();
         $('.studentCheckbox').prop('checked', false);
         $('#confirmChanges').prop('disabled', true);
         $('#selectedCount').text('0');
         $('#selectAll').prop('checked', false);
     }
 
-    function applyFiltersAreaType() {
-        const tBody = $('#studentsTable')?.find('tbody');
+    function applyFiltersAreaType(
+        tableID = 'tableStudents',
+        filterType = 'programType',
+        filterArea = 'programArea'
+    ) {
+        const tBody = $('#' + tableID)?.find('tbody');
         const rows = tBody.find('tr');
         const selectedType =
-            $('#programType')?.data('value') == 'masters' ? 'MAESTRÍA' : 'ESPECIALIDAD' || '';
-        const selectedArea = $('#programArea')?.data('value').toUpperCase() || '';
+            $('#' + filterType)?.data('value') == 'masters' ? 'MAESTRÍA' : 'ESPECIALIDAD' || '';
+        const selectedArea =
+            $('#' + filterArea)
+                ?.data('value')
+                ?.toUpperCase() || '';
 
         if (rows.length === 0) {
             return;
@@ -71,19 +78,21 @@ $(function () {
             const area = row.data('carrer').toUpperCase();
             const type = area.split(' ')[0].toUpperCase();
 
-            if (selectedType === '') return;
-
-            if (selectedArea === '') {
-                if (type === selectedType) {
-                    row.show();
-                } else {
-                    row.hide();
-                }
+            if (selectedType === '') {
+                rows.show();
             } else {
-                if (area === selectedArea) {
-                    row.show();
+                if (selectedArea === '') {
+                    if (type === selectedType) {
+                        row.show();
+                    } else {
+                        row.hide();
+                    }
                 } else {
-                    row.hide();
+                    if (area === selectedArea) {
+                        row.show();
+                    } else {
+                        row.hide();
+                    }
                 }
             }
         });
@@ -94,48 +103,63 @@ $(function () {
             );
     }
 
+    function handleProgramTypeChange(typeSelector, areaSelectors, tableId) {
+        $(typeSelector).on('input', function () {
+            const selectedOption = $(this).data('value') || '';
+            resetTableAndSelection(tableId);
+
+            // Seleccionar elementos del área y limpiar la lista de opciones
+            const $datalistArea = $(areaSelectors).closest('.datalist');
+            const $ulArea = $datalistArea.find('ul');
+            $ulArea.empty();
+            $ulArea.append('<li data-value="">Todos</li>');
+
+            // Determinar programas a mostrar según la selección
+            let programsToShow = [];
+            if (selectedOption === 'masters') {
+                programsToShow = window.afiPreloadedData.masters || [];
+            } else if (selectedOption === 'specialties') {
+                programsToShow = window.afiPreloadedData.specialties || [];
+            } else if (selectedOption === '') {
+                programsToShow = window.afiPreloadedData.masters.concat(
+                    window.afiPreloadedData.specialties
+                );
+            }
+
+            // Agregar opciones a la lista
+            if (programsToShow.length > 0) {
+                programsToShow.forEach((element) => {
+                    $ulArea.append(`<li data-value="${element}">${element}</li>`);
+                });
+            }
+
+            // Actualizar UI según la selección
+            if (selectedOption !== '') {
+                $(areaSelectors).val('Todos').data('value', '');
+                $(areaSelectors).siblings('.filter').removeClass('fa-times').addClass('fa-search');
+                $(areaSelectors).trigger('input');
+
+                $('#filterArea, #filterAreaGestor').show();
+            } else {
+                $('#filterArea, #filterAreaGestor').hide();
+            }
+        });
+    }
+
     initDatalist($('#programType, #programArea').closest('.datalist'));
+    initDatalist($('#programTypeGestor, #programAreaGestor').closest('.datalist'));
 
-    $('#programType').on('input', function () {
-        const selectedOption = $(this).data('value') || '';
-        resetTableAndSelection();
-
-        const $datalistArea = $('#programArea').closest('.datalist');
-        const $ulArea = $datalistArea.find('ul');
-        $ulArea.empty();
-        $ulArea.append('<li data-value="">Todos</li>');
-
-        let programsToShow = [];
-        if (selectedOption === 'masters') {
-            programsToShow = window.sedPreloadedData.masters || [];
-        } else if (selectedOption === 'specialties') {
-            programsToShow = window.sedPreloadedData.specialties || [];
-        } else if (selectedOption === '') {
-            programsToShow = window.sedPreloadedData.masters.concat(
-                window.sedPreloadedData.specialties
-            );
-        }
-
-        if (programsToShow.length > 0) {
-            programsToShow.forEach((element) => {
-                $ulArea.append(`<li data-value="${element}">${element}</li>`);
-            });
-        }
-
-        if (selectedOption !== '') {
-            $('#programArea').val('Todos').data('value', '');
-            $('#programArea').siblings('.filter').removeClass('fa-times').addClass('fa-search');
-            $('#programArea').trigger('input');
-
-            $('#filterArea').show();
-        } else {
-            $('#filterArea').hide();
-        }
-    });
+    handleProgramTypeChange('#programType', '#programArea, #programAreaGestor', 'tableStudents');
+    handleProgramTypeChange('#programTypeGestor', '#programAreaGestor', 'tableStudentsConfirm');
 
     $('#programArea').on('input', function () {
         resetTableAndSelection();
         applyFiltersAreaType();
+    });
+
+    $('#programAreaGestor').on('input', function () {
+        resetTableAndSelection('tableStudentsConfirm');
+        applyFiltersAreaType('tableStudentsConfirm', 'programTypeGestor', 'programAreaGestor');
     });
 
     $('.studentCheckbox').on('change', function () {
@@ -324,9 +348,9 @@ $(function () {
     });
 
     $('#onlyMissing').on('click', function () {
-        const tableBody = $('#studentsTable').find('tbody');
-        resetTableAndSelection();
-        applyFiltersAreaType();
+        const tableBody = $('#tableStudentsConfirm').find('tbody');
+        resetTableAndSelection('tableStudentsConfirm');
+        applyFiltersAreaType('tableStudentsConfirm', 'programTypeGestor', 'programAreaGestor');
 
         tableBody
             .find('tr:visible')
@@ -342,9 +366,9 @@ $(function () {
     });
 
     $('#onlyConfirm').on('click', function () {
-        const tableBody = $('#studentsTable').find('tbody');
+        const tableBody = $('#tableStudentsConfirm').find('tbody');
         resetTableAndSelection();
-        applyFiltersAreaType();
+        applyFiltersAreaType('tableStudentsConfirm', 'programTypeGestor', 'programAreaGestor');
 
         tableBody
             .find('tr:visible')
@@ -360,100 +384,7 @@ $(function () {
     });
 
     $('#removeFilter').on('click', function () {
-        resetTableAndSelection();
-        applyFiltersAreaType();
+        resetTableAndSelection('tableStudentsConfirm');
+        applyFiltersAreaType('tableStudentsConfirm', 'programTypeGestor', 'programAreaGestor');
     });
-});
-
-$('#onlyMissing').on('click', function () {
-    const tableBody = $('#studentsTable').find('tbody');
-    const rows = tableBody.find('tr');
-    let found = false;
-
-    $('#programType').val('');
-    $('#programArea').val('');
-    $('#filterArea').hide();
-
-    $('.studentCheckbox').prop('checked', false);
-    $('#confirmChanges').prop('disabled', true);
-    $('#selectedCount').text('0');
-    $('#selectAll').prop('checked', false);
-
-    tableBody.find('tr.noResults').remove();
-
-    rows.each(function () {
-        const icon = $(this).find('.changeSED i');
-
-        if (icon.hasClass('fa-check-square')) {
-            $(this).show();
-            found = true;
-        } else {
-            $(this).hide();
-        }
-    });
-
-    if (!found) {
-        tableBody.append(
-            '<tr class="noResults"><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
-        );
-    }
-});
-
-$('#onlyConfirm').on('click', function () {
-    const tableBody = $('#studentsTable').find('tbody');
-    const rows = tableBody.find('tr');
-    let found = false;
-
-    $('#programType').val('');
-    $('#programArea').val('');
-    $('#filterArea').hide();
-
-    $('.studentCheckbox').prop('checked', false);
-    $('#confirmChanges').prop('disabled', true);
-    $('#selectedCount').text('0');
-    $('#selectAll').prop('checked', false);
-
-    tableBody.find('tr.noResults').remove();
-
-    rows.each(function () {
-        const icon = $(this).find('.changeSED i');
-
-        if (icon.hasClass('fa-minus-square')) {
-            $(this).show();
-            found = true;
-        } else {
-            $(this).hide();
-        }
-    });
-
-    if (!found) {
-        tableBody.append(
-            '<tr class="noResults"><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
-        );
-    }
-});
-
-$('#removeFilter').on('click', function () {
-    const tableBody = $('#studentsTable').find('tbody');
-    const rows = tableBody.find('tr');
-
-    $('#programType').val('');
-    $('#programArea').val('');
-    $('#filterArea').hide();
-
-    $('.studentCheckbox').prop('checked', false);
-    $('#confirmChanges').prop('disabled', true);
-    $('#selectedCount').text('0');
-    $('#selectAll').prop('checked', false);
-
-    tableBody.find('tr.noResults').remove();
-
-    rows.each(function () {
-        $(this).show();
-    });
-
-    if (tableBody.find('tr:visible').length == 0)
-        tableBody.append(
-            '<tr><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
-        );
 });

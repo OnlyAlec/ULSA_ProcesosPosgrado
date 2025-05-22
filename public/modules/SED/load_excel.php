@@ -16,19 +16,27 @@ try {
             }
 
             $fileTmpPath = $_FILES['sedExcelFile']['tmp_name'];
-            $fileName = str_replace(' ', '_', htmlspecialchars($_FILES['sedExcelFile']['name'], ENT_QUOTES, 'UTF-8'));
+            $fileName = str_replace(
+                ' ',
+                '_',
+                htmlspecialchars($_FILES['sedExcelFile']['name'], ENT_QUOTES, 'UTF-8'),
+            );
             $ext = strtolower(pathinfo($_FILES['sedExcelFile']['name'], PATHINFO_EXTENSION));
 
             if (!in_array($ext, $allowedExtensions)) {
                 throw new RuntimeException('Invalid file type.');
             }
 
-            if (!preg_match($regex, $_POST["claveUlsa"]) || !preg_match($regex, $_POST["nombre"]) || !preg_match($regex, $_POST["estatus"])) {
+            if (
+                !preg_match($regex, $_POST['claveUlsa']) ||
+                !preg_match($regex, $_POST['nombre']) ||
+                !preg_match($regex, $_POST['estatus'])
+            ) {
                 throw new RuntimeException('Invalid column index.');
             }
 
             if (!is_dir($uploadDir)) {
-                if (!mkdir($uploadDir, 0755, true)) {
+                if (!mkdir($uploadDir, 02775, true)) {
                     throw new RuntimeException('Error creating directory for XLSX files.');
                 }
             }
@@ -37,12 +45,17 @@ try {
                 throw new RuntimeException('Error uploading file.');
             }
 
-            $res = processExcel("$uploadDir$fileName", $_POST["claveUlsa"], $_POST["nombre"], $_POST["estatus"]);
+            $res = processExcel(
+                "$uploadDir$fileName",
+                $_POST['claveUlsa'],
+                $_POST['nombre'],
+                $_POST['estatus'],
+            );
         }
 
         header('Content-Type: application/json');
         echo json_encode($res);
-        exit;
+        exit();
     }
 } catch (RuntimeException $e) {
     $response = [
@@ -52,7 +65,7 @@ try {
     http_response_code(500);
     header('Content-Type: application/json');
     echo json_encode($response);
-    exit;
+    exit();
 }
 ob_end_flush();
 ?>
@@ -60,13 +73,14 @@ ob_end_flush();
 <!DOCTYPE html>
 <?php
 require_once INCLUDES_DIR . '/templates/head.php';
-get_head("SED");
+get_head('SED');
 ?>
 
 <body style="display: block;">
-    <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header("Seguimiento de Evaluación Docente");
-?>
+    <?php
+    require_once INCLUDES_DIR . '/templates/header.php';
+    get_header('Seguimiento de Evaluación Docente');
+    ?>
 
     <main class="container content marco">
         <div>

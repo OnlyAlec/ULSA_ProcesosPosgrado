@@ -1,18 +1,17 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
-require_once INCLUDES_DIR . "/utilities/database.php";
-require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
-require_once INCLUDES_DIR . "/models/student.php";
+require_once INCLUDES_DIR . '/utilities/database.php';
+require_once INCLUDES_DIR . '/utilities/responseHTTP.php';
+require_once 'functionsSED.php';
 
 ob_start();
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Content-Type: application/json');
+        $res = false;
 
         if (isset($_POST['action'])) {
-            require_once 'functionsSED.php';
-
             switch ($_POST['action']) {
                 case 'updateSingleSED':
                     $res = changeStatusSEDSingle($_POST['studentID'], $_POST['state']);
@@ -20,111 +19,128 @@ try {
                 case 'updateSED':
                     $res = changeStatusSEDGroup($_POST['studentIDS']);
                     break;
-                case 'getMasters':
-                    $res = array_map(fn ($program) => $program->getName(), getMastersPrograms());
-                    break;
-                case 'getSpecialty':
-                    $res = array_map(fn ($program) => $program->getName(), getSpecialtyPrograms());
-                    break;
                 case 'sendEmail':
                     $student = getStudentByUlsaID($_POST['studentID']);
-                    if ($student) {
-                        $res = sendEmailRemainder($student);
-                    } else {
-                        throw new RuntimeException('Student not found');
-                    }
-                    break;
-                case '':
-                    $res = array_map(fn ($program) => $program->getName(), getProgramsFiltered($_POST['action']));
+                    $res = $student
+                        ? sendEmailRemainder($student)
+                        : responseBadRequest('Student not found');
                     break;
                 default:
-                    throw new RuntimeException('Not valid action!');
+                    $res = responseBadRequest('Invalid action');
             }
+        } else {
+            $res = responseBadRequest('No action specified');
         }
 
-        echo responseOK($res);
-        exit;
+        if ($res === false || (isset($res['success']) && $res['success'] === false)) {
+            echo responseBadRequest($res['message'] ?? 'Error processing the request.');
+        } else {
+            echo responseOK($res);
+        }
+        exit();
     }
 } catch (RuntimeException $e) {
     echo responseInternalError($e->getMessage());
-    exit;
+    exit();
 }
+
+$masterProgramsDataForPage = array_map(fn($program) => $program->getName(), getMastersPrograms());
+$specialtyProgramsDataForPage = array_map(
+    fn($program) => $program->getName(),
+    getSpecialtyPrograms(),
+);
 
 ob_end_flush();
 ?>
 
 <!DOCTYPE html>
-
+<html lang="es">
 <?php
 require_once INCLUDES_DIR . '/templates/head.php';
-get_head("SED");
+get_head('SED');
 ?>
 
 <body style="display: block;">
-    <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header("Seguimiento de Evaluación Docente");
-?>
+    <?php
+    require_once INCLUDES_DIR . '/templates/header.php';
+    get_header('Seguimiento de Evaluación Docente');
+    ?>
     <main class="container content marco">
-        
         <!-- PÁRRAFO INFORMATIVO -->
         <div class="sectionsSED">
             <h3>Lista de alumnos</h3>
             <p>
-                El sistema permite gestionar la selección y actualización del <strong>Estado SED</strong> de los alumnos mediante una tabla 
+                El sistema permite gestionar la selección y actualización del <strong>Estado SED</strong> de los alumnos
+                mediante una tabla
                 interactiva con filtros y opciones de selección múltiple.
             </p>
             <ul>
-                <li><strong>Checkboxes (cuadros de selección):</strong> Puede seleccionar varios alumnos mediante los checkboxes para cambiar su estado SED a "realizado" confirmando los cambios.</li>
-                <li><strong>Iconos de Estado:</strong> Puede actualizar el estado sed a "realizado" o "no realizado" de los alumnos de manera invidiual dando un clic en el icono de "Estatus SED".</li>
+                <li><strong>Checkboxes (cuadros de selección):</strong> Puede seleccionar varios alumnos mediante los
+                    checkboxes para cambiar su estado SED a "realizado" confirmando los cambios.</li>
+                <li><strong>Iconos de Estado:</strong> Puede actualizar el estado sed a "realizado" o "no realizado" de
+                    los alumnos de manera invidiual dando un clic en el icono de "Estatus SED".</li>
             </ul>
         </div>
         <br>
 
         <!-- FILTROS POR TIPO DE PROGRAMA Y ÁREA ESPECÍFICA + BOTÓN CARGA EXCEL -->
-        <div class="row align-items-center">
-            <div class="col-12 row">
-                <div class="form-box col-10" style="margin-bottom: 0;">
+        <div class="row mb-2">
+            <div class="col-md-9 mt-1">
+                <div class="form-box">
                     <div class="form-group row">
-                        <label for="programType" class="col-md-4 col-form-label">Seleccionar Tipo de Programa:</label>
+                        <label for="programType" class="col-md-4 col-form-label">Seleccionar Programa:</label>
                         <div class="col-md-7 ml-2 datalist">
-                            <input type="text" id="programType" class="datalist-input w-100" placeholder="Seleccionar" readonly>
+                            <input type="text" id="programType" class="datalist-input w-100"
+                                placeholder="Seleccionar Tipo de Programa:" readonly>
                             <i class="fas fa-search icono filter"></i>
                             <ul style="display: none;">
-                                <li data-value="">Todos</li >
-                                <li data-value="getMasters">Maestría</li>
-                                <li data-value="getSpecialty">Especialidad</li>
+                                <li data-value="">Todos</li>
+                                <li data-value="masters">Maestría</li>
+                                <li data-value="specialties">Especialidad</li>
                             </ul>
                         </div>
                     </div>
                 </div>
-                <div class="col-2">
-                    <a href="load_excel.php">
-                        <button type="button" class="btn btn-outline-primary w-100">Cargar Excel</button>
-                    </a>
+              
+                <div id="filterArea" class="mt-1" style="display:none;">
+                    <div class="form-box">
+                        <div class="form-group row">
+                            <label for="programArea" class="col-md-4 col-form-label">Seleccionar Área: </label>
+                            <div class="col-md-7 ml-2 datalist">
+                                <input type="text" id="programArea" class="datalist-input w-100"
+                                    placeholder="Seleccione un área" readonly>
+                                <i class="fas fa-search icono filter"></i>
+                                <ul style="display: none;"></ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div id="filterArea" class="col-12 row mt-1" style="display:none;">
-                <div class="form-box col-10" style="margin-bottom: 0;">
-                    <div class="form-group row">
-                        <label for="programArea" class="col-md-4 col-form-label">Seleccionar Área: </label>
-                        <div class="col-md-7 ml-2 datalist">
-                            <input type="text" id="programArea" class="datalist-input w-100" placeholder="Seleccione un área" readonly>
-                            <i class="fas fa-search icono filter"></i>
-                            <ul style="display: none;">
-                                <li data-value="">Seleccione un área</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-2"></div>
+            <div class="col-md-2">
+                <a href="load_excel.php">
+                    <button type="button"
+                        class="bg-primary text-white p-3 rounded d-flex flex-column justify-content-center align-items-center"
+                        style="height: 115px;">
+                        <i class="fas fa-file-upload fa-2x pb-2"></i>
+                        <b>Cargar Excel</b>
+                    </button>
+                </a>
+            </div>
+            <div class="col-md-1">
+                <button id="generateReport" type="button"
+                    class="bg-danger text-white p-3 rounded d-flex flex-column justify-content-center align-items-center"
+                    style="height: 115px;" data-filename="reporte_evaluaciones">
+                    <i class="fas fa-file-pdf fa-2x pb-2"></i>
+                    <b>Reporte</b>
+                </button>
             </div>
         </div>
-
+        <hr>
         <!-- FILTROS PARA ALUMNOS POR SU ESTADO SED -->
-        <div class="form-group row justify-content-center mt-3">
+        <div class="form-group row justify-content-center mt-4">
             <button id="removeFilter" class="btn btn-outline-success mr-2" style="width: 230px;">
-                <i class="fas fa-users"></i> Todos
+                <i class="fas fa-users"></i> Quitar sub-filtro
             </button>
             <button id="onlyConfirm" class="btn btn-outline-primary mr-2" style="width: 230px;">
                 <i class="fas fa-check-double"></i> Solamente confirmados
@@ -133,7 +149,6 @@ get_header("Seguimiento de Evaluación Docente");
                 <i class="fas fa-times-circle"></i> Solamente faltantes
             </button>
         </div>
-        <br>
 
         <!-- TABLA DE ALUMNOS -->
         <table class="table table-white table-nostriped" id="studentsTable">
@@ -142,53 +157,67 @@ get_header("Seguimiento de Evaluación Docente");
                     <th><input type="checkbox" id="selectAll" style="width: 20px; height: 20px;"></th>
                     <th>Clave ULSA</th>
                     <th>Nombre Completo</th>
+                    <th>Programa</th>
                     <th>Correo</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="studentsTable">
-                <?php
-                    if (empty($studentsDB = getStudents())) {
-                        echo '<tr><td colspan="5" class="text-center">No hay alumnos registrados.</td></tr>';
-                    } else {
-                        foreach ($studentsDB as $student): ?>
-                            <tr data-carrer="<?= $student->getProgram() ?>">
-                                <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td> 
-                                <td><?= $student->getUlsaId() ?></td>
-                                <td><?= ucwords($student->getName()). " " . ucwords($student->getLastName()) ?></td>
-                                <td><?= $student->getEmail() ?></td>
-                                <td>
-                                    <div class="d-flex" style="gap: 8px;">
-                                        <?php $btnClass = $student->getSed() ? 'btn-danger' : 'btn-success'; ?>
-                                        <button class="btn <?= $btnClass ?> btn-sm text-white changeSED border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
-                                            <?= $student->getSed() ? '<i class="fas fa-minus-square fa-2x"></i>' : '<i class="fas fa-check-square fa-2x"></i>' ?>
-                                        </button>
-                                        <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill" data-student-id="<?= $student->getUlsaId() ?>">
-                                            <i class="fas fa-paper-plane fa-lg"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach;
-                    }
-?>
+                <?php if (empty(($studentsDB = getStudents()))) {
+                    echo '<tr><td colspan="5" class="text-center">No hay alumnos registrados.</td></tr>';
+                } else {
+                    foreach ($studentsDB as $student): ?>
+                        <tr data-carrer="<?= $student->getProgram() ?>">
+                            <td class="text-center"><input type="checkbox" class="studentCheckbox"
+                                    style="width: 20px; height: 20px;"></td>
+                            <td><?= $student->getUlsaId() ?></td>
+                            <td><?= ucwords($student->getName()) .
+                                ' ' .
+                                ucwords($student->getLastName()) ?></td>
+                            <td>
+                                <?php
+                                $program = $student->getProgram();
+                                if ($program) {
+                                    echo ucwords($program);
+                                } else {
+                                    echo 'No disponible';
+                                }
+                                ?>
+                            <td><?= $student->getEmail() ?></td>
+                            <td>
+                                <div class="d-flex" style="gap: 8px;">
+                                    <?php $btnClass = $student->getSed()
+                                        ? 'btn-danger'
+                                        : 'btn-success'; ?>
+                                    <button class="btn <?= $btnClass ?> btn-sm text-white changeSED border-0 flex-fill"
+                                        data-student-id="<?= $student->getUlsaId() ?>">
+                                        <?= $student->getSed()
+                                            ? '<i class="fas fa-minus-square fa-2x"></i>'
+                                            : '<i class="fas fa-check-square fa-2x"></i>' ?>
+                                    </button>
+                                    <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill"
+                                        data-student-id="<?= $student->getUlsaId() ?>">
+                                        <i class="fas fa-paper-plane fa-lg"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach;
+                } ?>
             </tbody>
         </table>
         <br>
 
         <!-- BOTONES INFERIORES -->
         <div class="d-flex justify-content-between">
-            <button id="confirmChanges" class="btn btn-outline-success w-50" style="width: 200px;" disabled>
+            <button id="confirmChanges" class="btn btn-outline-success w-100" disabled>
                 <span>Confirmar Cambios</span>
             </button>
-            <button id="generateReport" class="btn btn-outline-primary" style="width: 200px;" data-filename="reporte_evaluaciones">
-                <span>Generar Reporte</span>
-            </button>
         </div>
-        
+
         <!-- NUMERO DE ALUMNOS SELECCIONADOS EN CHECKBOXES -->
         <div id="selectedCountContainer">
-            <p style="margin-top:15px; font-size: 20px; font-weight: bold;">Alumnos seleccionados: 
+            <p style="margin-top:15px; font-size: 20px; font-weight: bold;">Alumnos seleccionados:
                 <span id="selectedCount">0</span>
             </p>
         </div>
@@ -196,6 +225,12 @@ get_header("Seguimiento de Evaluación Docente");
 
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
+    <script>
+        window.sedPreloadedData = {
+            masters: <?= json_encode($masterProgramsDataForPage) ?>,
+            specialties: <?= json_encode($specialtyProgramsDataForPage) ?>
+        };
+    </script>
     <script src="<?= ASSETS_PATH ?>/js/jquery.min.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/bootstrap/popper.min.js"></script>
     <script src="<?= ASSETS_PATH ?>/js/bootstrap/bootstrap.min.js"></script>

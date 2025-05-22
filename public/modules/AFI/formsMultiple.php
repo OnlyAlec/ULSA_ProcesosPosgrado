@@ -1,7 +1,7 @@
 <?php
 
-require_once VENDOR_DIR . "/autoload.php";
-require_once INCLUDES_DIR . "/utilities/util.php";
+require_once VENDOR_DIR . '/autoload.php';
+require_once INCLUDES_DIR . '/utilities/util.php';
 
 function process_multiple_excels($uploadDir, $filePath1, $filePath2)
 {
@@ -18,14 +18,14 @@ function process_multiple_excels($uploadDir, $filePath1, $filePath2)
         $missingStudents = filterMissingStudents($studentsForms, $studentsAll);
         $programCount = getProgramCount($studentsAll, $missingStudents);
         $outputFile = createExcel($missingStudents, $programCount);
-        $studentsArray = array_map(fn ($student) => $student->getJSON(), $missingStudents);
+        $studentsArray = array_map(fn($student) => $student->getJSON(), $missingStudents);
 
         return [
             'students' => $studentsArray,
             'excel' => filePathToUrl($outputFile),
             'totalDB' => count($studentsAll),
             'totalFiltered' => count($studentsArray),
-            'graphData' => getGraphData($missingStudents)
+            'graphData' => getGraphData($missingStudents),
         ];
     } catch (RuntimeException $e) {
         throw new RuntimeException($e->getMessage());
@@ -50,13 +50,13 @@ function processAlumniExcel($filePath)
     }
 
     //^ Obtener datos y pasar a clase
-    $tipoColumn = $headerMap["tipo de programa"];
-    $areaColumn = $headerMap["Área de programa"];
-    $claveColumn = $headerMap["clave ulsa"];
-    $nombreColumn = $headerMap["nombre"];
-    $apellidoPColumn = $headerMap["apellido paterno"];
-    $apellidoMColumn = $headerMap["apellido materno"];
-    $emailColumn = $headerMap["correo"];
+    $tipoColumn = $headerMap['tipo de programa'];
+    $areaColumn = $headerMap['Área de programa'];
+    $claveColumn = $headerMap['clave ulsa'];
+    $nombreColumn = $headerMap['nombre'];
+    $apellidoPColumn = $headerMap['apellido paterno'];
+    $apellidoMColumn = $headerMap['apellido materno'];
+    $emailColumn = $headerMap['correo'];
 
     $students = [];
     $dataRows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
@@ -68,7 +68,7 @@ function processAlumniExcel($filePath)
                 strtolower(trim($row[$apellidoMColumn]) . ' ' . trim($row[$apellidoPColumn])),
                 $row[$claveColumn],
                 strtolower($row[$tipoColumn] . ' ' . $row[$areaColumn]),
-                "",
+                '',
             );
             $student->setEmail($row[$emailColumn]);
             $students[] = $student;
@@ -84,12 +84,12 @@ function processAlumniExcel($filePath)
 function _validateAlumniExcel($headerMap)
 {
     $requiredHeaders = [
-        "clave ulsa",
-        "apellido paterno",
-        "apellido materno",
-        "nombre",
-        "tipo de programa",
-        "Área de programa"
+        'clave ulsa',
+        'apellido paterno',
+        'apellido materno',
+        'nombre',
+        'tipo de programa',
+        'Área de programa',
     ];
 
     foreach ($requiredHeaders as $header) {

@@ -45,8 +45,8 @@ class StudentBase
             'firstName' => ucwords($this->getName()),
             'lastName' => ucwords($this->getLastName()),
             'ulsaID' => $this->getUlsaId(),
-            'carrer' => capitalizeExcept($this->getProgram(), ["de", "en", "la", "y"]),
-            'email' => $this->getEmail()
+            'carrer' => capitalizeExcept($this->getProgram(), ['de', 'en', 'la', 'y']),
+            'email' => $this->getEmail(),
         ];
     }
 

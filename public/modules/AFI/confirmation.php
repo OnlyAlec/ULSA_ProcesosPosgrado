@@ -1,61 +1,66 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
-require_once INCLUDES_DIR . "/utilities/database.php";
-require_once INCLUDES_DIR . "/models/student.php";
+require_once INCLUDES_DIR . '/utilities/database.php';
+require_once INCLUDES_DIR . '/models/student.php';
 
-if (!isset($_GET['token']) || strlen($_GET["token"]) != 64) {
-    header("Location: " . BASE_URL);
+if (!isset($_GET['token']) || strlen($_GET['token']) != 64) {
+    header('Location: ' . BASE_URL);
     exit();
 }
 
-$msg = "";
-$title = "";
-$subtitle = "";
+$msg = '';
+$title = '';
+$subtitle = '';
 $status = true;
-$token = $_GET["token"];
+$token = $_GET['token'];
 
 if ($student = getStudentByID(getStudentIDByToken($token))) {
     switch ($student->getAfi()) {
         case true:
-            $title = "¡Aviso ya confirmado!";
-            $subtitle = "Verificación para: " . $student->getEmail();
-            $msg = "Ya has confirmado tus avisos de fechas importantes. 🎉";
+            $title = '¡Aviso ya confirmado!';
+            $subtitle = 'Verificación para: ' . $student->getEmail();
+            $msg = 'Ya has confirmado tus avisos de fechas importantes. 🎉';
             break;
         default:
             if (updateStudentFieldBoolean($student->getUlsaId(), 'afi', true)) {
-                $title = "¡Aviso confirmado!";
-                $subtitle = "Verificación para: " . $student->getEmail();
-                $msg = "Gracias por confirmar tus avisos de fechas importantes. 🎉";
+                $title = '¡Aviso confirmado!';
+                $subtitle = 'Verificación para: ' . $student->getEmail();
+                $msg = 'Gracias por confirmar tus avisos de fechas importantes. 🎉';
             } else {
-                $title = "¡Ups! Hubo un problema...";
-                $subtitle = "Disculpa la molesita " . ucfirst($student->getName()) . ", intenta nuevamente más tarde. 😥";
-                $msg = "Si el problema persiste, por favor contacta a su jefe de posgrado.";
+                $title = '¡Ups! Hubo un problema...';
+                $subtitle =
+                    'Disculpa la molesita ' .
+                    ucfirst($student->getName()) .
+                    ', intenta nuevamente más tarde. 😥';
+                $msg = 'Si el problema persiste, por favor contacta a su jefe de posgrado.';
                 $status = false;
             }
             break;
     }
-
 }
 ?>
 <!DOCTYPE html>
 
 <?php
 require_once INCLUDES_DIR . '/templates/head.php';
-get_head("Confirmación AFI");
+get_head('Confirmación AFI');
 ?>
 
 <body style="display: block;">
-    <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header("Confirmación de Avisos de Fechas Importantes");
-?>
+    <?php
+    require_once INCLUDES_DIR . '/templates/header.php';
+    get_header('Confirmación de Avisos de Fechas Importantes');
+    ?>
 
     <main class="container content marco">
         <div class="d-flex flex-column align-items-center">
             <div class="mb-4">
                 <span
-                    class="d-flex justify-content-center align-items-center rounded-circle <?= $status ? "bg-success" : "bg-danger" ?> text-white"
+                    class="d-flex justify-content-center align-items-center rounded-circle <?= $status
+                        ? 'bg-success'
+                        : 'bg-danger' ?> text-white"
                     style="width: 8rem; height: 8rem;">
-                    <i class="far <?= $status ? "fa-check-circle" : "fa-times-circle" ?> fa-4x"></i>
+                    <i class="far <?= $status ? 'fa-check-circle' : 'fa-times-circle' ?> fa-4x"></i>
                 </span>
             </div>
             <div class="text-center">
