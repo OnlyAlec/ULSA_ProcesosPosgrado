@@ -364,3 +364,96 @@ $(function () {
         applyFiltersAreaType();
     });
 });
+
+$('#onlyMissing').on('click', function () {
+    const tableBody = $('#studentsTable').find('tbody');
+    const rows = tableBody.find('tr');
+    let found = false;
+
+    $('#programType').val('');
+    $('#programArea').val('');
+    $('#filterArea').hide();
+
+    $('.studentCheckbox').prop('checked', false);
+    $('#confirmChanges').prop('disabled', true);
+    $('#selectedCount').text('0');
+    $('#selectAll').prop('checked', false);
+
+    tableBody.find('tr.noResults').remove();
+
+    rows.each(function () {
+        const icon = $(this).find('.changeSED i');
+
+        if (icon.hasClass('fa-check-square')) {
+            $(this).show();
+            found = true;
+        } else {
+            $(this).hide();
+        }
+    });
+
+    if (!found) {
+        tableBody.append(
+            '<tr class="noResults"><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
+        );
+    }
+});
+
+$('#onlyConfirm').on('click', function () {
+    const tableBody = $('#studentsTable').find('tbody');
+    const rows = tableBody.find('tr');
+    let found = false;
+
+    $('#programType').val('');
+    $('#programArea').val('');
+    $('#filterArea').hide();
+
+    $('.studentCheckbox').prop('checked', false);
+    $('#confirmChanges').prop('disabled', true);
+    $('#selectedCount').text('0');
+    $('#selectAll').prop('checked', false);
+
+    tableBody.find('tr.noResults').remove();
+
+    rows.each(function () {
+        const icon = $(this).find('.changeSED i');
+
+        if (icon.hasClass('fa-minus-square')) {
+            $(this).show();
+            found = true;
+        } else {
+            $(this).hide();
+        }
+    });
+
+    if (!found) {
+        tableBody.append(
+            '<tr class="noResults"><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
+        );
+    }
+});
+
+$('#removeFilter').on('click', function () {
+    const tableBody = $('#studentsTable').find('tbody');
+    const rows = tableBody.find('tr');
+
+    $('#programType').val('');
+    $('#programArea').val('');
+    $('#filterArea').hide();
+
+    $('.studentCheckbox').prop('checked', false);
+    $('#confirmChanges').prop('disabled', true);
+    $('#selectedCount').text('0');
+    $('#selectAll').prop('checked', false);
+
+    tableBody.find('tr.noResults').remove();
+
+    rows.each(function () {
+        $(this).show();
+    });
+
+    if (tableBody.find('tr:visible').length == 0)
+        tableBody.append(
+            '<tr><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
+        );
+});
