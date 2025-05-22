@@ -1,41 +1,41 @@
 $(document).ready(function () {
     $.ajax({
-        url: '', // Asegúrate de que la URL sea correcta
-        type: 'POST',
-        data: { action: 'getPrograms' },
-        success: function(response) {
+        url: "", // Asegúrate de que la URL sea correcta
+        type: "POST",
+        data: { action: "getPrograms" },
+        success: function (response) {
             console.log(response);
-            const carreraOptions = $('#carreraOptions');
+            const carreraOptions = $("#carreraOptions");
             carreraOptions.empty(); // Limpiar opciones existentes
             if (response.success && Array.isArray(response.data)) {
-                response.data.forEach(program => {
+                response.data.forEach((program) => {
                     carreraOptions.append(`<li data-value="${program}">${program}</li>`);
                 });
             } else {
                 console.error("Error: La respuesta no contiene datos válidos.");
             }
         },
-        error: function() {
+        error: function () {
             console.error("Error al cargar las opciones de carrera.");
-        }
+        },
     });
 
     // Manejar la selección de una opción
-    $('#carreraOptions').on('click', 'li', function() {
-        const selectedValue = $(this).data('value');
-        $('#carrera').val(selectedValue);
-        $('#carreraOptions').hide();
+    $("#carreraOptions").on("click", "li", function () {
+        const selectedValue = $(this).data("value");
+        $("#carrera").val(selectedValue);
+        $("#carreraOptions").hide();
     });
 
     // Mostrar/ocultar el dropdown al hacer clic en el input
-    $('#carrera').on('click', function(e) {
+    $("#carrera").on("click", function (e) {
         e.stopPropagation();
-        $('#carreraOptions').toggle();
+        $("#carreraOptions").toggle();
     });
 
-    $(document).on('click', function(e) {
-        if (!$(e.target).closest('.datalist').length) {
-            $('#carreraOptions').hide();
+    $(document).on("click", function (e) {
+        if (!$(e.target).closest(".datalist").length) {
+            $("#carreraOptions").hide();
         }
     });
 
@@ -117,7 +117,6 @@ $(document).ready(function () {
         pos.before(newDiv);
     }
 });
-
 
 $(function () {
     $(".custom-file-input").on("change", function (e) {
