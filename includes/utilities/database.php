@@ -607,3 +607,69 @@ function addProgramSubject($professorId, $subjectId, $programId)
         throw new \RuntimeException("Error al asignar la materia al programa: " . $e->getMessage());
     }
 }
+
+function getProgramSubjects()
+{
+    $db = getDatabaseConnection();
+    $query = "SELECT ps.id, ps.has_signed, ps.will_be_absent, s.name AS subject_name, p.career AS program_name, 
+                     CONCAT(u.first_name, ' ', u.last_name) AS professor_name
+              FROM program_subject ps
+              JOIN subject s ON ps.subject_id = s.id
+              JOIN program p ON ps.program_id = p.id
+              JOIN professor pr ON ps.professor_id = pr.id
+              JOIN public.user u ON pr.user_id = u.id";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function updateHasSigned($programSubjectId, $newState)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "UPDATE program_subject SET has_signed = :newState WHERE id = :programSubjectId";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':newState', $newState, PDO::PARAM_BOOL);
+        $stmt->bindParam(':programSubjectId', $programSubjectId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error updating has_signed: " . $e->getMessage());
+    }
+}
+
+function updateWillBeAbsent($programSubjectId, $newState)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "UPDATE program_subject SET will_be_absent = :newState WHERE id = :programSubjectId";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':newState', $newState, PDO::PARAM_BOOL);
+        $stmt->bindParam(':programSubjectId', $programSubjectId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error updating will_be_absent: " . $e->getMessage());
+    }
+}
+
+function insertComment($programSubjectId, $comment, $author)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "INSERT INTO comments (comment, author, program_subject_id) VALUES (:comment, :author, :programSubjectId)";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':comment', $comment);
+        $stmt->bindParam(':author', $author);
+        $stmt->bindParam(':programSubjectId', $programSubjectId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error inserting comment: " . $e->getMessage());
+    }
+}
+
