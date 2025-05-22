@@ -92,7 +92,7 @@ class Mailer
 
             $base = $this->getTemplateHTML();
             $keys = array_map(
-                fn($key) => '-- ' . strtoupper($key) . ' --',
+                fn ($key) => '-- ' . strtoupper($key) . ' --',
                 array_keys($dataReplace),
             );
 
