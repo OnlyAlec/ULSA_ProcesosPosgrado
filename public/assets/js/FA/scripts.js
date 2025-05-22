@@ -1,6 +1,6 @@
 $(document).ready(function () {
     let currentCommentId = null;
-    const commentModal = new bootstrap.Modal(document.getElementById('commentModal'));
+    const commentModal = new bootstrap.Modal(document.getElementById("commentModal"));
 
     $("form").submit(function (e) {
         e.preventDefault();
@@ -63,11 +63,11 @@ $(document).ready(function () {
                         <td>${program.professor_name}</td>
                         <td>
                             <div class="d-flex justify-content-center">
-                                <button class="btn btn-sm mx-1 toggle-signed ${program.has_signed ? 'btn-success' : 'btn-danger'}" data-toggle="tooltip" title="Intercambiar estado de firma">
-                                    <i class="fas ${program.has_signed ? 'fa-check' : 'fa-times'}"></i>
+                                <button class="btn btn-sm mx-1 toggle-signed ${program.has_signed ? "btn-success" : "btn-danger"}" data-toggle="tooltip" title="Intercambiar estado de firma">
+                                    <i class="fas ${program.has_signed ? "fa-check" : "fa-times"}"></i>
                                 </button>
-                                <button class="btn btn-sm mx-1 toggle-absent ${program.will_be_absent ? 'btn-warning' : 'btn-secondary'}" data-toggle="tooltip" title="Intercambiar estado de asistencia">
-                                    <i class="fas ${program.will_be_absent ? 'fa-user-times' : 'fa-user-check'}"></i>
+                                <button class="btn btn-sm mx-1 toggle-absent ${program.will_be_absent ? "btn-warning" : "btn-secondary"}" data-toggle="tooltip" title="Intercambiar estado de asistencia">
+                                    <i class="fas ${program.will_be_absent ? "fa-user-times" : "fa-user-check"}"></i>
                                 </button>
                                 <button class="btn btn-sm mx-1 btn-info add-comment" data-toggle="tooltip" title="Agregar comentario">
                                     <i class="fas fa-comment"></i>
@@ -147,8 +147,8 @@ $(document).ready(function () {
 
     $("#saveCommentBtn").on("click", function () {
         const comment = $("#commentText").val().trim();
-        const author  = $("#commentAuthor").val().trim();
-    
+        const author = $("#commentAuthor").val().trim();
+
         if (comment && author) {
             $.ajax({
                 url: "", // Actualiza con la ruta de tu script PHP
@@ -157,7 +157,7 @@ $(document).ready(function () {
                     action: "addComment",
                     id: currentCommentId,
                     comment: comment,
-                    author: author
+                    author: author,
                 },
                 success: function (response) {
                     if (response.success) {
@@ -210,4 +210,3 @@ $(document).ready(function () {
         fileInput.trigger("click");
     });
 });
-
