@@ -6,7 +6,6 @@ ob_start();
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
         if ($_POST['action'] === 'getProgramSubjects') {
             $res = getProgramSubjects();
         } elseif ($_POST['action'] === 'toggleSigned') {
@@ -27,12 +26,11 @@ try {
         }
 
         echo responseOK($res);
-        exit;
+        exit();
     }
-
 } catch (RuntimeException $e) {
     echo responseInternalError($e->getMessage());
-    exit;
+    exit();
 }
 ob_end_flush();
 ?>
@@ -44,9 +42,10 @@ get_head('FA');
 ?>
 
 <body style="display: block;">
-    <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Firma de Actas');
-?>
+    <?php
+    require_once INCLUDES_DIR . '/templates/header.php';
+    get_header('Firma de Actas');
+    ?>
 
     <main class="container content marco">
         <div class="sectionsFA">
