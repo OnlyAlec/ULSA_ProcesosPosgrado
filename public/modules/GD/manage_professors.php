@@ -1,8 +1,8 @@
 <?php
 
-require_once VENDOR_DIR . "/autoload.php";
-require_once INCLUDES_DIR . "/utilities/util.php";
-require_once INCLUDES_DIR . "/utilities/handleErrors.php";
+require_once VENDOR_DIR . '/autoload.php';
+require_once INCLUDES_DIR . '/utilities/util.php';
+require_once INCLUDES_DIR . '/utilities/handleErrors.php';
 
 
 function restartDatabaseFromExcel($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $emailColumn)
@@ -44,7 +44,7 @@ function insertOneProfessor($ulsaId, $name, $lastname, $email)
     try {
         $db = getDatabaseConnection();
 
-        $stmt = $db->prepare("INSERT INTO public.user (first_name, last_name, ulsa_id, email) VALUES (:first_name, :last_name, :ulsa_id, :email) RETURNING id");
+        $stmt = $db->prepare('INSERT INTO public.user (first_name, last_name, ulsa_id, email) VALUES (:first_name, :last_name, :ulsa_id, :email) RETURNING id');
         $stmt->execute([
             ':first_name' => $name,
             ':last_name' => $lastname,
@@ -53,7 +53,7 @@ function insertOneProfessor($ulsaId, $name, $lastname, $email)
         ]);
         $userId = $stmt->fetchColumn();
 
-        $stmt = $db->prepare("INSERT INTO professor (user_id) VALUES (:user_id)");
+        $stmt = $db->prepare('INSERT INTO professor (user_id) VALUES (:user_id)');
         $stmt->execute([
             ':user_id' => $userId,
         ]);
@@ -73,11 +73,11 @@ function deleteOneProfessor($ulsaId)
     ErrorList::clear();
     try {
         $db = getDatabaseConnection();
-        $stmt = $db->prepare("DELETE FROM public.user WHERE ulsa_id = (:ulsaId)");
+        $stmt = $db->prepare('DELETE FROM public.user WHERE ulsa_id = (:ulsaId)');
         $stmt->execute([':ulsaId' => $ulsaId]);
 
         if ($stmt->rowCount() === 0) {
-            throw new RuntimeException("No se encontro ningun profesor con el ID proporcionado.");
+            throw new RuntimeException('No se encontro ningun profesor con el ID proporcionado.');
         }
 
         return [
@@ -156,7 +156,7 @@ function deleteFromUsers()
     try {
         $db = getDatabaseConnection();
         $db->beginTransaction();
-        $db->exec("DELETE FROM public.user WHERE id IN (SELECT user_id FROM professor)");
+        $db->exec('DELETE FROM public.user WHERE id IN (SELECT user_id FROM professor)');
         $db->commit();
     } catch (PDOException $e) {
         $db->rollBack();
@@ -173,7 +173,7 @@ function insertDataIntoDatabase($data)
         // Insertar nombres y apellidos
         $userIds = [];
         for ($i = 0; $i < count($data['first_names']); $i++) {
-            $stmt = $db->prepare("INSERT INTO public.user (first_name, last_name, ulsa_id, email) VALUES (:first_name, :last_name, :ulsa_id, :email) RETURNING id");
+            $stmt = $db->prepare('INSERT INTO public.user (first_name, last_name, ulsa_id, email) VALUES (:first_name, :last_name, :ulsa_id, :email) RETURNING id');
             $stmt->execute([
                 ':first_name' => $data['first_names'][$i],
                 ':last_name' => $data['last_names'][$i],
@@ -185,7 +185,7 @@ function insertDataIntoDatabase($data)
 
         // Insertar estudiantes
         for ($i = 0; $i < count($data['ulsa_ids']); $i++) {
-            $stmt = $db->prepare("INSERT INTO professor (user_id) VALUES (:user_id)");
+            $stmt = $db->prepare('INSERT INTO professor (user_id) VALUES (:user_id)');
             $stmt->execute([
                 ':user_id' => $userIds[$i],
             ]);

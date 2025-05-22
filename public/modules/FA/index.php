@@ -1,29 +1,29 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
-require_once INCLUDES_DIR . "/utilities/database.php";
-require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
+require_once INCLUDES_DIR . '/utilities/database.php';
+require_once INCLUDES_DIR . '/utilities/responseHTTP.php';
 ob_start();
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-        if ($_POST["action"] === "getProgramSubjects") {
+        if ($_POST['action'] === 'getProgramSubjects') {
             $res = getProgramSubjects();
-        } elseif ($_POST["action"] === "toggleSigned") {
-            if (!isset($_POST["id"]) || !isset($_POST["state"])) {
-                throw new RuntimeException("Faltan datos para actualizar el estado de firma.");
+        } elseif ($_POST['action'] === 'toggleSigned') {
+            if (!isset($_POST['id']) || !isset($_POST['state'])) {
+                throw new RuntimeException('Faltan datos para actualizar el estado de firma.');
             }
-            $res = updateHasSigned($_POST["id"], $_POST["state"]);
-        } elseif ($_POST["action"] === "toggleAbsent") {
-            if (!isset($_POST["id"]) || !isset($_POST["state"])) {
-                throw new RuntimeException("Faltan datos para actualizar el estado de asistencia.");
+            $res = updateHasSigned($_POST['id'], $_POST['state']);
+        } elseif ($_POST['action'] === 'toggleAbsent') {
+            if (!isset($_POST['id']) || !isset($_POST['state'])) {
+                throw new RuntimeException('Faltan datos para actualizar el estado de asistencia.');
             }
-            $res = updateWillBeAbsent($_POST["id"], $_POST["state"]);
-        } elseif ($_POST["action"] === "addComment") {
-            if (!isset($_POST["id"]) || !isset($_POST["comment"]) || !isset($_POST["author"])) {
-                throw new RuntimeException("Faltan datos para agregar un comentario.");
+            $res = updateWillBeAbsent($_POST['id'], $_POST['state']);
+        } elseif ($_POST['action'] === 'addComment') {
+            if (!isset($_POST['id']) || !isset($_POST['comment']) || !isset($_POST['author'])) {
+                throw new RuntimeException('Faltan datos para agregar un comentario.');
             }
-            $res = insertComment($_POST["id"], $_POST["comment"], $_POST["author"]);
+            $res = insertComment($_POST['id'], $_POST['comment'], $_POST['author']);
         }
 
         echo responseOK($res);
@@ -40,12 +40,12 @@ ob_end_flush();
 
 <?php
 require_once INCLUDES_DIR . '/templates/head.php';
-get_head("FA");
+get_head('FA');
 ?>
 
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header("Firma de Actas");
+get_header('Firma de Actas');
 ?>
 
     <main class="container content marco">

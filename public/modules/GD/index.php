@@ -1,8 +1,8 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
-require_once INCLUDES_DIR . "/utilities/database.php";
-require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
-require_once INCLUDES_DIR . "/models/professor.php";
+require_once INCLUDES_DIR . '/utilities/database.php';
+require_once INCLUDES_DIR . '/utilities/responseHTTP.php';
+require_once INCLUDES_DIR . '/models/professor.php';
 ob_start();
 
 try {
@@ -13,7 +13,7 @@ try {
         $regex = '/^[A-Za-z]$/';
         $uploadDir = __DIR__ . '/uploads/';
 
-        if ($_POST["action"] === "registerFromExcel" && isset($_FILES['gdExcelFile'])) {
+        if ($_POST['action'] === 'registerFromExcel' && isset($_FILES['gdExcelFile'])) {
             if ($_FILES['gdExcelFile']['error'] !== UPLOAD_ERR_OK) {
                 throw new RuntimeException('Error uploading file.');
             }
@@ -25,7 +25,7 @@ try {
             if (!in_array($ext, $allowedExtensions)) {
                 throw new RuntimeException('Invalid file type.');
             }
-            if (!preg_match($regex, $_POST["claveUlsaCol"]) || !preg_match($regex, $_POST["nombreCol"]) || !preg_match($regex, $_POST["apellidosCol"]) || !preg_match($regex, $_POST["emailCol"])) {
+            if (!preg_match($regex, $_POST['claveUlsaCol']) || !preg_match($regex, $_POST['nombreCol']) || !preg_match($regex, $_POST['apellidosCol']) || !preg_match($regex, $_POST['emailCol'])) {
                 throw new RuntimeException('Invalid column index.');
             }
             if (!is_dir($uploadDir)) {
@@ -36,82 +36,81 @@ try {
             if (!move_uploaded_file($fileTmpPath, "$uploadDir$fileName")) {
                 throw new RuntimeException('Error uploading file.');
             }
-            $res = restartDatabaseFromExcel("$uploadDir$fileName", $_POST["claveUlsaCol"], $_POST["nombreCol"], $_POST["apellidosCol"], $_POST["carreraCol"], $_POST["emailCol"]);
+            $res = restartDatabaseFromExcel("$uploadDir$fileName", $_POST['claveUlsaCol'], $_POST['nombreCol'], $_POST['apellidosCol'], $_POST['carreraCol'], $_POST['emailCol']);
 
-        } elseif ($_POST["action"] === "registerOneProfessor") {
-            if (!preg_match('/^\d{6}$/', $_POST["claveUlsa"])) {
+        } elseif ($_POST['action'] === 'registerOneProfessor') {
+            if (!preg_match('/^\d{6}$/', $_POST['claveUlsa'])) {
                 throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
             }
-            if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST["nombre"])) {
+            if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST['nombre'])) {
                 throw new RuntimeException('Nombre invalido. Solo se permiten letras y espacios.');
             }
-            if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST["apellidos"])) {
+            if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST['apellidos'])) {
                 throw new RuntimeException('Apellidos invalidos. Solo se permiten letras y espacios.');
             }
-            if (!filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)) {
+            if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
                 throw new RuntimeException('Correo electronico invalido.');
             }
-            $res = insertOneProfessor($_POST["claveUlsa"], $_POST["nombre"], $_POST["apellidos"], $_POST["email"]);
+            $res = insertOneProfessor($_POST['claveUlsa'], $_POST['nombre'], $_POST['apellidos'], $_POST['email']);
 
-        } elseif ($_POST["action"] === "getTableProfessor") {
+        } elseif ($_POST['action'] === 'getTableProfessor') {
             $res = array_values(array_map(fn ($professor) => $professor->getJSON(), getProfessors()));
-        
-        } elseif ($_POST["action"] === "deleteOneProfessor") {
-            if (!preg_match('/^\d{6}$/', $_POST["claveUlsaDelete"])) {
+
+        } elseif ($_POST['action'] === 'deleteOneProfessor') {
+            if (!preg_match('/^\d{6}$/', $_POST['claveUlsaDelete'])) {
                 throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
             }
 
-            $res = deleteOneProfessor($_POST["claveUlsaDelete"]);
+            $res = deleteOneProfessor($_POST['claveUlsaDelete']);
 
-        } elseif ($_POST["action"] === "deleteAllProfessors") {
+        } elseif ($_POST['action'] === 'deleteAllProfessors') {
             $res = deleteAllProfessors();
 
-        }
-        elseif ($_POST["action"] === "getProfessorDetails") {
-            if (!preg_match('/^\d{6}$/', $_POST["ulsaID"])) {
+        } elseif ($_POST['action'] === 'getProfessorDetails') {
+            if (!preg_match('/^\d{6}$/', $_POST['ulsaID'])) {
                 throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
             }
-            $res = getProfessorSubjectsAndProgramsByUlsaID($_POST["ulsaID"]);
+            $res = getProfessorSubjectsAndProgramsByUlsaID($_POST['ulsaID']);
 
-        } elseif ($_POST["action"] === "deleteProgramSubject") {
+        } elseif ($_POST['action'] === 'deleteProgramSubject') {
             if (!isset($_POST['professorId']) || !isset($_POST['subjectId']) || !isset($_POST['programId'])) {
                 throw new RuntimeException('Faltan datos para eliminar la materia del programa.');
             }
-            $res = deleteProgramSubject ($_POST["professorId"], $_POST["subjectId"], $_POST["programId"]);
-        
-        } elseif ($_POST["action"] === "deleteProgramSubject") {
+            $res = deleteProgramSubject($_POST['professorId'], $_POST['subjectId'], $_POST['programId']);
+
+        } elseif ($_POST['action'] === 'deleteProgramSubject') {
             if (!isset($_POST['professorId']) || !isset($_POST['subjectId']) || !isset($_POST['programId'])) {
                 throw new RuntimeException('Faltan datos para eliminar la materia del programa.');
             }
-            $res = deleteProgramSubject ($_POST["professorId"], $_POST["subjectId"], $_POST["programId"]);
-        
-        } elseif ($_POST["action"] === "addProgramSubject") {
+            $res = deleteProgramSubject($_POST['professorId'], $_POST['subjectId'], $_POST['programId']);
+
+        } elseif ($_POST['action'] === 'addProgramSubject') {
             if (!isset($_POST['professorId']) || !isset($_POST['subjectId']) || !isset($_POST['programId'])) {
                 throw new RuntimeException('Faltan datos para asignar la materia al programa.');
             }
             $inserted = addProgramSubject(
-                (int) $_POST["professorId"],
-                (int) $_POST["subjectId"],
-                (int) $_POST["programId"]
+                (int) $_POST['professorId'],
+                (int) $_POST['subjectId'],
+                (int) $_POST['programId']
             );
 
             if (!$inserted) {
                 throw new RuntimeException('No se pudo asignar la materia al programa.');
             }
 
-            $subject = getSubjectByID((int) $_POST["subjectId"]);
-            $program = getProgramByID((int) $_POST["programId"]);
+            $subject = getSubjectByID((int) $_POST['subjectId']);
+            $program = getProgramByID((int) $_POST['programId']);
 
             $res = [
                 'subject' => $subject->toArray(),
                 'program' => $program->toArray(),
             ];
 
-        } elseif ($_POST["action"] === "getSubjects") {
+        } elseif ($_POST['action'] === 'getSubjects') {
             $res = getSubjects();
             $res = array_map(fn ($subject) => $subject->toArray(), $res);
 
-        } elseif ($_POST["action"] === "getPrograms") {
+        } elseif ($_POST['action'] === 'getPrograms') {
             $res = getPrograms();
             $res = array_map(fn ($program) => $program->toArray(), $res);
         }
@@ -131,7 +130,7 @@ ob_end_flush();
 
 <?php
 require_once INCLUDES_DIR . '/templates/head.php';
-get_head("GD");
+get_head('GD');
 ?>
 
 <style>
@@ -193,7 +192,7 @@ get_head("GD");
 <body style="display: block;">
     
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header("Gestión de Profesores");
+get_header('Gestión de Profesores');
 ?>
 
     <main class="container content marco">
