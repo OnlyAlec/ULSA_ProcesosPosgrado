@@ -49,16 +49,16 @@ get_head('Confirmación AFI');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Confirmación de Avisos de Fechas Importantes');
-?>
+    get_header('Confirmación de Avisos de Fechas Importantes');
+    ?>
 
     <main class="container content marco">
         <div class="d-flex flex-column align-items-center">
             <div class="mb-4">
                 <span
                     class="d-flex justify-content-center align-items-center rounded-circle <?= $status
-                    ? 'bg-success'
-                    : 'bg-danger' ?> text-white"
+                        ? 'bg-success'
+                        : 'bg-danger' ?> text-white"
                     style="width: 8rem; height: 8rem;">
                     <i class="far <?= $status ? 'fa-check-circle' : 'fa-times-circle' ?> fa-4x"></i>
                 </span>
