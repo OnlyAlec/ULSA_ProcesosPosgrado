@@ -3,6 +3,8 @@
 require_once VENDOR_DIR . '/autoload.php';
 require_once INCLUDES_DIR . '/models/program.php';
 require_once INCLUDES_DIR . '/models/student.php';
+require_once INCLUDES_DIR . "/models/professor.php";
+require_once INCLUDES_DIR . "/models/subject.php";
 
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
 $dotenv->load();
@@ -689,9 +691,7 @@ function deleteAllStudents()
     try {
         $db = getDatabaseConnection();
         $db->beginTransaction();
-        $db->exec('DELETE FROM student');
-        $db->exec('DELETE FROM name');
-        $db->exec('DELETE FROM program');
+        $db->exec("DELETE FROM public.user WHERE id IN (SELECT user_id FROM student)");
         $db->commit();
 
         return true;
@@ -701,6 +701,376 @@ function deleteAllStudents()
     } catch (\Exception $e) {
         $db->rollBack();
         ErrorList::add("Error inesperado al limpiar estudiantes: {$e->getMessage()}");
+        return false;
+    }
+}
+
+
+/**
+ * @return Professor[]
+ */
+function getProfessors()
+{
+    $professorsDB = [];
+    $db = getDatabaseConnection();
+    $query = 'SELECT p.id,
+                LOWER(u.last_name) AS last_name, 
+                LOWER(u.first_name) AS first_name, 
+                u.ulsa_id, 
+                u.email AS ulsa_email 
+              FROM professor p
+              JOIN public.user u ON p.user_id = u.id';
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        try {
+            $professor = new Professor(
+                $row['first_name'],
+                $row['last_name'],
+                $row['ulsa_id'],
+                $row['ulsa_email'],
+                $row['id'],
+            );
+            $professorsDB[] = $professor;
+        } catch (InvalidArgumentException $e) {
+            ErrorList::add($e->getMessage());
+            continue;
+        }
+    }
+
+    if (count($professorsDB) > 0) {
+        return $professorsDB;
+    }
+    ErrorList::add("No professors found");
+    return [];
+}
+
+function getProfessorByUlsaID($ID)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "SELECT p.id,
+                LOWER(u.last_name) AS last_name,
+                LOWER(u.first_name) AS first_name,
+                u.ulsa_id,
+                u.email AS ulsa_email
+              FROM professor p
+              JOIN public.user u ON p.user_id = u.id
+              WHERE u.ulsa_id = :ulsa_id";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':ulsa_id', $ID);
+        $stmt->execute();
+
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($res === false) {
+            ErrorList::add("No professor found with ID $ID");
+            return false;
+        }
+
+        $professor = new Professor(
+            $res['first_name'],
+            $res['last_name'],
+            $res['ulsa_id'],
+            $res['ulsa_email'],
+            $res['id']
+        );
+        return $professor;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting pofessor by Ulsa ID:". $e->getMessage());
+    } catch (\InvalidArgumentException $e) {
+        ErrorList::add($e->getMessage());
+        return false;
+    }
+}
+
+function getProfessorByID($ID)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "SELECT p.id,
+                LOWER(u.last_name) AS last_name,
+                LOWER(u.first_name) AS first_name,
+                u.ulsa_id,
+                u.email AS ulsa_email
+              FROM professor p
+              JOIN public.user u ON p.user_id = u.id
+              WHERE p.id = :ID";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':ID', $ID);
+        $stmt->execute();
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($res === false) {
+            return null;
+        }
+
+        $professor = new Professor(
+            $res['first_name'],
+            $res['last_name'],
+            $res['ulsa_id'],
+            $res['ulsa_email'],
+            $res['id']
+        );
+        return $professor;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting professo by ID:" . $e->getMessage());
+    } catch (\InvalidArgumentException $e) {
+        ErrorList::add($e->getMessage());
+        return null;
+    }
+}
+
+function getProfessorSubjectsAndProgramsByUlsaID($ulsaID)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "SELECT s.name AS subject_name, p.career AS program_name, pr.id AS professor_id, s.id AS subject_id, p.id AS program_id
+                  FROM program_subject ps
+                  JOIN professor pr ON ps.professor_id = pr.id
+                  JOIN public.user u ON pr.user_id = u.id
+                  JOIN subject s ON ps.subject_id = s.id
+                  JOIN program p ON ps.program_id = p.id
+                  WHERE u.ulsa_id = :ulsa_id";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':ulsa_id', $ulsaID);
+        $stmt->execute();
+
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (empty($results)) {
+            ErrorList::add("No subjects or programs found for professor with ULSA ID $ulsaID");
+            return [];
+        }
+        return $results;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting subjects and programs by ULSA ID: " . $e->getMessage());
+    }
+}
+
+function deleteProgramSubject($professorId, $subjectId, $programId)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "DELETE FROM program_subject WHERE professor_id = :professor_id AND subject_id = :subject_id AND program_id = :program_id";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':professor_id', $professorId);
+        $stmt->bindParam(':subject_id', $subjectId);
+        $stmt->bindParam(':program_id', $programId);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            return true;
+        }
+        return false;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error deleting program subject: " . $e->getMessage());
+    }
+}
+
+function getSubjects(): array
+{
+    $subjects = [];
+    $db = getDatabaseConnection();
+
+    $query = "SELECT * FROM subject";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $subjects[] = new Subject($row['id'], $row['name']);
+    }
+    return $subjects;
+}
+
+function addProgramSubject($professorId, $subjectId, $programId)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "INSERT INTO program_subject (professor_id, subject_id, program_id) VALUES (:professor_id, :subject_id, :program_id)";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':professor_id', $professorId);
+        $stmt->bindParam(':subject_id', $subjectId);
+        $stmt->bindParam(':program_id', $programId);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            return true;
+        }
+        return false;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error al asignar la materia al programa: " . $e->getMessage());
+    }
+}
+
+function getProgramSubjects()
+{
+    $db = getDatabaseConnection();
+    $query = "SELECT ps.id, ps.has_signed, ps.will_be_absent, s.name AS subject_name, p.career AS program_name, 
+                     CONCAT(u.first_name, ' ', u.last_name) AS professor_name
+              FROM program_subject ps
+              JOIN subject s ON ps.subject_id = s.id
+              JOIN program p ON ps.program_id = p.id
+              JOIN professor pr ON ps.professor_id = pr.id
+              JOIN public.user u ON pr.user_id = u.id";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function updateHasSigned($programSubjectId, $newState)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "UPDATE program_subject SET has_signed = :newState WHERE id = :programSubjectId";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':newState', $newState, PDO::PARAM_BOOL);
+        $stmt->bindParam(':programSubjectId', $programSubjectId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error updating has_signed: " . $e->getMessage());
+    }
+}
+
+function updateWillBeAbsent($programSubjectId, $newState)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "UPDATE program_subject SET will_be_absent = :newState WHERE id = :programSubjectId";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':newState', $newState, PDO::PARAM_BOOL);
+        $stmt->bindParam(':programSubjectId', $programSubjectId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error updating will_be_absent: " . $e->getMessage());
+    }
+}
+
+function insertComment($programSubjectId, $comment, $author)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "INSERT INTO comments (comment, author, program_subject_id) VALUES (:comment, :author, :programSubjectId)";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':comment', $comment);
+        $stmt->bindParam(':author', $author);
+        $stmt->bindParam(':programSubjectId', $programSubjectId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error inserting comment: " . $e->getMessage());
+    }
+}
+
+function insertEvidence($programSubjectId, $path)
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = "INSERT INTO evidence (directory_path, program_subject_id) VALUES (:directory_path, :programSubjectId)";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':directory_path', $path);
+        $stmt->bindParam(':programSubjectId', $programSubjectId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error inserting evidence: " . $e->getMessage());
+    }
+}
+
+function getCommentsAndEvidence($programSubjectId){
+    try {
+        $db = getDatabaseConnection();
+
+        $queryComments = "SELECT c.comment AS comment, c.author AS author
+                          FROM comments c
+                          WHERE c.program_subject_id = :programSubjectId";
+        $stmtComments = $db->prepare($queryComments);
+        $stmtComments->bindParam(':programSubjectId', $programSubjectId, PDO::PARAM_INT);
+        $stmtComments->execute();
+
+        $comments = [];
+        while ($row = $stmtComments->fetch(PDO::FETCH_ASSOC)) {
+            if ($row['comment'] !== null && $row['author'] !== null) {
+                $comments[] = ['comment' => $row['comment'], 'author' => $row['author']];
+            }
+        }
+
+        $queryEvidence = "SELECT e.directory_path AS path
+                          FROM evidence e
+                          WHERE e.program_subject_id = :programSubjectId";
+        $stmtEvidence = $db->prepare($queryEvidence);
+        $stmtEvidence->bindParam(':programSubjectId', $programSubjectId, PDO::PARAM_INT);
+        $stmtEvidence->execute();
+
+        $evidence = [];
+        while ($row = $stmtEvidence->fetch(PDO::FETCH_ASSOC)) {
+            if ($row['path'] !== null) {
+                $evidence[] = ['path' => $row['path'], 'name' => basename($row['path'])];
+            }
+        }
+
+        return ['comments' => $comments, 'evidence' => $evidence];
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting comments and evidence: " . $e->getMessage());
+    }
+}
+
+function deleteProfessorByUlsaId($ulsaId)
+{
+    try {
+        $db = getDatabaseConnection();
+        $stmt = $db->prepare("DELETE FROM public.user WHERE ulsa_id = (:ulsaId)");
+        $stmt->bindParam(':ulsaId', $ulsaId);
+        $stmt->execute();
+
+        $stmt->rowCount() > 0;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error getting subject by ID: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add("Error inesperado al obtener materia: {$e->getMessage()}");
+        return false;
+    }
+}
+
+function getSubjectByID(int $id)
+{
+    try{
+        $db = getDatabaseConnection();
+    
+        $query = "SELECT * FROM subject WHERE id = :id";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+    
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return new Subject($row['id'], $row['name']);
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error get subject: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add("Error inesperado al obtener materia: {$e->getMessage()}");
+        return null;
+    }
+}
+
+function deleteAllProfessors()
+{
+    try {
+        $db = getDatabaseConnection();
+        $stmt = $db->prepare("DELETE FROM public.user WHERE id IN (SELECT user_id FROM professor)");
+        $stmt->bindParam(':ulsaId', $ulsaID);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error deleting professors: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add("Error inesperado al borrar profesores: {$e->getMessage()}");
         return false;
     }
 }
