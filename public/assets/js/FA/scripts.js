@@ -2,38 +2,38 @@ $(document).ready(function () {
     let currentCommentId = null;
     const commentModal = new bootstrap.Modal(document.getElementById('commentModal'));
 
-    $("form").submit(function (e) {
+    $('form').submit(function (e) {
         e.preventDefault();
         const form = $(this);
         const formData = new FormData(this);
 
         $.ajax({
-            url: "",
-            type: "POST",
+            url: '',
+            type: 'POST',
             data: formData,
             processData: false,
             contentType: false,
             beforeSend: function () {
-                $(".alert").remove();
-                form.find("button").prop("disabled", true);
+                $('.alert').remove();
+                form.find('button').prop('disabled', true);
             },
             success: function (response) {
-                displayMessage(form, "Acción realizada correctamente");
+                displayMessage(form, 'Acción realizada correctamente');
                 console.log(response);
             },
             error: function (xhr) {
-                const errorMsg = "Error al procesar la solicitud";
-                displayMessage(form, errorMsg, "error");
+                const errorMsg = 'Error al procesar la solicitud';
+                displayMessage(form, errorMsg, 'error');
             },
             complete: function () {
-                form.find("button").prop("disabled", false);
+                form.find('button').prop('disabled', false);
             },
         });
     });
 
-    function displayMessage(pos, message, type = "success") {
-        const newDiv = document.createElement("div");
-        newDiv.className = type == "success" ? "alert alert-success" : "alert alert-danger";
+    function displayMessage(pos, message, type = 'success') {
+        const newDiv = document.createElement('div');
+        newDiv.className = type == 'success' ? 'alert alert-success' : 'alert alert-danger';
         newDiv.innerHTML = message;
         pos.before(newDiv);
     }
@@ -43,17 +43,17 @@ $(document).ready(function () {
 
     function loadProgramSubjects() {
         $.ajax({
-            url: "", // Actualiza con la ruta de tu script PHP
-            type: "POST",
-            data: { action: "getProgramSubjects" },
-            dataType: "json",
+            url: '', // Actualiza con la ruta de tu script PHP
+            type: 'POST',
+            data: { action: 'getProgramSubjects' },
+            dataType: 'json',
             success: function (response) {
                 if (!response.success || !Array.isArray(response.data)) {
-                    displayMessage($(".sectionsFA"), "Ocurrió un problema", "error");
+                    displayMessage($('.sectionsFA'), 'Ocurrió un problema', 'error');
                     return;
                 }
 
-                const tbody = $("#programsTableBody");
+                const tbody = $('#programsTableBody');
                 tbody.empty();
 
                 response.data.forEach((program) => {
@@ -86,153 +86,155 @@ $(document).ready(function () {
                 $('[data-toggle="tooltip"]').tooltip();
             },
             error: function () {
-                displayMessage($(".sectionsFA"), "Error al procesar la solicitud", "error");
+                displayMessage($('.sectionsFA'), 'Error al procesar la solicitud', 'error');
             },
         });
     }
 
     // Funcionalidad de los botones
-    $(document).on("click", ".toggle-signed", function () {
+    $(document).on('click', '.toggle-signed', function () {
         const button = $(this);
-        const row = button.closest("tr");
-        const id = row.data("id");
-        const newState = !button.hasClass("btn-success");
+        const row = button.closest('tr');
+        const id = row.data('id');
+        const newState = !button.hasClass('btn-success');
 
         $.ajax({
-            url: "", // Actualiza con la ruta de tu script PHP
-            type: "POST",
-            data: { action: "toggleSigned", id: id, state: newState },
+            url: '', // Actualiza con la ruta de tu script PHP
+            type: 'POST',
+            data: { action: 'toggleSigned', id: id, state: newState },
             success: function (response) {
                 if (response.success) {
-                    button.toggleClass("btn-success btn-danger");
-                    button.find("i").toggleClass("fa-check fa-times");
+                    button.toggleClass('btn-success btn-danger');
+                    button.find('i').toggleClass('fa-check fa-times');
                     const newTitle = newState ? 'Acta firmada' : 'Acta sin firma';
-                    button.attr('title', newTitle)
+                    button
+                        .attr('title', newTitle)
                         .attr('data-original-title', newTitle)
                         .tooltip('dispose') // Destruye el tooltip existente
                         .tooltip(); // Vuelve a inicializar
                 } else {
-                    alert("Error al actualizar el estado de firma.");
+                    alert('Error al actualizar el estado de firma.');
                 }
             },
             error: function () {
-                alert("Error al procesar la solicitud.");
+                alert('Error al procesar la solicitud.');
             },
         });
     });
 
-    $(document).on("click", ".toggle-absent", function () {
+    $(document).on('click', '.toggle-absent', function () {
         const button = $(this);
-        const row = button.closest("tr");
-        const id = row.data("id");
-        const newState = !button.hasClass("btn-warning");
+        const row = button.closest('tr');
+        const id = row.data('id');
+        const newState = !button.hasClass('btn-warning');
 
         $.ajax({
-            url: "", // Actualiza con la ruta de tu script PHP
-            type: "POST",
-            data: { action: "toggleAbsent", id: id, state: newState },
+            url: '', // Actualiza con la ruta de tu script PHP
+            type: 'POST',
+            data: { action: 'toggleAbsent', id: id, state: newState },
             success: function (response) {
                 if (response.success) {
-                    button.toggleClass("btn-warning btn-secondary");
-                    button.find("i").toggleClass("fa-user-times fa-user-check");
+                    button.toggleClass('btn-warning btn-secondary');
+                    button.find('i').toggleClass('fa-user-times fa-user-check');
                     const newTitle = newState ? 'Estará ausente' : 'Estará presente';
-                    button.attr('title', newTitle)
+                    button
+                        .attr('title', newTitle)
                         .attr('data-original-title', newTitle)
                         .tooltip('dispose') // Destruye el tooltip existente
-                        .tooltip(); 
+                        .tooltip();
                 } else {
-                    alert("Error al actualizar el estado de ausencia.");
+                    alert('Error al actualizar el estado de ausencia.');
                 }
             },
             error: function () {
-                alert("Error al procesar la solicitud.");
+                alert('Error al procesar la solicitud.');
             },
         });
     });
 
-    $(document).on("click", ".add-comment", function () {
-        currentCommentId = $(this).closest("tr").data("id");
-        $("#commentText, #commentAuthor").val("");
+    $(document).on('click', '.add-comment', function () {
+        currentCommentId = $(this).closest('tr').data('id');
+        $('#commentText, #commentAuthor').val('');
         commentModal.show();
     });
 
-    $("#saveCommentBtn").on("click", function () {
-        const comment = $("#commentText").val().trim();
-        const author  = $("#commentAuthor").val().trim();
-    
+    $('#saveCommentBtn').on('click', function () {
+        const comment = $('#commentText').val().trim();
+        const author = $('#commentAuthor').val().trim();
+
         if (comment && author) {
             $.ajax({
-                url: "", // Actualiza con la ruta de tu script PHP
-                type: "POST",
+                url: '', // Actualiza con la ruta de tu script PHP
+                type: 'POST',
                 data: {
-                    action: "addComment",
+                    action: 'addComment',
                     id: currentCommentId,
                     comment: comment,
-                    author: author
+                    author: author,
                 },
                 success: function (response) {
                     if (response.success) {
-                        alert("Comentario agregado correctamente.");
+                        alert('Comentario agregado correctamente.');
                         commentModal.hide();
                     } else {
-                        alert("Error al agregar el comentario.");
+                        alert('Error al agregar el comentario.');
                     }
                 },
                 error: function () {
-                    alert("Error al procesar la solicitud.");
+                    alert('Error al procesar la solicitud.');
                 },
             });
         } else {
-            alert("Por favor, completa todos los campos.");
+            alert('Por favor, completa todos los campos.');
         }
     });
 
-    $(document).on("click", ".upload-evidence", function () {
-        const row = $(this).closest("tr");
-        const id = row.data("id");
+    $(document).on('click', '.upload-evidence', function () {
+        const row = $(this).closest('tr');
+        const id = row.data('id');
         const fileInput = $('<input type="file" accept="*/*">');
 
-        fileInput.on("change", function () {
+        fileInput.on('change', function () {
             const file = this.files[0];
             const formData = new FormData();
-            formData.append("file", file, file.name);
-            formData.append("id", id);
-            formData.append("action", "uploadEvidence");
+            formData.append('file', file, file.name);
+            formData.append('id', id);
+            formData.append('action', 'uploadEvidence');
 
             $.ajax({
-                url: "", // Actualiza con la ruta de tu script PHP
-                type: "POST",
+                url: '', // Actualiza con la ruta de tu script PHP
+                type: 'POST',
                 data: formData,
                 processData: false,
                 contentType: false,
                 success: function (response) {
                     if (response.success) {
-                        alert("Evidencia subida correctamente.");
+                        alert('Evidencia subida correctamente.');
                     } else {
-                        alert("Error al subir la evidencia.");
+                        alert('Error al subir la evidencia.');
                     }
                 },
                 error: function () {
-                    alert("Error al procesar la solicitud.");
+                    alert('Error al procesar la solicitud.');
                 },
             });
         });
 
-        fileInput.trigger("click");
+        fileInput.trigger('click');
     });
 
-    $(document).on("click", ".view-comments-evidence", function () {
-        const row = $(this).closest("tr");
-        const id = row.data("id");
+    $(document).on('click', '.view-comments-evidence', function () {
+        const row = $(this).closest('tr');
+        const id = row.data('id');
 
         // Eliminar el modal anterior si existe
         $('#commentsEvidenceModal').remove();
 
         $.ajax({
-            url: "", // Actualiza con la ruta de tu script PHP
-            type: "POST",
-            data: { action: "getCommentsAndEvidence", id: id },
-            dataType: "json",
+            url: '', // Actualiza con la ruta de tu script PHP
+            type: 'POST',
+            data: { action: 'getCommentsAndEvidence', id: id },
+            dataType: 'json',
             success: function (response) {
                 if (response.success) {
                     let modalContent = '<div class="modal-body bg-light">';
@@ -240,7 +242,7 @@ $(document).ready(function () {
                     // Agregar comentarios
                     modalContent += '<h5>Comentarios</h5>';
                     if (response.data.comments && response.data.comments.length > 0) {
-                        response.data.comments.forEach(comment => {
+                        response.data.comments.forEach((comment) => {
                             modalContent += `<p><strong>${comment.author}:</strong> ${comment.comment}</p>`;
                         });
                     } else {
@@ -250,7 +252,7 @@ $(document).ready(function () {
                     // Agregar evidencias
                     modalContent += '<h5>Evidencias</h5>';
                     if (response.data.evidence && response.data.evidence.length > 0) {
-                        response.data.evidence.forEach(evidence => {
+                        response.data.evidence.forEach((evidence) => {
                             modalContent += `<p><a href="${evidence.path}" download>${evidence.name}</a></p>`;
                         });
                     } else {
@@ -277,15 +279,17 @@ $(document).ready(function () {
                             </div>
                         </div>`;
 
-                    $("body").append(modalHtml);
-                    const commentsEvidenceModal = new bootstrap.Modal(document.getElementById('commentsEvidenceModal'));
+                    $('body').append(modalHtml);
+                    const commentsEvidenceModal = new bootstrap.Modal(
+                        document.getElementById('commentsEvidenceModal')
+                    );
                     commentsEvidenceModal.show();
                 } else {
-                    alert("Error al obtener los comentarios y evidencias.");
+                    alert('Error al obtener los comentarios y evidencias.');
                 }
             },
             error: function () {
-                alert("Error al procesar la solicitud.");
+                alert('Error al procesar la solicitud.');
             },
         });
     });
@@ -299,19 +303,19 @@ $(document).ready(function () {
         let showAll = $('#selectAll').is(':checked');
         const showSigned = $('#filterSigned').is(':checked');
         const showAbsent = $('#filterAbsent').is(':checked');
-    
+
         // Si ninguno de los filtros específicos está marcado,
         // forzamos 'Todos' y por tanto showAll = true
         if (!showSigned && !showAbsent) {
             $('#selectAll').prop('checked', true);
             showAll = true;
         }
-    
+
         $('#programsTableBody tr').each(function () {
             const row = $(this);
-            const hasSigned    = row.find('.toggle-signed').hasClass('btn-success');
+            const hasSigned = row.find('.toggle-signed').hasClass('btn-success');
             const willBeAbsent = row.find('.toggle-absent').hasClass('btn-warning');
-    
+
             let showRow;
             if (showAll) {
                 // Cuando 'Todos' está activo, muestro todo
@@ -330,11 +334,10 @@ $(document).ready(function () {
                 // Caso residual (no debería entrar aquí)
                 showRow = true;
             }
-    
+
             row.toggle(showRow);
         });
     }
-    
 
     $('#selectAll').on('change', function () {
         if (this.checked) {
@@ -353,4 +356,3 @@ $(document).ready(function () {
     // Inicializar el filtro de la tabla
     updateTableFilter();
 });
-

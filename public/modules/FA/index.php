@@ -6,7 +6,6 @@ ob_start();
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
         if ($_POST['action'] === 'getProgramSubjects') {
             $res = getProgramSubjects();
         } elseif ($_POST['action'] === 'toggleSigned') {
@@ -29,25 +28,31 @@ try {
                 throw new RuntimeException('Faltan datos para subir la evidencia.');
             }
             $filePath = '/uploads/FA/' . $_FILES['file']['name'];
-            if (move_uploaded_file($_FILES['file']['tmp_name'], $_SERVER['DOCUMENT_ROOT'] . $filePath)) {
+            if (
+                move_uploaded_file(
+                    $_FILES['file']['tmp_name'],
+                    $_SERVER['DOCUMENT_ROOT'] . $filePath,
+                )
+            ) {
                 $res = insertEvidence($_POST['id'], $filePath);
             } else {
                 throw new RuntimeException('Error al mover el archivo.');
             }
         } elseif ($_POST['action'] === 'getCommentsAndEvidence') {
             if (!isset($_POST['id'])) {
-                throw new RuntimeException('Faltan datos para obtener los comentarios y la evidencia.');
+                throw new RuntimeException(
+                    'Faltan datos para obtener los comentarios y la evidencia.',
+                );
             }
             $res = getCommentsAndEvidence($_POST['id']);
         }
 
         echo responseOK($res);
-        exit;
+        exit();
     }
-
 } catch (RuntimeException $e) {
     echo responseInternalError($e->getMessage());
-    exit;
+    exit();
 }
 ob_end_flush();
 ?>
@@ -80,9 +85,10 @@ get_head('FA');
 </head>
 
 <body style="display: block;">
-    <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Firma de Actas');
-?>
+    <?php
+    require_once INCLUDES_DIR . '/templates/header.php';
+    get_header('Firma de Actas');
+    ?>
 
     <main class="container content marco">
         <div class="sectionsFA">

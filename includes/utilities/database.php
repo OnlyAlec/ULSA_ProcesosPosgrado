@@ -705,7 +705,6 @@ function deleteAllStudents()
     }
 }
 
-
 /**
  * @return Professor[]
  */
@@ -773,11 +772,11 @@ function getProfessorByUlsaID($ID)
             $res['last_name'],
             $res['ulsa_id'],
             $res['ulsa_email'],
-            $res['id']
+            $res['id'],
         );
         return $professor;
     } catch (\PDOException $e) {
-        throw new \RuntimeException('Error getting pofessor by Ulsa ID:'. $e->getMessage());
+        throw new \RuntimeException('Error getting pofessor by Ulsa ID:' . $e->getMessage());
     } catch (\InvalidArgumentException $e) {
         ErrorList::add($e->getMessage());
         return false;
@@ -810,7 +809,7 @@ function getProfessorByID($ID)
             $res['last_name'],
             $res['ulsa_id'],
             $res['ulsa_email'],
-            $res['id']
+            $res['id'],
         );
         return $professor;
     } catch (\PDOException $e) {
@@ -843,7 +842,9 @@ function getProfessorSubjectsAndProgramsByUlsaID($ulsaID)
         }
         return $results;
     } catch (\PDOException $e) {
-        throw new \RuntimeException('Error getting subjects and programs by ULSA ID: ' . $e->getMessage());
+        throw new \RuntimeException(
+            'Error getting subjects and programs by ULSA ID: ' . $e->getMessage(),
+        );
     }
 }
 
@@ -851,7 +852,8 @@ function deleteProgramSubject($professorId, $subjectId, $programId)
 {
     try {
         $db = getDatabaseConnection();
-        $query = 'DELETE FROM program_subject WHERE professor_id = :professor_id AND subject_id = :subject_id AND program_id = :program_id';
+        $query =
+            'DELETE FROM program_subject WHERE professor_id = :professor_id AND subject_id = :subject_id AND program_id = :program_id';
         $stmt = $db->prepare($query);
         $stmt->bindParam(':professor_id', $professorId);
         $stmt->bindParam(':subject_id', $subjectId);
@@ -886,7 +888,8 @@ function addProgramSubject($professorId, $subjectId, $programId)
 {
     try {
         $db = getDatabaseConnection();
-        $query = 'INSERT INTO program_subject (professor_id, subject_id, program_id) VALUES (:professor_id, :subject_id, :program_id)';
+        $query =
+            'INSERT INTO program_subject (professor_id, subject_id, program_id) VALUES (:professor_id, :subject_id, :program_id)';
         $stmt = $db->prepare($query);
         $stmt->bindParam(':professor_id', $professorId);
         $stmt->bindParam(':subject_id', $subjectId);
@@ -938,7 +941,8 @@ function updateWillBeAbsent($programSubjectId, $newState)
 {
     try {
         $db = getDatabaseConnection();
-        $query = 'UPDATE program_subject SET will_be_absent = :newState WHERE id = :programSubjectId';
+        $query =
+            'UPDATE program_subject SET will_be_absent = :newState WHERE id = :programSubjectId';
         $stmt = $db->prepare($query);
         $stmt->bindParam(':newState', $newState, PDO::PARAM_BOOL);
         $stmt->bindParam(':programSubjectId', $programSubjectId, PDO::PARAM_INT);
@@ -954,7 +958,8 @@ function insertComment($programSubjectId, $comment, $author)
 {
     try {
         $db = getDatabaseConnection();
-        $query = 'INSERT INTO comments (comment, author, program_subject_id) VALUES (:comment, :author, :programSubjectId)';
+        $query =
+            'INSERT INTO comments (comment, author, program_subject_id) VALUES (:comment, :author, :programSubjectId)';
         $stmt = $db->prepare($query);
         $stmt->bindParam(':comment', $comment);
         $stmt->bindParam(':author', $author);
@@ -971,7 +976,8 @@ function insertEvidence($programSubjectId, $path)
 {
     try {
         $db = getDatabaseConnection();
-        $query = 'INSERT INTO evidence (directory_path, program_subject_id) VALUES (:directory_path, :programSubjectId)';
+        $query =
+            'INSERT INTO evidence (directory_path, program_subject_id) VALUES (:directory_path, :programSubjectId)';
         $stmt = $db->prepare($query);
         $stmt->bindParam(':directory_path', $path);
         $stmt->bindParam(':programSubjectId', $programSubjectId, PDO::PARAM_INT);
