@@ -38,5 +38,4 @@ class Subject
             'name' => $this->getName(),
         ];
     }
-
 }

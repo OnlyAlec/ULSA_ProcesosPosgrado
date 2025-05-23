@@ -8,7 +8,6 @@ class ProfessorBase
     private int $ulsaID;
     private string $email;
 
-
     public function __construct($firstName, $lastName, $ulsaID, $email, $id = -1)
     {
         $this->firstName = $firstName;
@@ -44,7 +43,7 @@ class ProfessorBase
             'lastName' => ucwords($this->getLastName()),
             'ulsaID' => $this->getUlsaId(),
             'email' => $this->getEmail(),
-            'id' => $this->getID()
+            'id' => $this->getID(),
         ];
     }
 
