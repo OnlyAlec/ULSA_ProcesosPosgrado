@@ -1,9 +1,9 @@
 <?php
 
-require_once VENDOR_DIR . "/autoload.php";
-require_once INCLUDES_DIR . "/utilities/util.php";
-require_once INCLUDES_DIR . "/utilities/handleErrors.php";
-require_once INCLUDES_DIR . "/utilities/database.php";
+require_once VENDOR_DIR . '/autoload.php';
+require_once INCLUDES_DIR . '/utilities/util.php';
+require_once INCLUDES_DIR . '/utilities/handleErrors.php';
+require_once INCLUDES_DIR . '/utilities/database.php';
 
 
 function restartDatabaseFromExcel($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $careerColumn, $emailColumn)
@@ -46,17 +46,17 @@ function insertOneStudent($ulsaId, $name, $lastname, $career, $email)
 
     try {
         $db = getDatabaseConnection();
-        $stmt = $db->prepare("SELECT id FROM program WHERE career = :career");
+        $stmt = $db->prepare('SELECT id FROM program WHERE career = :career');
         $stmt->execute([':career' => $career]);
         $careerId = $stmt->fetchColumn();
 
         if (!$careerId) {
-            $stmt = $db->prepare("INSERT INTO program (career) VALUES (:career) RETURNING id");
+            $stmt = $db->prepare('INSERT INTO program (career) VALUES (:career) RETURNING id');
             $stmt->execute([':career' => $career]);
             $careerId = $db->lastInsertId();
         }
 
-        $stmt = $db->prepare("INSERT INTO public.user (first_name, last_name, ulsa_id, email) VALUES (:first_name, :last_name, :ulsa_id, :email) RETURNING id");
+        $stmt = $db->prepare('INSERT INTO public.user (first_name, last_name, ulsa_id, email) VALUES (:first_name, :last_name, :ulsa_id, :email) RETURNING id');
         $stmt->execute([
             ':first_name' => $name,
             ':last_name' => $lastname,
@@ -65,7 +65,7 @@ function insertOneStudent($ulsaId, $name, $lastname, $career, $email)
         ]);
         $userId = $db->lastInsertId();
 
-        $stmt = $db->prepare("INSERT INTO student (program_id, user_id) VALUES (:program_id, :user_id)");
+        $stmt = $db->prepare('INSERT INTO student (program_id, user_id) VALUES (:program_id, :user_id)');
         $stmt->execute([
             ':program_id' => $careerId,
             ':user_id' => $userId,
@@ -147,7 +147,7 @@ function insertDataIntoDatabase($data)
         $careers = array_unique($data['careers']);
         $careerIds = [];
         foreach ($careers as $career) {
-            $stmt = $db->prepare("INSERT INTO program (career) VALUES (:career) RETURNING id");
+            $stmt = $db->prepare('INSERT INTO program (career) VALUES (:career) RETURNING id');
             $stmt->execute([':career' => $career]);
             $careerIds[$career] = $db->lastInsertId();
         }
@@ -155,7 +155,7 @@ function insertDataIntoDatabase($data)
         // Insertar nombres y apellidos
         $nameIds = [];
         for ($i = 0; $i < count($data['first_names']); $i++) {
-            $stmt = $db->prepare("INSERT INTO public.user (first_name, last_name, email, ulsa_id) VALUES (:first_name, :last_name, :email, :ulsa_id) RETURNING id");
+            $stmt = $db->prepare('INSERT INTO public.user (first_name, last_name, email, ulsa_id) VALUES (:first_name, :last_name, :email, :ulsa_id) RETURNING id');
             $stmt->execute([
                 ':first_name' => $data['first_names'][$i],
                 ':last_name' => $data['last_names'][$i],
@@ -167,7 +167,7 @@ function insertDataIntoDatabase($data)
 
         // Insertar estudiantes
         for ($i = 0; $i < count($data['ulsa_ids']); $i++) {
-            $stmt = $db->prepare("INSERT INTO student (user_id, program_id) VALUES (:user_id, :program_id)");
+            $stmt = $db->prepare('INSERT INTO student (user_id, program_id) VALUES (:user_id, :program_id)');
             $stmt->execute([
                 ':user_id' => $userIds[$i],
                 ':program_id' => $careerIds[$data['careers'][$i]],

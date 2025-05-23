@@ -18,7 +18,7 @@ try {
             switch ($_POST['action']) {
                 case 'getTableStudents':
                     $res = array_values(
-                        array_map(fn($student) => $student->getJSON(), getStudents()),
+                        array_map(fn ($student) => $student->getJSON(), getStudents()),
                     );
                     break;
                 case 'getMissing':
@@ -120,9 +120,9 @@ try {
     exit();
 }
 
-$masterProgramsDataForPage = array_map(fn($program) => $program->getName(), getMastersPrograms());
+$masterProgramsDataForPage = array_map(fn ($program) => $program->getName(), getMastersPrograms());
 $specialtyProgramsDataForPage = array_map(
-    fn($program) => $program->getName(),
+    fn ($program) => $program->getName(),
     getSpecialtyPrograms(),
 );
 
@@ -138,8 +138,8 @@ get_head('AFI');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-    get_header('Avisos de Fechas Importantes');
-    ?>
+get_header('Avisos de Fechas Importantes');
+?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
