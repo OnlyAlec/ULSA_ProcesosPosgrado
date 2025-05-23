@@ -1,9 +1,9 @@
 <?php
 
-require_once VENDOR_DIR . "/autoload.php";
-require_once INCLUDES_DIR . "/utilities/util.php";
-require_once INCLUDES_DIR . "/utilities/handleErrors.php";
-require_once INCLUDES_DIR . "/utilities/database.php";
+require_once VENDOR_DIR . '/autoload.php';
+require_once INCLUDES_DIR . '/utilities/util.php';
+require_once INCLUDES_DIR . '/utilities/handleErrors.php';
+require_once INCLUDES_DIR . '/utilities/database.php';
 
 
 
@@ -46,7 +46,7 @@ function insertOneProfessor($ulsaId, $name, $lastname, $email)
     try {
         $db = getDatabaseConnection();
 
-        $stmt = $db->prepare("INSERT INTO public.user (first_name, last_name, ulsa_id, email) VALUES (:first_name, :last_name, :ulsa_id, :email) RETURNING id");
+        $stmt = $db->prepare('INSERT INTO public.user (first_name, last_name, ulsa_id, email) VALUES (:first_name, :last_name, :ulsa_id, :email) RETURNING id');
         $stmt->execute([
             ':first_name' => $name,
             ':last_name' => $lastname,
@@ -55,7 +55,7 @@ function insertOneProfessor($ulsaId, $name, $lastname, $email)
         ]);
         $userId = $stmt->fetchColumn();
 
-        $stmt = $db->prepare("INSERT INTO professor (user_id) VALUES (:user_id)");
+        $stmt = $db->prepare('INSERT INTO professor (user_id) VALUES (:user_id)');
         $stmt->execute([
             ':user_id' => $userId,
         ]);
@@ -127,7 +127,7 @@ function insertDataIntoDatabase($data)
         // Insertar nombres y apellidos
         $userIds = [];
         for ($i = 0; $i < count($data['first_names']); $i++) {
-            $stmt = $db->prepare("INSERT INTO public.user (first_name, last_name, ulsa_id, email) VALUES (:first_name, :last_name, :ulsa_id, :email) RETURNING id");
+            $stmt = $db->prepare('INSERT INTO public.user (first_name, last_name, ulsa_id, email) VALUES (:first_name, :last_name, :ulsa_id, :email) RETURNING id');
             $stmt->execute([
                 ':first_name' => $data['first_names'][$i],
                 ':last_name' => $data['last_names'][$i],
@@ -139,7 +139,7 @@ function insertDataIntoDatabase($data)
 
         // Insertar estudiantes
         for ($i = 0; $i < count($data['ulsa_ids']); $i++) {
-            $stmt = $db->prepare("INSERT INTO professor (user_id) VALUES (:user_id)");
+            $stmt = $db->prepare('INSERT INTO professor (user_id) VALUES (:user_id)');
             $stmt->execute([
                 ':user_id' => $userIds[$i],
             ]);
