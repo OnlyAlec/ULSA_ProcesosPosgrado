@@ -3,6 +3,8 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once INCLUDES_DIR . '/utilities/database.php';
 require_once INCLUDES_DIR . '/utilities/responseHTTP.php';
 require_once INCLUDES_DIR . '/models/student.php';
+require_once INCLUDES_DIR . '/utilities/util.php';
+
 ob_start();
 
 try {
@@ -41,7 +43,7 @@ try {
             }
 
             if (!is_dir($uploadDir)) {
-                if (!mkdir($uploadDir, 02775, true)) {
+                if (!mkdir($uploadDir, 0755, true)) {
                     throw new RuntimeException('Error creating directory for XLSX files.');
                 }
             }
@@ -132,7 +134,7 @@ get_head('GA');
             </button>
         </div>
 
-        <div>         
+        <div>
             <div id="crear" class="my-5 sectionGA" style="display: none;">
                 <h3>Registro de Alumnos desde Excel</h3>
                 <p class="d-flex justify-content-end">
@@ -146,7 +148,8 @@ get_head('GA');
                     <div class="form-group row mb-4">
                         <label for="gaExcelFile" class="col-md-3 col-form-label">Archivo Excel</label>
                         <div class="col-md-8 custom-file ml-2">
-                            <input type="file" class="custom-file-input" id="gaExcelFile" name="gaExcelFile" accept=".xls,.xlsx" required>
+                            <input type="file" class="custom-file-input" id="gaExcelFile" name="gaExcelFile"
+                                accept=".xls,.xlsx" required>
                             <label class="custom-file-label" for="gaExcelFile" data-browse="Examinar">
                                 Seleccionar archivo...
                             </label>
@@ -164,31 +167,36 @@ get_head('GA');
                     <div class="form-group row mb-4">
                         <label for="claveUlsaCol" class="col-md-3 col-form-label">Clave Ulsa:</label>
                         <div class="col-md-8 ml-2">
-                            <input type="text" class="form-control w-auto" id="claveUlsaCol" name="claveUlsaCol" placeholder="Columna" maxlength="1">
+                            <input type="text" class="form-control w-auto" id="claveUlsaCol" name="claveUlsaCol"
+                                placeholder="Columna" maxlength="1">
                         </div>
                     </div>
                     <div class="form-group row mb-4">
                         <label for="nombreCol" class="col-md-3 col-form-label">Nombre(s):</label>
                         <div class="col-md-8 ml-2">
-                            <input type="text" class="form-control w-auto" id="nombreCol" name="nombreCol" placeholder="Columna" maxlength="1">
+                            <input type="text" class="form-control w-auto" id="nombreCol" name="nombreCol"
+                                placeholder="Columna" maxlength="1">
                         </div>
                     </div>
                     <div class="form-group row mb-4">
                         <label for="apellidosCol" class="col-md-3 col-form-label">Apellidos:</label>
                         <div class="col-md-8 ml-2">
-                            <input type="text" class="form-control w-auto" id="apellidosCol" name="apellidosCol" placeholder="Columna" maxlength="1">
+                            <input type="text" class="form-control w-auto" id="apellidosCol" name="apellidosCol"
+                                placeholder="Columna" maxlength="1">
                         </div>
                     </div>
                     <div class="form-group row mb-4">
                         <label for="carreraCol" class="col-md-3 col-form-label">Carrera:</label>
                         <div class="col-md-8 ml-2">
-                            <input type="text" class="form-control w-auto" id="carreraCol" name="carreraCol" placeholder="Columna" maxlength="1">
+                            <input type="text" class="form-control w-auto" id="carreraCol" name="carreraCol"
+                                placeholder="Columna" maxlength="1">
                         </div>
                     </div>
                     <div class="form-group row mb-4">
                         <label for="emailCol" class="col-md-3 col-form-label">Email:</label>
                         <div class="col-md-8 ml-2">
-                            <input type="text" class="form-control w-auto" id="emailCol" name="emailCol" placeholder="Columna" maxlength="1">
+                            <input type="text" class="form-control w-auto" id="emailCol" name="emailCol"
+                                placeholder="Columna" maxlength="1">
                         </div>
                     </div>
 
@@ -216,35 +224,40 @@ get_head('GA');
                     <div class="form-group row mb-4">
                         <label for="claveUlsa" class="col-md-3 col-form-label">Clave Ulsa:</label>
                         <div class="col-md-8 ml-2">
-                            <input type="text" class="form-control w-auto" id="claveUlsa" name="claveUlsa" placeholder="Clave Ulsa">
+                            <input type="text" class="form-control w-auto" id="claveUlsa" name="claveUlsa"
+                                placeholder="Clave Ulsa">
                         </div>
                     </div>
 
                     <div class="form-group row mb-4">
                         <label for="nombre" class="col-md-3 col-form-label">Nombre(s):</label>
                         <div class="col-md-8 ml-2">
-                            <input type="text" class="form-control w-auto" id="nombre" name="nombre" placeholder="Nombre(s)">
+                            <input type="text" class="form-control w-auto" id="nombre" name="nombre"
+                                placeholder="Nombre(s)">
                         </div>
                     </div>
 
                     <div class="form-group row mb-4">
                         <label for="apellidos" class="col-md-3 col-form-label">Apellidos:</label>
                         <div class="col-md-8 ml-2">
-                            <input type="text" class="form-control w-auto" id="apellidos" name="apellidos" placeholder="Apellidos">
+                            <input type="text" class="form-control w-auto" id="apellidos" name="apellidos"
+                                placeholder="Apellidos">
                         </div>
                     </div>
 
                     <div class="form-group row mb-4">
                         <label for="carrera" class="col-md-3 col-form-label">Carrera:</label>
                         <div class="col-md-8 ml-2">
-                            <input type="text" class="form-control w-auto" id="carrera" name="carrera" placeholder="Carrera">
+                            <input type="text" class="form-control w-auto" id="carrera" name="carrera"
+                                placeholder="Carrera">
                         </div>
                     </div>
 
                     <div class="form-group row mb-4">
                         <label for="email" class="col-md-3 col-form-label">Email:</label>
                         <div class="col-md-8 ml-2">
-                            <input type="text" class="form-control w-auto" id="email" name="email" placeholder="Correo electrónico">
+                            <input type="text" class="form-control w-auto" id="email" name="email"
+                                placeholder="Correo electrónico">
                         </div>
                     </div>
 
@@ -288,7 +301,8 @@ get_head('GA');
                     <div class="form-group row mb-4">
                         <label for="claveUlsaDelete" class="col-md-3 col-form-label">Clave Ulsa:</label>
                         <div class="col-md-8 ml-2">
-                            <input type="text" class="form-control w-auto" id="claveUlsaDelete" name="claveUlsaDelete" placeholder="Clave Ulsa" maxlength="6">
+                            <input type="text" class="form-control w-auto" id="claveUlsaDelete" name="claveUlsaDelete"
+                                placeholder="Clave Ulsa" maxlength="6">
                         </div>
                     </div>
                     <div class="text-center mt-4 d-flex justify-content-end">
@@ -321,11 +335,13 @@ get_head('GA');
 
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
-    <script src="<?= ASSETS_PATH ?>/js/jquery.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/bootstrap/bootstrap.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/util.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/sidebarmenu.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/GA/scripts.js"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery.min.js') ?>"></script>
+    <script src="<?= filePathToUrl(
+        PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/bootstrap.min.js',
+    ) ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/util.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/sidebarmenu.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/GA/scripts.js') ?>"></script>
 </body>
 
 </html>

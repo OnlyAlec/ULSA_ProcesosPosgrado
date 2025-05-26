@@ -2,7 +2,10 @@
     <footer class="footer mt-4">
         <div class="footerTop">
             <div class="container marco">
-                <div class="logotipo"><img src="<?= ASSETS_PATH ?>/img/lasalle-logo-blanco.png"
+                <div class="logotipo"><img
+                        src="<?= filePathToUrl(
+                            PUBLIC_DIR . ASSETS_PATH . '/img/lasalle-logo-blanco.png',
+                        ) ?>"
                         alt="Universidad La Salle">
                     <h3> <span>Profesionales</span>con <strong>Valor</strong></h3>
                 </div>
@@ -116,10 +119,18 @@
                 <div class="logotipos">
                     <ul>
                         <li><a href="http://redlasalle.mx/" target="_blank"><img
-                                    src="<?= ASSETS_PATH ?>/img/la-salle-logo-red-universidades.png"
+                                    src="<?= filePathToUrl(
+                                        PUBLIC_DIR .
+                                            ASSETS_PATH .
+                                            '/img/la-salle-logo-red-universidades.png',
+                                    ) ?>"
                                     alt="La Salle - logotipo" class="img-responsive" width="80"></a></li>
                         <li><a href="http://ialu.org/english/" target="_blank"><img
-                                    src="<?= ASSETS_PATH ?>/img/la-salle-logo-international-ia.png"
+                                    src="<?= filePathToUrl(
+                                        PUBLIC_DIR .
+                                            ASSETS_PATH .
+                                            '/img/la-salle-logo-international-ia.png',
+                                    ) ?>"
                                     alt="La Salle - logotipo" class="img-responsive" width="80"></a></li>
                     </ul>
                 </div>

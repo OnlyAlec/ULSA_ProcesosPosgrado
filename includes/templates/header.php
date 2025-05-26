@@ -3,7 +3,7 @@
 function get_header($title)
 {
     $menuItems = get_modules_links();
-    $logo = ASSETS_PATH . '/img/logo_lasalle.png';
+    $logo = filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/img/logo_lasalle.png');
     $home = BASE_URL;
     $header = <<<HTML
     <div class="overlay"></div><!-- Dark Overlay element -->
