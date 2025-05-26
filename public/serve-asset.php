@@ -16,7 +16,7 @@ $fullPath = __DIR__ . $assetPath;
 if (strpos($assetPath, '..') !== false || !file_exists($fullPath) || is_dir($fullPath)) {
     header('HTTP/1.1 404 Not Found');
     echo 'File not found: ' . htmlspecialchars($assetPath);
-    exit;
+    exit();
 }
 
 // Get the file extension to determine content type
@@ -41,7 +41,7 @@ $contentTypes = [
     'zip' => 'application/zip',
     'txt' => 'text/plain',
     'html' => 'text/html',
-    'xml' => 'application/xml'
+    'xml' => 'application/xml',
 ];
 
 $contentType = $contentTypes[$extension] ?? 'application/octet-stream';
@@ -55,4 +55,4 @@ header('Access-Control-Allow-Origin: *');
 
 // Output the file
 readfile($fullPath);
-exit;
+exit();

@@ -17,7 +17,9 @@ try {
 
             switch ($_POST['action']) {
                 case 'getTableStudents':
-                    $res = array_values(array_map(fn ($student) => $student->getJSON(), getStudents()));
+                    $res = array_values(
+                        array_map(fn($student) => $student->getJSON(), getStudents()),
+                    );
                     break;
                 case 'getMissing':
                     //? Not in use
@@ -50,7 +52,11 @@ try {
                 }
 
                 $fileTmpPath = $_FILES['excelFile']['tmp_name'];
-                $fileName = str_replace(' ', '_', htmlspecialchars($_FILES['excelFile']['name'], ENT_QUOTES, 'UTF-8'));
+                $fileName = str_replace(
+                    ' ',
+                    '_',
+                    htmlspecialchars($_FILES['excelFile']['name'], ENT_QUOTES, 'UTF-8'),
+                );
                 $ext = strtolower(pathinfo($_FILES['excelFile']['name'], PATHINFO_EXTENSION));
 
                 if (in_array($ext, $allowedExtensions)) {
@@ -69,8 +75,16 @@ try {
                 $fileTmpPath1 = $_FILES['excelForms']['tmp_name'];
                 $fileTmpPath2 = $_FILES['excelAlumni']['tmp_name'];
 
-                $fileName1 = str_replace(' ', '_', htmlspecialchars($_FILES['excelForms']['name'], ENT_QUOTES, 'UTF-8'));
-                $fileName2 = str_replace(' ', '_', htmlspecialchars($_FILES['excelAlumni']['name'], ENT_QUOTES, 'UTF-8'));
+                $fileName1 = str_replace(
+                    ' ',
+                    '_',
+                    htmlspecialchars($_FILES['excelForms']['name'], ENT_QUOTES, 'UTF-8'),
+                );
+                $fileName2 = str_replace(
+                    ' ',
+                    '_',
+                    htmlspecialchars($_FILES['excelAlumni']['name'], ENT_QUOTES, 'UTF-8'),
+                );
 
                 $ext1 = strtolower(pathinfo($_FILES['excelForms']['name'], PATHINFO_EXTENSION));
                 $ext2 = strtolower(pathinfo($_FILES['excelAlumni']['name'], PATHINFO_EXTENSION));
@@ -82,7 +96,10 @@ try {
                         }
                     }
 
-                    if (!move_uploaded_file($fileTmpPath1, "$uploadDir$fileName1") || !move_uploaded_file($fileTmpPath2, "$uploadDir$fileName2")) {
+                    if (
+                        !move_uploaded_file($fileTmpPath1, "$uploadDir$fileName1") ||
+                        !move_uploaded_file($fileTmpPath2, "$uploadDir$fileName2")
+                    ) {
                         throw new RuntimeException('Error uploading file.');
                     }
 
@@ -93,14 +110,14 @@ try {
 
         if ($res === false || $res === null || empty($res)) {
             echo responseBadRequest('Error processing the request.');
-            exit;
+            exit();
         }
         echo responseOK($res);
-        exit;
+        exit();
     }
 } catch (RuntimeException $e) {
     echo responseInternalError($e->getMessage());
-    exit;
+    exit();
 }
 ob_end_flush();
 ?>
@@ -112,9 +129,10 @@ get_head('AFI');
 ?>
 
 <body style="display: block;">
-    <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Avisos de Fechas Importantes');
-?>
+    <?php
+    require_once INCLUDES_DIR . '/templates/header.php';
+    get_header('Avisos de Fechas Importantes');
+    ?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
@@ -248,11 +266,10 @@ get_header('Avisos de Fechas Importantes');
                             readonly>
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
-                            <?php
-                        foreach (getMastersPrograms() as $master) {
-                            $master = $master->getName();
-                            echo "<li>$master</li>";
-                        } ?>
+                            <?php foreach (getMastersPrograms() as $master) {
+                                $master = $master->getName();
+                                echo "<li>$master</li>";
+                            } ?>
                         </ul>
                     </div>
                 </div>
@@ -263,11 +280,10 @@ get_header('Avisos de Fechas Importantes');
                             readonly>
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
-                            <?php
-                        foreach (getSpecialtyPrograms() as $special) {
-                            $special = $special->getName();
-                            echo "<li>$special</li>";
-                        } ?>
+                            <?php foreach (getSpecialtyPrograms() as $special) {
+                                $special = $special->getName();
+                                echo "<li>$special</li>";
+                            } ?>
                         </ul>
                     </div>
                 </div>
@@ -312,11 +328,10 @@ get_header('Avisos de Fechas Importantes');
                             placeholder="Seleccionar" readonly>
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
-                            <?php
-                        foreach (getMastersPrograms() as $master) {
-                            $master = $master->getName();
-                            echo "<li>$master</li>";
-                        } ?>
+                            <?php foreach (getMastersPrograms() as $master) {
+                                $master = $master->getName();
+                                echo "<li>$master</li>";
+                            } ?>
                         </ul>
                     </div>
                 </div>
@@ -327,11 +342,10 @@ get_header('Avisos de Fechas Importantes');
                             placeholder="Seleccionar" readonly>
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
-                            <?php
-                        foreach (getSpecialtyPrograms() as $special) {
-                            $special = $special->getName();
-                            echo "<li>$special</li>";
-                        } ?>
+                            <?php foreach (getSpecialtyPrograms() as $special) {
+                                $special = $special->getName();
+                                echo "<li>$special</li>";
+                            } ?>
                         </ul>
                     </div>
                 </div>
@@ -411,15 +425,17 @@ get_header('Avisos de Fechas Importantes');
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery.min.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery-ui.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/datepicker-es.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/bootstrap.min.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/sidebarmenu.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/scripts.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/forms.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/gestor.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/settings.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery.min.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery-ui.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/datepicker-es.js') ?>"></script>
+    <script src="<?= filePathToUrl(
+        PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/bootstrap.min.js',
+    ) ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/sidebarmenu.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/scripts.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/forms.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/gestor.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/settings.js') ?>"></script>
 </body>
 
 </html>
