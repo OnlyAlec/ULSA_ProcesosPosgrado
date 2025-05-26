@@ -1,8 +1,8 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
-require_once INCLUDES_DIR . "/utilities/database.php";
-require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
-require_once INCLUDES_DIR . "/models/student.php";
+require_once INCLUDES_DIR . '/utilities/database.php';
+require_once INCLUDES_DIR . '/utilities/responseHTTP.php';
+require_once INCLUDES_DIR . '/models/student.php';
 require_once INCLUDES_DIR . '/utilities/util.php';
 
 ob_start();
@@ -22,10 +22,10 @@ try {
                     $res = changeStatusSEDGroup($_POST['studentIDS']);
                     break;
                 case 'getMasters':
-                    $res = array_map(fn($program) => $program->getName(), getMastersPrograms());
+                    $res = array_map(fn ($program) => $program->getName(), getMastersPrograms());
                     break;
                 case 'getSpecialty':
-                    $res = array_map(fn($program) => $program->getName(), getSpecialtyPrograms());
+                    $res = array_map(fn ($program) => $program->getName(), getSpecialtyPrograms());
                     break;
                 case 'sendEmail':
                     $student = getStudentByUlsaID($_POST['studentID']);
@@ -36,7 +36,7 @@ try {
                     }
                     break;
                 case '':
-                    $res = array_map(fn($program) => $program->getName(), getProgramsFiltered($_POST['action']));
+                    $res = array_map(fn ($program) => $program->getName(), getProgramsFiltered($_POST['action']));
                     break;
                 default:
                     throw new RuntimeException('Not valid action!');
@@ -58,13 +58,13 @@ ob_end_flush();
 
 <?php
 require_once INCLUDES_DIR . '/templates/head.php';
-get_head("SED");
+get_head('SED');
 ?>
 
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-    get_header("Seguimiento de Evaluación Docente");
-    ?>
+get_header('Seguimiento de Evaluación Docente');
+?>
     <main class="container content marco">
 
         <!-- PÁRRAFO INFORMATIVO -->
@@ -154,14 +154,14 @@ get_head("SED");
             </thead>
             <tbody id="studentsTable">
                 <?php
-                if (empty($studentsDB = getStudents())) {
-                    echo '<tr><td colspan="5" class="text-center">No hay alumnos registrados.</td></tr>';
-                } else {
-                    foreach ($studentsDB as $student): ?>
+            if (empty($studentsDB = getStudents())) {
+                echo '<tr><td colspan="5" class="text-center">No hay alumnos registrados.</td></tr>';
+            } else {
+                foreach ($studentsDB as $student): ?>
                         <tr data-carrer="<?= $student->getProgram() ?>">
                             <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
                             <td><?= $student->getUlsaId() ?></td>
-                            <td><?= ucwords($student->getName()) . " " . ucwords($student->getLastName()) ?></td>
+                            <td><?= ucwords($student->getName()) . ' ' . ucwords($student->getLastName()) ?></td>
                             <td><?= $student->getEmail() ?></td>
                             <td>
                                 <div class="d-flex" style="gap: 8px;">
@@ -178,8 +178,8 @@ get_head("SED");
                             </td>
                         </tr>
                     <?php endforeach;
-                }
-                ?>
+            }
+?>
             </tbody>
         </table>
         <br>
@@ -205,13 +205,13 @@ get_head("SED");
 
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/jquery.min.js"); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/bootstrap/popper.min.js"); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/bootstrap/bootstrap.min.js"); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/util.js"); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/sidebarmenu.js"); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/SED/scripts.js"); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/SED/table.js"); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery.min.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/popper.min.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/bootstrap.min.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/util.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/sidebarmenu.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/SED/scripts.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/SED/table.js'); ?>"></script>
 </body>
 
 </html>

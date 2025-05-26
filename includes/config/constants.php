@@ -13,7 +13,7 @@ define('EMAIL_TEMPLATES_DIR', INCLUDES_DIR . '/templates/emails');
 define('ASSETS_PATH', '/assets');
 define('CONFIG_PATH', INCLUDES_DIR . '/config');
 
-define('BASE_URL', (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'] . "/gpp");
+define('BASE_URL', (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/gpp');
 
 const EMAIL_NAME_SENDER = 'Development OA';
 const LIMIT_LISTS = 50;

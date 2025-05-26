@@ -3,7 +3,7 @@
 function get_header($title)
 {
     $menuItems = get_modules_links();
-    $logo = filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/img/logo_lasalle.png");
+    $logo = filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/img/logo_lasalle.png');
     $home = BASE_URL;
     $header = <<<HTML
     <div class="overlay"></div><!-- Dark Overlay element -->
@@ -95,7 +95,7 @@ function get_modules_links()
     }
 
     foreach ($modules as $module) {
-        if ($module !== "." && $module !== ".." && is_dir(MODULES_DIR . "/$module")) {
+        if ($module !== '.' && $module !== '..' && is_dir(MODULES_DIR . "/$module")) {
             $valid_modules[] = $module;
         }
     }

@@ -1,8 +1,8 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
-require_once INCLUDES_DIR . "/utilities/database.php";
-require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
-require_once INCLUDES_DIR . "/models/student.php";
+require_once INCLUDES_DIR . '/utilities/database.php';
+require_once INCLUDES_DIR . '/utilities/responseHTTP.php';
+require_once INCLUDES_DIR . '/models/student.php';
 require_once INCLUDES_DIR . '/utilities/util.php';
 
 ob_start();
@@ -17,7 +17,7 @@ try {
 
             switch ($_POST['action']) {
                 case 'getTableStudents':
-                    $res = array_values(array_map(fn($student) => $student->getJSON(), getStudents()));
+                    $res = array_values(array_map(fn ($student) => $student->getJSON(), getStudents()));
                     break;
                 case 'getMissing':
                     //? Not in use
@@ -108,13 +108,13 @@ ob_end_flush();
 
 <?php
 require_once INCLUDES_DIR . '/templates/head.php';
-get_head("AFI");
+get_head('AFI');
 ?>
 
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-    get_header("Avisos de Fechas Importantes");
-    ?>
+get_header('Avisos de Fechas Importantes');
+?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
@@ -249,10 +249,10 @@ get_head("AFI");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                            foreach (getMastersPrograms() as $master) {
-                                $master = $master->getName();
-                                echo "<li>$master</li>";
-                            } ?>
+                        foreach (getMastersPrograms() as $master) {
+                            $master = $master->getName();
+                            echo "<li>$master</li>";
+                        } ?>
                         </ul>
                     </div>
                 </div>
@@ -264,10 +264,10 @@ get_head("AFI");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                            foreach (getSpecialtyPrograms() as $special) {
-                                $special = $special->getName();
-                                echo "<li>$special</li>";
-                            } ?>
+                        foreach (getSpecialtyPrograms() as $special) {
+                            $special = $special->getName();
+                            echo "<li>$special</li>";
+                        } ?>
                         </ul>
                     </div>
                 </div>
@@ -313,10 +313,10 @@ get_head("AFI");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                            foreach (getMastersPrograms() as $master) {
-                                $master = $master->getName();
-                                echo "<li>$master</li>";
-                            } ?>
+                        foreach (getMastersPrograms() as $master) {
+                            $master = $master->getName();
+                            echo "<li>$master</li>";
+                        } ?>
                         </ul>
                     </div>
                 </div>
@@ -328,10 +328,10 @@ get_head("AFI");
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
                             <?php
-                            foreach (getSpecialtyPrograms() as $special) {
-                                $special = $special->getName();
-                                echo "<li>$special</li>";
-                            } ?>
+                        foreach (getSpecialtyPrograms() as $special) {
+                            $special = $special->getName();
+                            echo "<li>$special</li>";
+                        } ?>
                         </ul>
                     </div>
                 </div>
@@ -374,7 +374,7 @@ get_head("AFI");
                     <div class="col-md-10">
                         <h3>Primer cuatrimestre:</h3>
                         <input class="form-control date" type="text" placeholder="Selecciona una fecha"
-                            data-set="<?= getConfig("dateFirstAFI") ?? '' ?>">
+                            data-set="<?= getConfig('dateFirstAFI') ?? '' ?>">
                     </div>
                     <button type="submit" class="col-md-1 btn btn-success text-white">
                         <i class="fas fa-save fa-2x"></i>
@@ -386,7 +386,7 @@ get_head("AFI");
                     <div class="col-md-10">
                         <h3>Segundo cuatrimestre:</h3>
                         <input class="form-control date" type="text" placeholder="Selecciona una fecha"
-                            data-set="<?= getConfig("dateSecondAFI") ?? '' ?>">
+                            data-set="<?= getConfig('dateSecondAFI') ?? '' ?>">
                     </div>
                     <button type="submit" class="col-md-1 btn btn-success text-white">
                         <i class="fas fa-save fa-2x"></i>
@@ -398,7 +398,7 @@ get_head("AFI");
                     <div class="col-md-10">
                         <h3>Tercer cuatrimestre:</h3>
                         <input class="form-control date" type="text" placeholder="Selecciona una fecha"
-                            data-set="<?= getConfig("dateThirdAFI") ?? '' ?>">
+                            data-set="<?= getConfig('dateThirdAFI') ?? '' ?>">
                     </div>
                     <button type="submit" class="col-md-1 btn btn-success text-white">
                         <i class="fas fa-save fa-2x"></i>
@@ -411,15 +411,15 @@ get_head("AFI");
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/jquery.min.js"); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/jquery-ui.js"); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/datepicker-es.js"); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/bootstrap/bootstrap.min.js"); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/sidebarmenu.js"); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/AFI/scripts.js"); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/AFI/forms.js"); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/AFI/gestor.js"); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/AFI/settings.js"); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery.min.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery-ui.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/datepicker-es.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/bootstrap.min.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/sidebarmenu.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/scripts.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/forms.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/gestor.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/settings.js'); ?>"></script>
 </body>
 
 </html>
