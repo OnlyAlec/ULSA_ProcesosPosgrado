@@ -1,17 +1,19 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
-require_once INCLUDES_DIR . '/utilities/database.php';
-require_once INCLUDES_DIR . '/utilities/responseHTTP.php';
-require_once 'functionsSED.php';
+require_once INCLUDES_DIR . "/utilities/database.php";
+require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
+require_once INCLUDES_DIR . "/models/student.php";
+require_once INCLUDES_DIR . '/utilities/util.php';
 
 ob_start();
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Content-Type: application/json');
-        $res = false;
 
         if (isset($_POST['action'])) {
+            require_once 'functionsSED.php';
+
             switch ($_POST['action']) {
                 case 'updateSingleSED':
                     $res = changeStatusSEDSingle($_POST['studentID'], $_POST['state']);
@@ -19,53 +21,52 @@ try {
                 case 'updateSED':
                     $res = changeStatusSEDGroup($_POST['studentIDS']);
                     break;
+                case 'getMasters':
+                    $res = array_map(fn($program) => $program->getName(), getMastersPrograms());
+                    break;
+                case 'getSpecialty':
+                    $res = array_map(fn($program) => $program->getName(), getSpecialtyPrograms());
+                    break;
                 case 'sendEmail':
                     $student = getStudentByUlsaID($_POST['studentID']);
-                    $res = $student
-                        ? sendEmailRemainder($student)
-                        : responseBadRequest('Student not found');
+                    if ($student) {
+                        $res = sendEmailRemainder($student);
+                    } else {
+                        throw new RuntimeException('Student not found');
+                    }
+                    break;
+                case '':
+                    $res = array_map(fn($program) => $program->getName(), getProgramsFiltered($_POST['action']));
                     break;
                 default:
-                    $res = responseBadRequest('Invalid action');
+                    throw new RuntimeException('Not valid action!');
             }
-        } else {
-            $res = responseBadRequest('No action specified');
         }
 
-        if ($res === false || (isset($res['success']) && $res['success'] === false)) {
-            echo responseBadRequest($res['message'] ?? 'Error processing the request.');
-        } else {
-            echo responseOK($res);
-        }
-        exit();
+        echo responseOK($res);
+        exit;
     }
 } catch (RuntimeException $e) {
     echo responseInternalError($e->getMessage());
-    exit();
+    exit;
 }
-
-$masterProgramsDataForPage = array_map(fn($program) => $program->getName(), getMastersPrograms());
-$specialtyProgramsDataForPage = array_map(
-    fn($program) => $program->getName(),
-    getSpecialtyPrograms(),
-);
 
 ob_end_flush();
 ?>
 
 <!DOCTYPE html>
-<html lang="es">
+
 <?php
 require_once INCLUDES_DIR . '/templates/head.php';
-get_head('SED');
+get_head("SED");
 ?>
 
 <body style="display: block;">
-    <?php
-    require_once INCLUDES_DIR . '/templates/header.php';
-    get_header('Seguimiento de Evaluación Docente');
+    <?php require_once INCLUDES_DIR . '/templates/header.php';
+    get_header("Seguimiento de Evaluación Docente");
     ?>
     <main class="container content marco">
+
         <!-- PÁRRAFO INFORMATIVO -->
         <div class="sectionsSED">
             <h3>Lista de alumnos</h3>
@@ -84,63 +85,52 @@ get_head('SED');
         <br>
 
         <!-- FILTROS POR TIPO DE PROGRAMA Y ÁREA ESPECÍFICA + BOTÓN CARGA EXCEL -->
-        <div class="row mb-2">
-            <div class="col-md-9 mt-1">
-                <div class="form-box">
+        <div class="row align-items-center">
+            <div class="col-12 row">
+                <div class="form-box col-10" style="margin-bottom: 0;">
                     <div class="form-group row">
-                        <label for="programType" class="col-md-4 col-form-label">Seleccionar Programa:</label>
+                        <label for="programType" class="col-md-4 col-form-label">Seleccionar Tipo de Programa:</label>
                         <div class="col-md-7 ml-2 datalist">
-                            <input type="text" id="programType" class="datalist-input w-100"
-                                placeholder="Seleccionar Tipo de Programa:" readonly>
+                            <input type="text" id="programType" class="datalist-input w-100" placeholder="Seleccionar"
+                                readonly>
                             <i class="fas fa-search icono filter"></i>
                             <ul style="display: none;">
                                 <li data-value="">Todos</li>
-                                <li data-value="masters">Maestría</li>
-                                <li data-value="specialties">Especialidad</li>
+                                <li data-value="getMasters">Maestría</li>
+                                <li data-value="getSpecialty">Especialidad</li>
                             </ul>
                         </div>
                     </div>
                 </div>
-              
-                <div id="filterArea" class="mt-1" style="display:none;">
-                    <div class="form-box">
-                        <div class="form-group row">
-                            <label for="programArea" class="col-md-4 col-form-label">Seleccionar Área: </label>
-                            <div class="col-md-7 ml-2 datalist">
-                                <input type="text" id="programArea" class="datalist-input w-100"
-                                    placeholder="Seleccione un área" readonly>
-                                <i class="fas fa-search icono filter"></i>
-                                <ul style="display: none;"></ul>
-                            </div>
-                        </div>
-                    </div>
+                <div class="col-2">
+                    <a href="load_excel.php">
+                        <button type="button" class="btn btn-outline-primary w-100">Cargar Excel</button>
+                    </a>
                 </div>
             </div>
 
-            <div class="col-md-2">
-                <a href="load_excel.php">
-                    <button type="button"
-                        class="bg-primary text-white p-3 rounded d-flex flex-column justify-content-center align-items-center"
-                        style="height: 115px;">
-                        <i class="fas fa-file-upload fa-2x pb-2"></i>
-                        <b>Cargar Excel</b>
-                    </button>
-                </a>
-            </div>
-            <div class="col-md-1">
-                <button id="generateReport" type="button"
-                    class="bg-danger text-white p-3 rounded d-flex flex-column justify-content-center align-items-center"
-                    style="height: 115px;" data-filename="reporte_evaluaciones">
-                    <i class="fas fa-file-pdf fa-2x pb-2"></i>
-                    <b>Reporte</b>
-                </button>
+            <div id="filterArea" class="col-12 row mt-1" style="display:none;">
+                <div class="form-box col-10" style="margin-bottom: 0;">
+                    <div class="form-group row">
+                        <label for="programArea" class="col-md-4 col-form-label">Seleccionar Área: </label>
+                        <div class="col-md-7 ml-2 datalist">
+                            <input type="text" id="programArea" class="datalist-input w-100"
+                                placeholder="Seleccione un área" readonly>
+                            <i class="fas fa-search icono filter"></i>
+                            <ul style="display: none;">
+                                <li data-value="">Seleccione un área</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-2"></div>
             </div>
         </div>
-        <hr>
+
         <!-- FILTROS PARA ALUMNOS POR SU ESTADO SED -->
-        <div class="form-group row justify-content-center mt-4">
+        <div class="form-group row justify-content-center mt-3">
             <button id="removeFilter" class="btn btn-outline-success mr-2" style="width: 230px;">
-                <i class="fas fa-users"></i> Quitar sub-filtro
+                <i class="fas fa-users"></i> Todos
             </button>
             <button id="onlyConfirm" class="btn btn-outline-primary mr-2" style="width: 230px;">
                 <i class="fas fa-check-double"></i> Solamente confirmados
@@ -149,6 +139,7 @@ get_head('SED');
                 <i class="fas fa-times-circle"></i> Solamente faltantes
             </button>
         </div>
+        <br>
 
         <!-- TABLA DE ALUMNOS -->
         <table class="table table-white table-nostriped" id="studentsTable">
@@ -157,43 +148,27 @@ get_head('SED');
                     <th><input type="checkbox" id="selectAll" style="width: 20px; height: 20px;"></th>
                     <th>Clave ULSA</th>
                     <th>Nombre Completo</th>
-                    <th>Programa</th>
                     <th>Correo</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="studentsTable">
-                <?php if (empty(($studentsDB = getStudents()))) {
+                <?php
+                if (empty($studentsDB = getStudents())) {
                     echo '<tr><td colspan="5" class="text-center">No hay alumnos registrados.</td></tr>';
                 } else {
                     foreach ($studentsDB as $student): ?>
                         <tr data-carrer="<?= $student->getProgram() ?>">
-                            <td class="text-center"><input type="checkbox" class="studentCheckbox"
-                                    style="width: 20px; height: 20px;"></td>
+                            <td><input type="checkbox" class="studentCheckbox" style="width: 20px; height: 20px;"></td>
                             <td><?= $student->getUlsaId() ?></td>
-                            <td><?= ucwords($student->getName()) .
-                                ' ' .
-                                ucwords($student->getLastName()) ?></td>
-                            <td>
-                                <?php
-                                $program = $student->getProgram();
-                                if ($program) {
-                                    echo ucwords($program);
-                                } else {
-                                    echo 'No disponible';
-                                }
-                                ?>
+                            <td><?= ucwords($student->getName()) . " " . ucwords($student->getLastName()) ?></td>
                             <td><?= $student->getEmail() ?></td>
                             <td>
                                 <div class="d-flex" style="gap: 8px;">
-                                    <?php $btnClass = $student->getSed()
-                                        ? 'btn-danger'
-                                        : 'btn-success'; ?>
+                                    <?php $btnClass = $student->getSed() ? 'btn-danger' : 'btn-success'; ?>
                                     <button class="btn <?= $btnClass ?> btn-sm text-white changeSED border-0 flex-fill"
                                         data-student-id="<?= $student->getUlsaId() ?>">
-                                        <?= $student->getSed()
-                                            ? '<i class="fas fa-minus-square fa-2x"></i>'
-                                            : '<i class="fas fa-check-square fa-2x"></i>' ?>
+                                        <?= $student->getSed() ? '<i class="fas fa-minus-square fa-2x"></i>' : '<i class="fas fa-check-square fa-2x"></i>' ?>
                                     </button>
                                     <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill"
                                         data-student-id="<?= $student->getUlsaId() ?>">
@@ -203,15 +178,20 @@ get_head('SED');
                             </td>
                         </tr>
                     <?php endforeach;
-                } ?>
+                }
+                ?>
             </tbody>
         </table>
         <br>
 
         <!-- BOTONES INFERIORES -->
         <div class="d-flex justify-content-between">
-            <button id="confirmChanges" class="btn btn-outline-success w-100" disabled>
+            <button id="confirmChanges" class="btn btn-outline-success w-50" style="width: 200px;" disabled>
                 <span>Confirmar Cambios</span>
+            </button>
+            <button id="generateReport" class="btn btn-outline-primary" style="width: 200px;"
+                data-filename="reporte_evaluaciones">
+                <span>Generar Reporte</span>
             </button>
         </div>
 
@@ -225,19 +205,13 @@ get_head('SED');
 
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
-    <script>
-        window.sedPreloadedData = {
-            masters: <?= json_encode($masterProgramsDataForPage) ?>,
-            specialties: <?= json_encode($specialtyProgramsDataForPage) ?>
-        };
-    </script>
-    <script src="<?= ASSETS_PATH ?>/js/jquery.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/bootstrap/popper.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/bootstrap/bootstrap.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/util.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/sidebarmenu.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/SED/scripts.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/SED/table.js"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/jquery.min.js"); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/bootstrap/popper.min.js"); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/bootstrap/bootstrap.min.js"); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/util.js"); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/sidebarmenu.js"); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/SED/scripts.js"); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/SED/table.js"); ?>"></script>
 </body>
 
 </html>

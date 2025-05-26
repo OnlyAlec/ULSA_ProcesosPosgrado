@@ -3,13 +3,14 @@
 
 <?php
 require_once INCLUDES_DIR . '/templates/head.php';
-get_head('AFI');
+require_once INCLUDES_DIR . '/utilities/util.php';
+get_head("AFI");
 ?>
 
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-    get_header('Homepage');
+    get_header("Homepage");
     ?>
 
     <main class="container content marco">
@@ -33,7 +34,7 @@ get_head('AFI');
 
                 // Filter and sort modules
                 foreach ($modules as $module) {
-                    if ($module !== '.' && $module !== '..' && is_dir("$modules_dir/$module")) {
+                    if ($module !== "." && $module !== ".." && is_dir("$modules_dir/$module")) {
                         $valid_modules[] = $module;
                     }
                 }
@@ -43,16 +44,9 @@ get_head('AFI');
 
                 // Display modules
                 foreach ($valid_modules as $module) {
-
-                    $module_path = htmlspecialchars(
-                        BASE_URL . "/modules/$module/index.php",
-                        ENT_QUOTES,
-                        'UTF-8',
-                    );
+                    $module_path = htmlspecialchars(BASE_URL . "/modules/$module/index.php", ENT_QUOTES, 'UTF-8');
                     $name = $module_info[$module]['name'] ?? ucfirst($module);
-                    $description =
-                        $module_info[$module]['description'] ??
-                        'This is a description of the module';
+                    $description = $module_info[$module]['description'] ?? 'This is a description of the module';
                     $icon = $module_info[$module]['icon'] ?? 'fas fa-cube';
                     ?>
                     <div class="col-md-4 col-sm-6 col-12 mb-4">
@@ -80,12 +74,11 @@ get_head('AFI');
 
     </main>
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
-
-    <script src="<?= ASSETS_PATH ?>/js/jquery.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/bootstrap/popper.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/bootstrap/bootstrap.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/util.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/sidebarmenu.js"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/jquery.min.js"); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/bootstrap/popper.min.js"); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/bootstrap/bootstrap.min.js"); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/util.js"); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . "/js/sidebarmenu.js"); ?>"></script>
 
 </body>
 
