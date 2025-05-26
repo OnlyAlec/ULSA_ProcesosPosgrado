@@ -58,7 +58,7 @@ class Program
         return [
             'id' => $this->id,
             'name' => $this->getName(),
-            'type' => $this->type
+            'type' => $this->type,
         ];
     }
 }
