@@ -43,9 +43,6 @@ try {
                 case 'generateReport':
                     $res = generateReport($_POST['students'], $_POST['statusField'], $_POST['filename']);
                     break;
-                case 'generateReport':
-                    $res = generateReport($_POST['students'], $_POST['statusField'], $_POST['filename']);
-                    break;
                 default:
                     throw new RuntimeException('Not valid action!');
             }
