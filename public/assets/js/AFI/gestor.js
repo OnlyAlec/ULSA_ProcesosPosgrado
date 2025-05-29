@@ -71,6 +71,48 @@ $(function () {
             },
         });
     });
+
+    $('#generateReport_AFI').on('click', function(){
+        let allStudents = [];
+        let filename = $(this).data('filename');
+
+        $('#tableStudentsConfirm tbody tr').each(function () {
+            let studentID = $(this).find('th').text();
+            let fullName = $(this).find('td').eq(0).text();
+            let carrer = $(this).find('td').eq(1).text();
+            let email = $(this).find('td').eq(2).text();
+            let afiStatus = $(this).find('.statusAFI i').hasClass('fa-minus-square'); 
+
+            let student = {
+                id: studentID,
+                fullName: fullName,
+                carrer: carrer,
+                email: email,
+                afiStatus: afiStatus,
+            };
+
+            allStudents.push(student);
+        });
+
+        $.ajax({
+            url: '',
+            type: 'POST',
+            data: { 
+                action: 'generateReport',
+                students: JSON.stringify(allStudents), 
+                statusField: 'afiStatus', 
+                filename: filename 
+            },
+            success: function (){
+                const publicUrl = `/assets/pdf/${filename}.pdf?t=${Date.now()}`;
+                window.open(publicUrl, '_blank');
+            }, 
+            error: function(xhr){
+                const errorMsg = xhr.responseText || 'Error al procesar la solicitud del Reporte de Avisos'
+                displayMessage($('.sectionsAFI'), errorMsg, 'error');
+            }
+        });
+    });
 });
 
 function setupActions() {

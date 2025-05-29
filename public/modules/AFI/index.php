@@ -2,6 +2,7 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once INCLUDES_DIR . '/utilities/database.php';
 require_once INCLUDES_DIR . '/utilities/responseHTTP.php';
+require_once INCLUDES_DIR . '/utilities/generate_report.php';
 
 ob_start();
 
@@ -28,6 +29,9 @@ try {
                     break;
                 case 'setConfigDate':
                     $res = updateConfig($_POST['type'], $_POST['date']);
+                    break;
+                case 'generateReport':
+                    $res = generateReport($_POST['students'], $_POST['statusField'], $_POST['filename']);
                     break;
             }
         } elseif (count($_FILES) > 0) {
@@ -227,36 +231,54 @@ get_head('AFI');
                 <b>Evita el marcado manual</b> de la confirmación del alumno, como alternativa puedes mandar un
                 <b>recordatorio por correo electrónico</b>.
             </p>
-            <div class="form-box">
-                <div class="form-group row">
-                    <label for="programTypeGestor" class="col-md-4 col-form-label">
-                        Seleccionar Programa:
-                    </label>
-                    <div class="col-md-7 ml-2 datalist">
-                        <input type="text" id="programTypeGestor" class="datalist-input w-100"
-                            placeholder="Seleccionar Tipo de Programa:" readonly>
-                        <i class="fas fa-search icono filter"></i>
-                        <ul style="display: none;">
-                            <li data-value="">Todos</li>
-                            <li data-value="masters">Maestría</li>
-                            <li data-value="specialties">Especialidad</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div id="filterAreaGestor" class="mt-1" style="display:none;">
-                <div class="form-box">
-                    <div class="form-group row">
-                        <label for="programAreaGestor" class="col-md-4 col-form-label">Seleccionar Área:</label>
-                        <div class="col-md-7 ml-2 datalist">
-                            <input type="text" id="programAreaGestor" class="datalist-input w-100"
-                                placeholder="Seleccione un área" readonly>
-                            <i class="fas fa-search icono filter"></i>
-                            <ul style="display: none;"></ul>
+
+            <div class="row mb-2">
+
+                <div class="col-md-9 mt-1">
+                    <div class="form-box">
+                        <div class="form-group row">
+                            <label for="programTypeGestor" class="col-md-4 col-form-label">
+                                Seleccionar Programa:
+                            </label>
+                            <div class="col-md-7 ml-2 datalist">
+                                <input type="text" id="programTypeGestor" class="datalist-input w-100"
+                                    placeholder="Seleccionar Tipo de Programa:" readonly>
+                                <i class="fas fa-search icono filter"></i>
+                                <ul style="display: none;">
+                                    <li data-value="">Todos</li>
+                                    <li data-value="masters">Maestría</li>
+                                    <li data-value="specialties">Especialidad</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
+
+                    <div id="filterAreaGestor" class="mt-1" style="display:none;">
+                        <div class="form-box">
+                            <div class="form-group row">
+                                <label for="programAreaGestor" class="col-md-4 col-form-label">Seleccionar Área:</label>
+                                <div class="col-md-7 ml-2 datalist">
+                                    <input type="text" id="programAreaGestor" class="datalist-input w-100"
+                                        placeholder="Seleccione un área" readonly>
+                                    <i class="fas fa-search icono filter"></i>
+                                    <ul style="display: none;"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>    
+
+                <div class="col-md-1">
+                    <button id="generateReport_AFI" type="button"
+                        class="bg-danger text-white p-3 rounded d-flex flex-column justify-content-center align-items-center"
+                        style="height: 115px;" data-filename="reporte_avisos">
+                        <i class="fas fa-file-pdf fa-2x pb-2"></i>
+                        <b>Reporte</b>
+                    </button>
                 </div>
+
             </div>
+        
             <hr>
             <div class="form-group row justify-content-center mt-4">
                 <button id="removeFilter" class="btn btn-outline-success mr-2" style="width: 230px;">

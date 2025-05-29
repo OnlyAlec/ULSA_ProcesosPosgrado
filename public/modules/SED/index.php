@@ -3,6 +3,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once INCLUDES_DIR . '/utilities/database.php';
 require_once INCLUDES_DIR . '/utilities/responseHTTP.php';
 require_once 'functionsSED.php';
+require_once INCLUDES_DIR . '/utilities/generate_report.php';
 
 ob_start();
 
@@ -24,6 +25,9 @@ try {
                     $res = $student
                         ? sendEmailRemainder($student)
                         : responseBadRequest('Student not found');
+                    break;
+                case 'generateReport':
+                    $res = generateReport($_POST['students'], $_POST['statusField'], $_POST['filename']);
                     break;
                 default:
                     $res = responseBadRequest('Invalid action');
