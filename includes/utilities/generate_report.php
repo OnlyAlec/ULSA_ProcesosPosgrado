@@ -71,7 +71,6 @@ function separateStudents($students, $statusField)
 
 function addResume($pdf, $students, $statusField)
 {
-
     $programsTotal = [];
 
     foreach ($students as $student) {
@@ -112,7 +111,14 @@ function addResume($pdf, $students, $statusField)
         $x = $pdf->GetX();
         $y = $pdf->GetY();
 
-        $pdf->MultiCell(100, 10, mb_convert_encoding($programName, 'ISO-8859-1', 'UTF-8'), 1, 'C', true);
+        $pdf->MultiCell(
+            100,
+            10,
+            mb_convert_encoding($programName, 'ISO-8859-1', 'UTF-8'),
+            1,
+            'C',
+            true,
+        );
 
         $yAfter = $pdf->GetY();
         $height = $yAfter - $y;
@@ -126,7 +132,15 @@ function addResume($pdf, $students, $statusField)
         $pdf->SetFont('IndivisaSans', '', 12);
         $pdf->SetFillColor(255, 255, 0);
         $pdf->SetTextColor(255, 0, 0);
-        $pdf->Cell(30, $height, round(($program['EVALUATED'] / $program['TOTAL']) * 100, 2) . '%', 1, 1, 'C', true);
+        $pdf->Cell(
+            30,
+            $height,
+            round(($program['EVALUATED'] / $program['TOTAL']) * 100, 2) . '%',
+            1,
+            1,
+            'C',
+            true,
+        );
 
         $total += $program['EVALUATED'];
     }
@@ -143,8 +157,7 @@ function addResume($pdf, $students, $statusField)
     $pdf->Cell(20, 10, count($students), 1, 0, 'C', true);
 
     $pdf->SetTextColor(255, 0, 0);
-    $pdf->Cell(30, 10, round($total / count($students) * 100, 2) . '%', 1, 0, 'C', true);
-
+    $pdf->Cell(30, 10, round(($total / count($students)) * 100, 2) . '%', 1, 0, 'C', true);
 }
 
 function generateReport($studentsJson, $statusField, $filename)
@@ -185,11 +198,7 @@ function generateReport($studentsJson, $statusField, $filename)
         $pdf->Cell(
             0,
             10,
-            mb_convert_encoding(
-                'Alumnos que realizaron ' . $subtitle,
-                'ISO-8859-1',
-                'UTF-8',
-            ),
+            mb_convert_encoding('Alumnos que realizaron ' . $subtitle, 'ISO-8859-1', 'UTF-8'),
             0,
             1,
             'L',
@@ -207,11 +216,7 @@ function generateReport($studentsJson, $statusField, $filename)
         $pdf->Cell(
             0,
             10,
-            mb_convert_encoding(
-                'Alumnos que no han realizado ' . $subtitle,
-                'ISO-8859-1',
-                'UTF-8',
-            ),
+            mb_convert_encoding('Alumnos que no han realizado ' . $subtitle, 'ISO-8859-1', 'UTF-8'),
             0,
             1,
             'L',

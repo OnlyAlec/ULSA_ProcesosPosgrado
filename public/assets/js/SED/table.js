@@ -309,18 +309,20 @@ $(function () {
         $.ajax({
             url: '',
             type: 'POST',
-            data: { 
+            data: {
                 action: 'generateReport',
-                students: JSON.stringify(allStudents), 
-                statusField: 'sedStatus', 
-                filename: filename 
+                students: JSON.stringify(allStudents),
+                statusField: 'sedStatus',
+                filename: filename,
             },
             success: function () {
                 const publicUrl = `/assets/pdf/${filename}.pdf?t=${Date.now()}`;
                 window.open(publicUrl, '_blank');
             },
             error: function (xhr) {
-                const errorMsg = xhr.responseText || 'Error al procesar la solicitud del Reporte de Evaluación Docente';
+                const errorMsg =
+                    xhr.responseText ||
+                    'Error al procesar la solicitud del Reporte de Evaluación Docente';
                 displayMessage($('.sectionsSED'), errorMsg, 'error');
             },
         });
