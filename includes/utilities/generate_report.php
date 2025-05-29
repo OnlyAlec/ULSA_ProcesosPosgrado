@@ -10,7 +10,7 @@ function addNewPage($pdf, $title)
     $pdf->AddPage();
     $pdf->Image(PUBLIC_DIR . ASSETS_PATH . '/img/logo_lasalle.png', 10, 10, 45, 15.3, 'png');
     $pdf->SetFont('IndivisaSans', '', 15);
-    
+
     $pdf->Cell(0, 40, $title, 0, 1, 'R');
 }
 
@@ -62,25 +62,26 @@ function separateStudents($students, $statusField)
         $studentsEvaluation[$evaluationKey][$programName][] = $student;
     }
 
-    foreach(['EVALUATED', 'NOT_EVALUATED'] as $evaluationStatus) {
+    foreach (['EVALUATED', 'NOT_EVALUATED'] as $evaluationStatus) {
         ksort($studentsEvaluation[$evaluationStatus]);
     }
 
     return $studentsEvaluation;
 }
 
-function addResume($pdf, $students, $statusField) {
+function addResume($pdf, $students, $statusField)
+{
 
     $programsTotal = [];
 
     foreach ($students as $student) {
         $programName = strtoupper($student->carrer);
 
-        if (!isset($programsTotal[$programName])){
-            $programsTotal[$programName]=['EVALUATED' => 0, 'TOTAL' => 0];
+        if (!isset($programsTotal[$programName])) {
+            $programsTotal[$programName] = ['EVALUATED' => 0, 'TOTAL' => 0];
         }
 
-        if($student->$statusField){
+        if ($student->$statusField) {
             $programsTotal[$programName]['EVALUATED'] += 1;
         }
 
@@ -107,28 +108,28 @@ function addResume($pdf, $students, $statusField) {
         $pdf->SetFont('IndivisaTextSans', '', 12);
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetFillColor(200, 220, 255);
-    
+
         $x = $pdf->GetX();
         $y = $pdf->GetY();
-    
+
         $pdf->MultiCell(100, 10, mb_convert_encoding($programName, 'ISO-8859-1', 'UTF-8'), 1, 'C', true);
-    
+
         $yAfter = $pdf->GetY();
         $height = $yAfter - $y;
-    
+
         $pdf->SetXY($x + 100, $y);
-    
+
         $pdf->SetFillColor(255, 255, 153);
         $pdf->Cell(40, $height, $program['EVALUATED'], 1, 0, 'C', true);
         $pdf->Cell(20, $height, $program['TOTAL'], 1, 0, 'C', true);
-    
+
         $pdf->SetFont('IndivisaSans', '', 12);
         $pdf->SetFillColor(255, 255, 0);
         $pdf->SetTextColor(255, 0, 0);
         $pdf->Cell(30, $height, round(($program['EVALUATED'] / $program['TOTAL']) * 100, 2) . '%', 1, 1, 'C', true);
-    
+
         $total += $program['EVALUATED'];
-    }    
+    }
 
     $pdf->SetFont('IndivisaSans', '', 14);
     $pdf->SetTextColor(0, 0, 0);
