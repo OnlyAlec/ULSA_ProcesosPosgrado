@@ -27,7 +27,11 @@ try {
                         : responseBadRequest('Student not found');
                     break;
                 case 'generateReport':
-                    $res = generateReport($_POST['students'], $_POST['statusField'], $_POST['filename']);
+                    $res = generateReport(
+                        $_POST['students'],
+                        $_POST['statusField'],
+                        $_POST['filename'],
+                    );
                     break;
                 default:
                     $res = responseBadRequest('Invalid action');
@@ -48,9 +52,9 @@ try {
     exit();
 }
 
-$masterProgramsDataForPage = array_map(fn ($program) => $program->getName(), getMastersPrograms());
+$masterProgramsDataForPage = array_map(fn($program) => $program->getName(), getMastersPrograms());
 $specialtyProgramsDataForPage = array_map(
-    fn ($program) => $program->getName(),
+    fn($program) => $program->getName(),
     getSpecialtyPrograms(),
 );
 
@@ -67,8 +71,8 @@ get_head('SED');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Seguimiento de Evaluación Docente');
-?>
+    get_header('Seguimiento de Evaluación Docente');
+    ?>
     <main class="container content marco">
         <!-- PÁRRAFO INFORMATIVO -->
         <div class="sectionsSED">
@@ -181,23 +185,23 @@ get_header('Seguimiento de Evaluación Docente');
                             <td>
                                 <?php
                                 $program = $student->getProgram();
-                        if ($program) {
-                            echo ucwords($program);
-                        } else {
-                            echo 'No disponible';
-                        }
-                        ?>
+                                if ($program) {
+                                    echo ucwords($program);
+                                } else {
+                                    echo 'No disponible';
+                                }
+                                ?>
                             <td><?= $student->getEmail() ?></td>
                             <td>
                                 <div class="d-flex" style="gap: 8px;">
                                     <?php $btnClass = $student->getSed()
-                                ? 'btn-danger'
-                                : 'btn-success'; ?>
+                                        ? 'btn-danger'
+                                        : 'btn-success'; ?>
                                     <button class="btn <?= $btnClass ?> btn-sm text-white changeSED border-0 flex-fill"
                                         data-student-id="<?= $student->getUlsaId() ?>">
                                         <?= $student->getSed()
-                                    ? '<i class="fas fa-minus-square fa-2x"></i>'
-                                    : '<i class="fas fa-check-square fa-2x"></i>' ?>
+                                            ? '<i class="fas fa-minus-square fa-2x"></i>'
+                                            : '<i class="fas fa-check-square fa-2x"></i>' ?>
                                     </button>
                                     <button class="btn btn-info btn-sm text-white sendEmail border-0 flex-fill"
                                         data-student-id="<?= $student->getUlsaId() ?>">
