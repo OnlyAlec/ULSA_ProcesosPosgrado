@@ -4,6 +4,7 @@ require_once INCLUDES_DIR . '/utilities/database.php';
 require_once INCLUDES_DIR . '/utilities/responseHTTP.php';
 require_once INCLUDES_DIR . '/models/student.php';
 require_once INCLUDES_DIR . '/utilities/util.php';
+require_once INCLUDES_DIR . '/utilities/generate_report.php';
 
 ob_start();
 
@@ -29,17 +30,21 @@ try {
                     break;
                 case 'sendEmail':
                     $student = getStudentByUlsaID($_POST['studentID']);
-                    if ($student) {
-                        $res = sendEmailRemainder($student);
-                    } else {
-                        throw new RuntimeException('Student not found');
-                    }
+                    $res = $student
+                        ? sendEmailRemainder($student)
+                        : responseBadRequest('Student not found');
                     break;
                 case '':
                     $res = array_map(
                         fn($program) => $program->getName(),
                         getProgramsFiltered($_POST['action']),
                     );
+                    break;
+                case 'generateReport':
+                    $res = generateReport($_POST['students'], $_POST['statusField'], $_POST['filename']);
+                    break;
+                case 'generateReport':
+                    $res = generateReport($_POST['students'], $_POST['statusField'], $_POST['filename']);
                     break;
                 default:
                     throw new RuntimeException('Not valid action!');
