@@ -1,5 +1,5 @@
 <?php
-
+require_once INCLUDES_DIR . '/utilities/util.php';
 function get_header($title)
 {
     $menuItems = get_modules_links();

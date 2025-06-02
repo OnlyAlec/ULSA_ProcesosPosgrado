@@ -58,3 +58,4 @@ public/modules/**/reports/
 
 # GRAPHS .gitignore
 public/assets/graphs/*
+includes/config/constants.php
