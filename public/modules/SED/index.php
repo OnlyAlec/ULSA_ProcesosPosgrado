@@ -4,6 +4,7 @@ require_once INCLUDES_DIR . '/utilities/database.php';
 require_once INCLUDES_DIR . '/utilities/responseHTTP.php';
 require_once INCLUDES_DIR . '/models/student.php';
 require_once INCLUDES_DIR . '/utilities/util.php';
+require_once INCLUDES_DIR . '/utilities/generate_report.php';
 
 ob_start();
 
@@ -29,16 +30,21 @@ try {
                     break;
                 case 'sendEmail':
                     $student = getStudentByUlsaID($_POST['studentID']);
-                    if ($student) {
-                        $res = sendEmailRemainder($student);
-                    } else {
-                        throw new RuntimeException('Student not found');
-                    }
+                    $res = $student
+                        ? sendEmailRemainder($student)
+                        : responseBadRequest('Student not found');
                     break;
                 case '':
                     $res = array_map(
                         fn($program) => $program->getName(),
                         getProgramsFiltered($_POST['action']),
+                    );
+                    break;
+                case 'generateReport':
+                    $res = generateReport(
+                        $_POST['students'],
+                        $_POST['statusField'],
+                        $_POST['filename'],
                     );
                     break;
                 default:
@@ -53,6 +59,12 @@ try {
     echo responseInternalError($e->getMessage());
     exit();
 }
+
+$masterProgramsDataForPage = array_map(fn($program) => $program->getName(), getMastersPrograms());
+$specialtyProgramsDataForPage = array_map(
+    fn($program) => $program->getName(),
+    getSpecialtyPrograms(),
+);
 
 ob_end_flush();
 ?>
@@ -167,6 +179,15 @@ get_head('SED');
                             <td><?= ucwords($student->getName()) .
                                 ' ' .
                                 ucwords($student->getLastName()) ?></td>
+                            <td>
+                                <?php
+                                $program = $student->getProgram();
+                                if ($program) {
+                                    echo ucwords($program);
+                                } else {
+                                    echo 'No disponible';
+                                }
+                                ?>
                             <td><?= $student->getEmail() ?></td>
                             <td>
                                 <div class="d-flex" style="gap: 8px;">
