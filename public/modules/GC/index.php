@@ -1,122 +1,117 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
-require_once INCLUDES_DIR . "/utilities/database.php";
-require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
-require_once INCLUDES_DIR . "/models/candidate.php";
+require_once INCLUDES_DIR . '/utilities/database.php';
+require_once INCLUDES_DIR . '/utilities/responseHTTP.php';
+require_once INCLUDES_DIR . '/models/candidate.php';
 ob_start();
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         require_once 'manage_candidates.php';
 
-        if ($_POST["action"] === "registerOneCandidate") {
+        if ($_POST['action'] === 'registerOneCandidate') {
             // Validaciones
-            if (!preg_match('/^[A-Za-z0-9\-]+$/', $_POST["folioAdmision"])) {
+            if (!preg_match('/^[A-Za-z0-9\-]+$/', $_POST['folioAdmision'])) {
                 throw new RuntimeException('Folio de Admisión inválido.');
             }
-            if (!preg_match('/^[1-5]$/', $_POST["numeroBloque"])) {
+            if (!preg_match('/^[1-5]$/', $_POST['numeroBloque'])) {
                 throw new RuntimeException('Número de Bloque inválido. Debe ser entre 1 y 5.');
             }
-            if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST["nombre"])) {
+            if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST['nombre'])) {
                 throw new RuntimeException('Nombre inválido. Solo se permiten letras y espacios.');
             }
-            if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST["apellidos"])) {
+            if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST['apellidos'])) {
                 throw new RuntimeException('Apellidos inválidos. Solo se permiten letras y espacios.');
             }
-            if (!filter_var($_POST["correo1"], FILTER_VALIDATE_EMAIL)) {
+            if (!filter_var($_POST['correo1'], FILTER_VALIDATE_EMAIL)) {
                 throw new RuntimeException('Correo electrónico 1 inválido.');
             }
-            if (!empty($_POST["correo2"]) && !filter_var($_POST["correo2"], FILTER_VALIDATE_EMAIL)) {
+            if (!empty($_POST['correo2']) && !filter_var($_POST['correo2'], FILTER_VALIDATE_EMAIL)) {
                 throw new RuntimeException('Correo electrónico 2 inválido.');
             }
-            if (!preg_match('/^\d{10}$/', $_POST["celular"])) {
+            if (!preg_match('/^\d{10}$/', $_POST['celular'])) {
                 throw new RuntimeException('Número de celular inválido. Debe tener 10 dígitos.');
             }
-            if (empty($_POST["programaAcademico"]) || !is_numeric($_POST["programaAcademico"])) {
+            if (empty($_POST['programaAcademico']) || !is_numeric($_POST['programaAcademico'])) {
                 throw new RuntimeException('Programa Académico no válido.');
             }
-            if (empty($_POST["fechaSolicitudEntrevista"])) {
+            if (empty($_POST['fechaSolicitudEntrevista'])) {
                 throw new RuntimeException('Fecha de Solicitud de Entrevista no puede estar vacía.');
             }
-            if (empty($_POST["fechaHoraEntrevista"])) {
+            if (empty($_POST['fechaHoraEntrevista'])) {
                 throw new RuntimeException('Fecha y Hora de Entrevista no pueden estar vacías.');
             }
-            
+
             // Validar clave ULSA si se proporciona
             $claveUlsa = null;
-            if (isset($_POST["tieneClaveUlsa"]) && $_POST["tieneClaveUlsa"] === "true") {
-                if (!preg_match('/^\d{6}$/', $_POST["claveUlsa"])) {
+            if (isset($_POST['tieneClaveUlsa']) && $_POST['tieneClaveUlsa'] === 'true') {
+                if (!preg_match('/^\d{6}$/', $_POST['claveUlsa'])) {
                     throw new RuntimeException('Clave ULSA inválida. Debe ser un número de 6 dígitos.');
                 }
-                $claveUlsa = (int)$_POST["claveUlsa"];
+                $claveUlsa = (int)$_POST['claveUlsa'];
             }
 
             $res = insertOneCandidate(
-                $_POST["folioAdmision"],
-                (int)$_POST["numeroBloque"],
-                $_POST["nombre"],
-                $_POST["apellidos"],
-                $_POST["correo1"],
-                $_POST["correo2"] ?: null,
-                $_POST["celular"],
-                (int)$_POST["programaAcademico"],
-                $_POST["fechaSolicitudEntrevista"],
-                $_POST["fechaHoraEntrevista"],
+                $_POST['folioAdmision'],
+                (int)$_POST['numeroBloque'],
+                $_POST['nombre'],
+                $_POST['apellidos'],
+                $_POST['correo1'],
+                $_POST['correo2'] ?: null,
+                $_POST['celular'],
+                (int)$_POST['programaAcademico'],
+                $_POST['fechaSolicitudEntrevista'],
+                $_POST['fechaHoraEntrevista'],
                 $claveUlsa
             );
-        }
-        elseif ($_POST["action"] === "getPrograms") {
+        } elseif ($_POST['action'] === 'getPrograms') {
             $programs = getPrograms();
             $res = array_map(fn ($program) => $program->toArray(), $programs);
-        }
-        elseif ($_POST["action"] === "getTableCandidates") {
+        } elseif ($_POST['action'] === 'getTableCandidates') {
             $res = array_values(
-                array_map(fn($candidate) => $candidate->getJSON(), getCandidates())
+                array_map(fn ($candidate) => $candidate->getJSON(), getCandidates())
             );
-        }
-        elseif ($_POST["action"] === "getCandidateDetails") {
-            if (empty($_POST["candidateID"])) {
+        } elseif ($_POST['action'] === 'getCandidateDetails') {
+            if (empty($_POST['candidateID'])) {
                 throw new RuntimeException('ID del candidato no proporcionado.');
             }
-            
+
             $candidates = getCandidates();
             $candidate = null;
             foreach ($candidates as $c) {
-                if ($c->getID() == $_POST["candidateID"]) {
+                if ($c->getID() == $_POST['candidateID']) {
                     $candidate = $c;
                     break;
                 }
             }
-            
+
             if ($candidate) {
                 $res = $candidate->getJSON();
             } else {
                 throw new RuntimeException('Candidato no encontrado.');
             }
-        }
-        elseif ($_POST["action"] === "updateCandidateField") {
-            if (empty($_POST["candidateID"]) || empty($_POST["field"]) || !isset($_POST["value"])) {
+        } elseif ($_POST['action'] === 'updateCandidateField') {
+            if (empty($_POST['candidateID']) || empty($_POST['field']) || !isset($_POST['value'])) {
                 throw new RuntimeException('Datos incompletos para actualización.');
             }
-            
-            $candidateID = (int)$_POST["candidateID"];
-            $field = $_POST["field"];
-            $value = $_POST["value"];
-            
+
+            $candidateID = (int)$_POST['candidateID'];
+            $field = $_POST['field'];
+            $value = $_POST['value'];
+
             // Campos que pertenecen a la tabla user
             $userFields = ['first_name', 'last_name', 'email'];
-            
+
             if (in_array($field, $userFields)) {
                 $res = updateCandidateUserField($candidateID, $field, $value);
             } else {
                 $res = updateCandidateField($candidateID, $field, $value);
             }
-        }
-        elseif ($_POST["action"] === "deleteOneCandidate") {
-            if (!preg_match('/^[A-Za-z0-9\-]+$/', $_POST["folioAdmisionDelete"])) {
+        } elseif ($_POST['action'] === 'deleteOneCandidate') {
+            if (!preg_match('/^[A-Za-z0-9\-]+$/', $_POST['folioAdmisionDelete'])) {
                 throw new RuntimeException('Folio de Admisión inválido.');
             }
-            $res = deleteCandidateByAdmissionFolio($_POST["folioAdmisionDelete"]);
+            $res = deleteCandidateByAdmissionFolio($_POST['folioAdmisionDelete']);
         }
 
         echo responseOK($res);
@@ -133,7 +128,7 @@ ob_end_flush();
 
 <?php
 require_once INCLUDES_DIR . '/templates/head.php';
-get_head("GC");
+get_head('GC');
 ?>
 
 <style>
@@ -397,7 +392,7 @@ get_head("GC");
 
 <body style="display: block;">
     <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header("Gestión de Candidatos");
+get_header('Gestión de Candidatos');
 ?>
 
     <main class="container content marco">

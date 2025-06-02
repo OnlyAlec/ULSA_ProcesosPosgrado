@@ -24,7 +24,7 @@ function insertOneCandidate(
         // Convertir fechas al formato esperado por PostgreSQL
         $fechaSolicitud = date('Y-m-d H:i:s', strtotime($fechaSolicitudEntrevista));
         $fechaEntrevista = date('Y-m-d H:i:s', strtotime($fechaHoraEntrevista));
-        
+
         return insertCandidate(
             $nombre,
             $apellidos,
@@ -42,4 +42,4 @@ function insertOneCandidate(
         ErrorList::add("Error al insertar candidato: {$e->getMessage()}");
         return false;
     }
-} 
+}

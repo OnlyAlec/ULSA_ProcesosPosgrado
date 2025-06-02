@@ -59,7 +59,7 @@ class Candidate
         $this->id = $id;
         $this->userID = $userID;
         $this->ulsaID = $ulsaID; // Este valor viene del JOIN con user
-        
+
         // Valores por defecto
         $this->programCoordinatorApprovalFlag = false;
         $this->programCoordinatorDecision = null;
@@ -432,4 +432,4 @@ class Candidate
     {
         return $this->toArray();
     }
-} 
+}

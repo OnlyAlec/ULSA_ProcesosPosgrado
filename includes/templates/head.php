@@ -1,4 +1,5 @@
 <?php
+
 require_once INCLUDES_DIR . '/utilities/util.php';
 function get_head($title)
 {
