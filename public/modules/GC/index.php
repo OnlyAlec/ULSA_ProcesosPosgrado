@@ -21,12 +21,17 @@ try {
                 throw new RuntimeException('Nombre inválido. Solo se permiten letras y espacios.');
             }
             if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST['apellidos'])) {
-                throw new RuntimeException('Apellidos inválidos. Solo se permiten letras y espacios.');
+                throw new RuntimeException(
+                    'Apellidos inválidos. Solo se permiten letras y espacios.',
+                );
             }
             if (!filter_var($_POST['correo1'], FILTER_VALIDATE_EMAIL)) {
                 throw new RuntimeException('Correo electrónico 1 inválido.');
             }
-            if (!empty($_POST['correo2']) && !filter_var($_POST['correo2'], FILTER_VALIDATE_EMAIL)) {
+            if (
+                !empty($_POST['correo2']) &&
+                !filter_var($_POST['correo2'], FILTER_VALIDATE_EMAIL)
+            ) {
                 throw new RuntimeException('Correo electrónico 2 inválido.');
             }
             if (!preg_match('/^\d{10}$/', $_POST['celular'])) {
@@ -36,7 +41,9 @@ try {
                 throw new RuntimeException('Programa Académico no válido.');
             }
             if (empty($_POST['fechaSolicitudEntrevista'])) {
-                throw new RuntimeException('Fecha de Solicitud de Entrevista no puede estar vacía.');
+                throw new RuntimeException(
+                    'Fecha de Solicitud de Entrevista no puede estar vacía.',
+                );
             }
             if (empty($_POST['fechaHoraEntrevista'])) {
                 throw new RuntimeException('Fecha y Hora de Entrevista no pueden estar vacías.');
@@ -46,30 +53,32 @@ try {
             $claveUlsa = null;
             if (isset($_POST['tieneClaveUlsa']) && $_POST['tieneClaveUlsa'] === 'true') {
                 if (!preg_match('/^\d{6}$/', $_POST['claveUlsa'])) {
-                    throw new RuntimeException('Clave ULSA inválida. Debe ser un número de 6 dígitos.');
+                    throw new RuntimeException(
+                        'Clave ULSA inválida. Debe ser un número de 6 dígitos.',
+                    );
                 }
-                $claveUlsa = (int)$_POST['claveUlsa'];
+                $claveUlsa = (int) $_POST['claveUlsa'];
             }
 
             $res = insertOneCandidate(
                 $_POST['folioAdmision'],
-                (int)$_POST['numeroBloque'],
+                (int) $_POST['numeroBloque'],
                 $_POST['nombre'],
                 $_POST['apellidos'],
                 $_POST['correo1'],
                 $_POST['correo2'] ?: null,
                 $_POST['celular'],
-                (int)$_POST['programaAcademico'],
+                (int) $_POST['programaAcademico'],
                 $_POST['fechaSolicitudEntrevista'],
                 $_POST['fechaHoraEntrevista'],
-                $claveUlsa
+                $claveUlsa,
             );
         } elseif ($_POST['action'] === 'getPrograms') {
             $programs = getPrograms();
-            $res = array_map(fn ($program) => $program->toArray(), $programs);
+            $res = array_map(fn($program) => $program->toArray(), $programs);
         } elseif ($_POST['action'] === 'getTableCandidates') {
             $res = array_values(
-                array_map(fn ($candidate) => $candidate->getJSON(), getCandidates())
+                array_map(fn($candidate) => $candidate->getJSON(), getCandidates()),
             );
         } elseif ($_POST['action'] === 'getCandidateDetails') {
             if (empty($_POST['candidateID'])) {
@@ -95,7 +104,7 @@ try {
                 throw new RuntimeException('Datos incompletos para actualización.');
             }
 
-            $candidateID = (int)$_POST['candidateID'];
+            $candidateID = (int) $_POST['candidateID'];
             $field = $_POST['field'];
             $value = $_POST['value'];
 
@@ -115,12 +124,11 @@ try {
         }
 
         echo responseOK($res);
-        exit;
+        exit();
     }
-
 } catch (RuntimeException $e) {
     echo responseInternalError($e->getMessage());
-    exit;
+    exit();
 }
 ob_end_flush();
 ?>
@@ -391,9 +399,10 @@ get_head('GC');
 </style>
 
 <body style="display: block;">
-    <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Gestión de Candidatos');
-?>
+    <?php
+    require_once INCLUDES_DIR . '/templates/header.php';
+    get_header('Gestión de Candidatos');
+    ?>
 
     <main class="container content marco">
         <!-- Botones Nav -->

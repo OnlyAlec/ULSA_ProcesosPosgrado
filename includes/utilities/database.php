@@ -1143,23 +1143,33 @@ function getCandidates(): array
                     $row['id'],
                     $row['user_id'],
                     $row['ulsa_id'],
-                    $row['candidate_email'] ? null : null
+                    $row['candidate_email'] ? null : null,
                 );
 
                 // Establecer todos los campos adicionales
-                $candidate->setProgramCoordinatorApprovalFlag($row['program_coordinator_approval_flag']);
+                $candidate->setProgramCoordinatorApprovalFlag(
+                    $row['program_coordinator_approval_flag'],
+                );
                 $candidate->setProgramCoordinatorDecision($row['program_coordinator_decision']);
                 $candidate->setCandidatePendingFlag($row['candidate_pending_flag']);
                 $candidate->setAdmissionsPendingFlag($row['admissions_pending_flag']);
                 $candidate->setAdmissionsPendingDescription($row['admissions_pending_description']);
                 $candidate->setRegistrarPendingFlag($row['registrar_pending_flag']);
                 $candidate->setRegistrarPendingDescription($row['registrar_pending_description']);
-                $candidate->setEngineeringFacultyPendingFlag($row['engineering_faculty_pending_flag']);
-                $candidate->setEngineeringFacultyPendingDescription($row['engineering_faculty_pending_description']);
+                $candidate->setEngineeringFacultyPendingFlag(
+                    $row['engineering_faculty_pending_flag'],
+                );
+                $candidate->setEngineeringFacultyPendingDescription(
+                    $row['engineering_faculty_pending_description'],
+                );
                 $candidate->setGradChiefPendingFlag($row['grad_chief_pending_flag']);
                 $candidate->setGradChiefPendingDescription($row['grad_chief_pending_description']);
-                $candidate->setProgramCoordinatorPendingFlag($row['program_coordinator_pending_flag']);
-                $candidate->setProgramCoordinatorPendingDescription($row['program_coordinator_pending_description']);
+                $candidate->setProgramCoordinatorPendingFlag(
+                    $row['program_coordinator_pending_flag'],
+                );
+                $candidate->setProgramCoordinatorPendingDescription(
+                    $row['program_coordinator_pending_description'],
+                );
                 $candidate->setStatus($row['status']);
                 $candidate->setProgramName($row['program_name']);
 
@@ -1245,7 +1255,7 @@ function getCandidateByAdmissionFolio(string $folio): ?Candidate
             $res['interview_datetime'],
             $res['id'],
             $res['user_id'],
-            $res['ulsa_id']
+            $res['ulsa_id'],
         );
 
         // Establecer campos adicionales
@@ -1257,11 +1267,15 @@ function getCandidateByAdmissionFolio(string $folio): ?Candidate
         $candidate->setRegistrarPendingFlag($res['registrar_pending_flag']);
         $candidate->setRegistrarPendingDescription($res['registrar_pending_description']);
         $candidate->setEngineeringFacultyPendingFlag($res['engineering_faculty_pending_flag']);
-        $candidate->setEngineeringFacultyPendingDescription($res['engineering_faculty_pending_description']);
+        $candidate->setEngineeringFacultyPendingDescription(
+            $res['engineering_faculty_pending_description'],
+        );
         $candidate->setGradChiefPendingFlag($res['grad_chief_pending_flag']);
         $candidate->setGradChiefPendingDescription($res['grad_chief_pending_description']);
         $candidate->setProgramCoordinatorPendingFlag($res['program_coordinator_pending_flag']);
-        $candidate->setProgramCoordinatorPendingDescription($res['program_coordinator_pending_description']);
+        $candidate->setProgramCoordinatorPendingDescription(
+            $res['program_coordinator_pending_description'],
+        );
         $candidate->setStatus($res['status']);
         $candidate->setProgramName($res['program_name']);
 
@@ -1288,7 +1302,7 @@ function insertCandidate(
     int $programID,
     string $interviewRequestDate,
     string $interviewDateTime,
-    ?int $ulsaID = null
+    ?int $ulsaID = null,
 ): bool {
     try {
         $db = getDatabaseConnection();
@@ -1399,7 +1413,7 @@ function updateCandidateStatus($candidateID, bool $newStatus): bool
             throw new \RuntimeException("No se encontró candidato con ID: $candidateID");
         }
 
-        $oldStatus = (bool)$candidateData['status'];
+        $oldStatus = (bool) $candidateData['status'];
         $userID = $candidateData['user_id'];
         $programID = $candidateData['program_id'];
         $ulsaID = $candidateData['ulsa_id'];
@@ -1407,7 +1421,9 @@ function updateCandidateStatus($candidateID, bool $newStatus): bool
         // VALIDACIÓN: Si se intenta activar (status = true) pero no tiene ULSA ID
         if (!$oldStatus && $newStatus && empty($ulsaID)) {
             $db->rollBack();
-            throw new \RuntimeException('No se puede activar el candidato. Debe tener una Clave ULSA asignada.');
+            throw new \RuntimeException(
+                'No se puede activar el candidato. Debe tener una Clave ULSA asignada.',
+            );
         }
 
         // Si el status cambia de false a true, insertar en student
@@ -1419,7 +1435,8 @@ function updateCandidateStatus($candidateID, bool $newStatus): bool
             $stmtCheckStudent->execute();
 
             if ($stmtCheckStudent->rowCount() === 0) {
-                $queryInsertStudent = 'INSERT INTO student (user_id, program_id) VALUES (:user_id, :program_id)';
+                $queryInsertStudent =
+                    'INSERT INTO student (user_id, program_id) VALUES (:user_id, :program_id)';
                 $stmtInsertStudent = $db->prepare($queryInsertStudent);
                 $stmtInsertStudent->bindParam(':user_id', $userID);
                 $stmtInsertStudent->bindParam(':program_id', $programID);
@@ -1462,15 +1479,27 @@ function updateCandidateField($candidateID, string $field, $value): bool
 
         // Lista de campos permitidos
         $allowedFields = [
-            'admission_folio', 'admission_block_number', 'email',
-            'mobile_phone', 'interview_request_date', 'interview_datetime',
-            'program_coordinator_approval_flag', 'program_coordinator_decision',
-            'candidate_pending_flag', 'admissions_pending_flag',
-            'admissions_pending_description', 'registrar_pending_flag',
-            'registrar_pending_description', 'engineering_faculty_pending_flag',
-            'engineering_faculty_pending_description', 'grad_chief_pending_flag',
-            'grad_chief_pending_description', 'program_coordinator_pending_flag',
-            'program_coordinator_pending_description', 'status', 'program_id'
+            'admission_folio',
+            'admission_block_number',
+            'email',
+            'mobile_phone',
+            'interview_request_date',
+            'interview_datetime',
+            'program_coordinator_approval_flag',
+            'program_coordinator_decision',
+            'candidate_pending_flag',
+            'admissions_pending_flag',
+            'admissions_pending_description',
+            'registrar_pending_flag',
+            'registrar_pending_description',
+            'engineering_faculty_pending_flag',
+            'engineering_faculty_pending_description',
+            'grad_chief_pending_flag',
+            'grad_chief_pending_description',
+            'program_coordinator_pending_flag',
+            'program_coordinator_pending_description',
+            'status',
+            'program_id',
         ];
 
         // Campos que van en la tabla user
@@ -1486,7 +1515,7 @@ function updateCandidateField($candidateID, string $field, $value): bool
             if (is_string($value)) {
                 $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
             }
-            return updateCandidateStatus($candidateID, (bool)$value);
+            return updateCandidateStatus($candidateID, (bool) $value);
         }
 
         // Si es un campo de user, actualizar en tabla user
@@ -1496,10 +1525,14 @@ function updateCandidateField($candidateID, string $field, $value): bool
 
         // Convertir valores boolean que vienen como cadenas
         $booleanFields = [
-            'program_coordinator_approval_flag', 'candidate_pending_flag',
-            'admissions_pending_flag', 'registrar_pending_flag',
-            'engineering_faculty_pending_flag', 'grad_chief_pending_flag',
-            'program_coordinator_pending_flag', 'status'
+            'program_coordinator_approval_flag',
+            'candidate_pending_flag',
+            'admissions_pending_flag',
+            'registrar_pending_flag',
+            'engineering_faculty_pending_flag',
+            'grad_chief_pending_flag',
+            'program_coordinator_pending_flag',
+            'status',
         ];
 
         if (in_array($field, $booleanFields)) {
@@ -1507,7 +1540,7 @@ function updateCandidateField($candidateID, string $field, $value): bool
             if (is_string($value)) {
                 $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
             }
-            $value = (bool)$value;
+            $value = (bool) $value;
         }
 
         // LÓGICA ESPECIAL PARA PROGRAM_ID: Si el candidato está activo, también actualizar en student
@@ -1534,8 +1567,9 @@ function updateCandidateField($candidateID, string $field, $value): bool
                 $stmtUpdateCandidate->execute();
 
                 // Si el candidato está activo (status = true), también actualizar en student
-                if ((bool)$candidateData['status']) {
-                    $queryUpdateStudent = 'UPDATE student SET program_id = :program_id WHERE user_id = :user_id';
+                if ((bool) $candidateData['status']) {
+                    $queryUpdateStudent =
+                        'UPDATE student SET program_id = :program_id WHERE user_id = :user_id';
                     $stmtUpdateStudent = $db->prepare($queryUpdateStudent);
                     $stmtUpdateStudent->bindParam(':program_id', $value);
                     $stmtUpdateStudent->bindParam(':user_id', $candidateData['user_id']);
