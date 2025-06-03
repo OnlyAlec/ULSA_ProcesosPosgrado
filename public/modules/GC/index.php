@@ -75,12 +75,12 @@ try {
             );
         } elseif ($_POST['action'] === 'getPrograms') {
             $programs = getPrograms();
-            $res = array_map(fn($program) => $program->toArray(), $programs);
+            $res = array_map(fn ($program) => $program->toArray(), $programs);
         } elseif ($_POST['action'] === 'getCandidateDescriptions') {
             $res = getCandidateDescriptions();
         } elseif ($_POST['action'] === 'getTableCandidates') {
             $res = array_values(
-                array_map(fn($candidate) => $candidate->getJSON(), getCandidates()),
+                array_map(fn ($candidate) => $candidate->getJSON(), getCandidates()),
             );
         } elseif ($_POST['action'] === 'getCandidateDetails') {
             if (empty($_POST['candidateID'])) {
@@ -476,8 +476,8 @@ get_head('GC');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-    get_header('Gestión de Candidatos');
-    ?>
+get_header('Gestión de Candidatos');
+?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
