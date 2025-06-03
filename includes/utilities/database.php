@@ -1352,7 +1352,7 @@ function insertCandidate(
 
             $userID = $db->lastInsertId();
         }
-        
+
         // Insertar candidato con status por defecto 1 (pendiente)
         $queryCandidate = 'INSERT INTO candidate (
                             user_id, program_id, admission_folio, 
@@ -1414,18 +1414,20 @@ function updateCandidateStatus($candidateID, int $newStatus): bool
         if (!$candidateData) {
             throw new \RuntimeException("No se encontró candidato con ID: $candidateID");
         }
-        
-        $oldStatus = (int)$candidateData['status'];
+
+        $oldStatus = (int) $candidateData['status'];
         $userID = $candidateData['user_id'];
         $programID = $candidateData['program_id'];
         $ulsaID = $candidateData['ulsa_id'];
-        
+
         // VALIDACIÓN: Si se intenta cambiar a inscrito (status = 2) pero no tiene ULSA ID
         if ($newStatus === 2 && empty($ulsaID)) {
             $db->rollBack();
-            throw new \RuntimeException("No se puede inscribir el candidato. Debe tener una Clave ULSA asignada.");
+            throw new \RuntimeException(
+                'No se puede inscribir el candidato. Debe tener una Clave ULSA asignada.',
+            );
         }
-        
+
         // Si el status cambia a inscrito (2), insertar en student
         if ($oldStatus !== 2 && $newStatus === 2) {
             // Verificar si ya existe el estudiante
@@ -1479,15 +1481,26 @@ function updateCandidateField($candidateID, string $field, $value): bool
 
         // Lista de campos permitidos
         $allowedFields = [
-            'admission_folio', 'admission_block_number', 'email', 
-            'mobile_phone', 'interview_request_date', 'interview_datetime',
-            'program_coordinator_approval_flag', 'program_coordinator_decision',
-            'admissions_pending_flag', 'admissions_pending_description', 
-            'registrar_pending_flag', 'registrar_pending_description', 
-            'engineering_faculty_pending_flag', 'engineering_faculty_pending_description',
-            'grad_chief_pending_flag', 'grad_chief_pending_description',
-            'program_coordinator_pending_flag', 'program_coordinator_pending_description',
-            'status', 'program_id'
+            'admission_folio',
+            'admission_block_number',
+            'email',
+            'mobile_phone',
+            'interview_request_date',
+            'interview_datetime',
+            'program_coordinator_approval_flag',
+            'program_coordinator_decision',
+            'admissions_pending_flag',
+            'admissions_pending_description',
+            'registrar_pending_flag',
+            'registrar_pending_description',
+            'engineering_faculty_pending_flag',
+            'engineering_faculty_pending_description',
+            'grad_chief_pending_flag',
+            'grad_chief_pending_description',
+            'program_coordinator_pending_flag',
+            'program_coordinator_pending_description',
+            'status',
+            'program_id',
         ];
 
         // Campos que van en la tabla user
@@ -1499,7 +1512,7 @@ function updateCandidateField($candidateID, string $field, $value): bool
 
         // Si es el campo status, manejar la lógica especial
         if ($field === 'status') {
-            return updateCandidateStatus($candidateID, (int)$value);
+            return updateCandidateStatus($candidateID, (int) $value);
         }
 
         // Si es un campo de user, actualizar en tabla user
@@ -1509,9 +1522,12 @@ function updateCandidateField($candidateID, string $field, $value): bool
 
         // Convertir valores boolean que vienen como cadenas
         $booleanFields = [
-            'program_coordinator_approval_flag', 'admissions_pending_flag', 
-            'registrar_pending_flag', 'engineering_faculty_pending_flag', 
-            'grad_chief_pending_flag', 'program_coordinator_pending_flag'
+            'program_coordinator_approval_flag',
+            'admissions_pending_flag',
+            'registrar_pending_flag',
+            'engineering_faculty_pending_flag',
+            'grad_chief_pending_flag',
+            'program_coordinator_pending_flag',
         ];
 
         if (in_array($field, $booleanFields)) {
@@ -1521,7 +1537,7 @@ function updateCandidateField($candidateID, string $field, $value): bool
             }
             $value = (bool) $value;
         }
-        
+
         // LÓGICA ESPECIAL PARA PROGRAM_ID: Si el candidato está inscrito, también actualizar en student
         if ($field === 'program_id') {
             $db->beginTransaction();
@@ -1544,10 +1560,11 @@ function updateCandidateField($candidateID, string $field, $value): bool
                 $stmtUpdateCandidate->bindParam(':value', $value);
                 $stmtUpdateCandidate->bindParam(':id', $candidateID);
                 $stmtUpdateCandidate->execute();
-                
+
                 // Si el candidato está inscrito (status = 2), también actualizar en student
-                if ((int)$candidateData['status'] === 2) {
-                    $queryUpdateStudent = 'UPDATE student SET program_id = :program_id WHERE user_id = :user_id';
+                if ((int) $candidateData['status'] === 2) {
+                    $queryUpdateStudent =
+                        'UPDATE student SET program_id = :program_id WHERE user_id = :user_id';
                     $stmtUpdateStudent = $db->prepare($queryUpdateStudent);
                     $stmtUpdateStudent->bindParam(':program_id', $value);
                     $stmtUpdateStudent->bindParam(':user_id', $candidateData['user_id']);
@@ -1674,18 +1691,20 @@ function getCandidateDescriptions(): array
         $query = 'SELECT id, description FROM candidatedescription ORDER BY id';
         $stmt = $db->prepare($query);
         $stmt->execute();
-        
+
         $descriptions = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $descriptions[] = [
                 'id' => $row['id'],
-                'description' => $row['description']
+                'description' => $row['description'],
             ];
         }
-        
+
         return $descriptions;
     } catch (\PDOException $e) {
-        throw new \RuntimeException("Error al obtener descripciones de candidatos: {$e->getMessage()}");
+        throw new \RuntimeException(
+            "Error al obtener descripciones de candidatos: {$e->getMessage()}",
+        );
     } catch (\Exception $e) {
         ErrorList::add("Error inesperado al obtener descripciones: {$e->getMessage()}");
         return [];
@@ -1699,7 +1718,8 @@ function insertCandidateEvidence($candidateID, $path): bool
 {
     try {
         $db = getDatabaseConnection();
-        $query = 'INSERT INTO evidence (directory_path, candidate_id) VALUES (:directory_path, :candidateID)';
+        $query =
+            'INSERT INTO evidence (directory_path, candidate_id) VALUES (:directory_path, :candidateID)';
         $stmt = $db->prepare($query);
         $stmt->bindParam(':directory_path', $path);
         $stmt->bindParam(':candidateID', $candidateID, PDO::PARAM_INT);
@@ -1707,7 +1727,9 @@ function insertCandidateEvidence($candidateID, $path): bool
 
         return $stmt->rowCount() > 0;
     } catch (\PDOException $e) {
-        throw new \RuntimeException('Error al insertar evidencia de candidato: ' . $e->getMessage());
+        throw new \RuntimeException(
+            'Error al insertar evidencia de candidato: ' . $e->getMessage(),
+        );
     }
 }
 
@@ -1730,8 +1752,8 @@ function getCandidateEvidence($candidateID): array
             if ($row['path'] !== null) {
                 $evidence[] = [
                     'id' => $row['id'],
-                    'path' => $row['path'], 
-                    'name' => basename($row['path'])
+                    'path' => $row['path'],
+                    'name' => basename($row['path']),
                 ];
             }
         }

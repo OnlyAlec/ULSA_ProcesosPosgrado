@@ -75,12 +75,10 @@ try {
             );
         } elseif ($_POST['action'] === 'getPrograms') {
             $programs = getPrograms();
-            $res = array_map(fn ($program) => $program->toArray(), $programs);
-        }
-        elseif ($_POST["action"] === "getCandidateDescriptions") {
+            $res = array_map(fn($program) => $program->toArray(), $programs);
+        } elseif ($_POST['action'] === 'getCandidateDescriptions') {
             $res = getCandidateDescriptions();
-        }
-        elseif ($_POST["action"] === "getTableCandidates") {
+        } elseif ($_POST['action'] === 'getTableCandidates') {
             $res = array_values(
                 array_map(fn($candidate) => $candidate->getJSON(), getCandidates()),
             );
@@ -120,37 +118,44 @@ try {
             } else {
                 $res = updateCandidateField($candidateID, $field, $value);
             }
-        }
-        elseif ($_POST["action"] === "uploadEvidence") {
+        } elseif ($_POST['action'] === 'uploadEvidence') {
             if (!isset($_POST['candidateID']) || !isset($_FILES['file'])) {
                 throw new RuntimeException('Faltan datos para subir la evidencia.');
             }
-            
+
             // Crear directorio si no existe
             $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/GC/';
             if (!file_exists($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }
-            
+
             // Generar nombre único para el archivo
             $fileInfo = pathinfo($_FILES['file']['name']);
-            $fileName = uniqid() . '_' . preg_replace('/[^a-zA-Z0-9_.-]/', '_', $fileInfo['filename']) . '.' . $fileInfo['extension'];
+            $fileName =
+                uniqid() .
+                '_' .
+                preg_replace('/[^a-zA-Z0-9_.-]/', '_', $fileInfo['filename']) .
+                '.' .
+                $fileInfo['extension'];
             $filePath = '/uploads/GC/' . $fileName;
-            
-            if (move_uploaded_file($_FILES['file']['tmp_name'], $_SERVER['DOCUMENT_ROOT'] . $filePath)) {
+
+            if (
+                move_uploaded_file(
+                    $_FILES['file']['tmp_name'],
+                    $_SERVER['DOCUMENT_ROOT'] . $filePath,
+                )
+            ) {
                 $res = insertCandidateEvidence($_POST['candidateID'], $filePath);
             } else {
                 throw new RuntimeException('Error al mover el archivo.');
             }
-        }
-        elseif ($_POST["action"] === "getCandidateEvidence") {
+        } elseif ($_POST['action'] === 'getCandidateEvidence') {
             if (!isset($_POST['candidateID'])) {
                 throw new RuntimeException('Falta el ID del candidato para obtener evidencias.');
             }
             $res = getCandidateEvidence($_POST['candidateID']);
-        }
-        elseif ($_POST["action"] === "deleteOneCandidate") {
-            if (!preg_match('/^[A-Za-z0-9\-]+$/', $_POST["folioAdmisionDelete"])) {
+        } elseif ($_POST['action'] === 'deleteOneCandidate') {
+            if (!preg_match('/^[A-Za-z0-9\-]+$/', $_POST['folioAdmisionDelete'])) {
                 throw new RuntimeException('Folio de Admisión inválido.');
             }
             $res = deleteCandidateByAdmissionFolio($_POST['folioAdmisionDelete']);
