@@ -429,7 +429,7 @@ class Candidate
             'programCoordinatorPendingDescription' => $this->programCoordinatorPendingDescription,
             'status' => $this->status,
             'statusDescription' => $this->statusDescription,
-            'programName' => $this->programName
+            'programName' => $this->programName,
         ];
     }
 

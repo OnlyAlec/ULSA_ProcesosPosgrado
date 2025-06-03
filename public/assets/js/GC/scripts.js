@@ -172,22 +172,26 @@ $(document).ready(function () {
                     res.data.forEach(function (candidate) {
                         let statusIcon;
                         let statusClass;
-                        
+
                         // Determinar icono y clase según el status
-                        switch(candidate.status) {
+                        switch (candidate.status) {
                             case 1: // Pendiente
-                                statusIcon = '<span class="status-badge pending"><i class="fas fa-clock"></i> Pendiente</span>';
+                                statusIcon =
+                                    '<span class="status-badge pending"><i class="fas fa-clock"></i> Pendiente</span>';
                                 break;
                             case 2: // Inscrito
-                                statusIcon = '<span class="status-badge active"><i class="fas fa-check"></i> Inscrito</span>';
+                                statusIcon =
+                                    '<span class="status-badge active"><i class="fas fa-check"></i> Inscrito</span>';
                                 break;
                             case 3: // Baja
-                                statusIcon = '<span class="status-badge inactive"><i class="fas fa-times"></i> Baja</span>';
+                                statusIcon =
+                                    '<span class="status-badge inactive"><i class="fas fa-times"></i> Baja</span>';
                                 break;
                             default:
-                                statusIcon = '<span class="status-badge pending"><i class="fas fa-question"></i> Desconocido</span>';
+                                statusIcon =
+                                    '<span class="status-badge pending"><i class="fas fa-question"></i> Desconocido</span>';
                         }
-                        
+
                         let row = `<tr>
                                 <td>${candidate.admissionFolio}</td>
                                 <td>${candidate.fullName}</td>
@@ -254,13 +258,13 @@ $(document).ready(function () {
 
                         // Cargar programas para el selector
                         loadProgramsForCandidate(candidate.id, candidate.programID);
-                        
+
                         // Cargar descripciones de status
                         loadStatusDescriptions(candidate.id, candidate.status);
-                        
+
                         // Cargar evidencias
                         loadCandidateEvidence(candidate.id);
-                        
+
                         // Verificar y actualizar estado del dropdown de status
                         updateStatusDropdownState(candidate.id);
                     } else {
@@ -646,60 +650,68 @@ $(document).ready(function () {
     // Cargar descripciones de status para el selector
     function loadStatusDescriptions(candidateId, currentStatus) {
         $.ajax({
-            url: "",
-            type: "POST",
-            data: { action: "getPrograms" },
+            url: '',
+            type: 'POST',
+            data: { action: 'getPrograms' },
             success: function (response) {
-                let res = typeof response === "string" ? JSON.parse(response) : response;
-                
+                let res = typeof response === 'string' ? JSON.parse(response) : response;
+
                 if (res.success && Array.isArray(res.data)) {
-                    const select = $(`.candidate-details[data-candidate-id='${candidateId}'] .program-select`);
+                    const select = $(
+                        `.candidate-details[data-candidate-id='${candidateId}'] .program-select`
+                    );
                     select.empty();
-                    
+
                     res.data.forEach(function (program) {
                         const selected = program.id == currentProgramId ? 'selected' : '';
-                        select.append(`<option value="${program.id}" ${selected}>${program.name}</option>`);
+                        select.append(
+                            `<option value="${program.id}" ${selected}>${program.name}</option>`
+                        );
                     });
                 }
-            }
+            },
         });
     }
 
     // Cargar descripciones de status para el selector
     function loadStatusDescriptions(candidateId, currentStatus) {
         $.ajax({
-            url: "",
-            type: "POST",
-            data: { action: "getCandidateDescriptions" },
+            url: '',
+            type: 'POST',
+            data: { action: 'getCandidateDescriptions' },
             success: function (response) {
-                let res = typeof response === "string" ? JSON.parse(response) : response;
-                
+                let res = typeof response === 'string' ? JSON.parse(response) : response;
+
                 if (res.success && Array.isArray(res.data)) {
-                    const select = $(`.candidate-details[data-candidate-id='${candidateId}'] .status-select`);
+                    const select = $(
+                        `.candidate-details[data-candidate-id='${candidateId}'] .status-select`
+                    );
                     select.empty();
-                    
+
                     res.data.forEach(function (status) {
                         const selected = status.id == currentStatus ? 'selected' : '';
-                        select.append(`<option value="${status.id}" ${selected}>${status.description}</option>`);
+                        select.append(
+                            `<option value="${status.id}" ${selected}>${status.description}</option>`
+                        );
                     });
                 }
-            }
+            },
         });
     }
 
     // Cargar evidencias del candidato
     function loadCandidateEvidence(candidateId) {
         $.ajax({
-            url: "",
-            type: "POST",
-            data: { action: "getCandidateEvidence", candidateID: candidateId },
+            url: '',
+            type: 'POST',
+            data: { action: 'getCandidateEvidence', candidateID: candidateId },
             success: function (response) {
-                let res = typeof response === "string" ? JSON.parse(response) : response;
+                let res = typeof response === 'string' ? JSON.parse(response) : response;
                 const evidenceList = $(`#evidence-list-${candidateId}`);
-                
+
                 if (res.success && Array.isArray(res.data) && res.data.length > 0) {
                     evidenceList.empty();
-                    res.data.forEach(function(evidence) {
+                    res.data.forEach(function (evidence) {
                         evidenceList.append(`
                             <div class='evidence-item mb-2'>
                                 <i class='fas fa-file-alt text-primary'></i>
@@ -713,53 +725,61 @@ $(document).ready(function () {
                     evidenceList.html('<p class="text-muted">No hay evidencias disponibles.</p>');
                 }
             },
-            error: function() {
-                $(`#evidence-list-${candidateId}`).html('<p class="text-danger">Error al cargar evidencias.</p>');
-            }
+            error: function () {
+                $(`#evidence-list-${candidateId}`).html(
+                    '<p class="text-danger">Error al cargar evidencias.</p>'
+                );
+            },
         });
     }
 
     // Manejar subida de evidencias
-    $(document).on('click', '.upload-evidence', function() {
+    $(document).on('click', '.upload-evidence', function () {
         const candidateId = $(this).data('candidateId');
         const fileInput = $('<input type="file" accept="*/*">');
-        
-        fileInput.on('change', function() {
+
+        fileInput.on('change', function () {
             const file = this.files[0];
             if (!file) return;
-            
+
             const formData = new FormData();
             formData.append('file', file);
             formData.append('candidateID', candidateId);
             formData.append('action', 'uploadEvidence');
-            
+
             $.ajax({
                 url: '',
                 type: 'POST',
                 data: formData,
                 processData: false,
                 contentType: false,
-                beforeSend: function() {
-                    $(`#evidence-list-${candidateId}`).html('<p class="text-info">Subiendo archivo...</p>');
+                beforeSend: function () {
+                    $(`#evidence-list-${candidateId}`).html(
+                        '<p class="text-info">Subiendo archivo...</p>'
+                    );
                 },
-                success: function(response) {
+                success: function (response) {
                     let res = typeof response === 'string' ? JSON.parse(response) : response;
-                    
+
                     if (res.success) {
-                        displayMessage($(`.candidate-details[data-candidate-id='${candidateId}']`), 'Evidencia subida correctamente', 'success');
+                        displayMessage(
+                            $(`.candidate-details[data-candidate-id='${candidateId}']`),
+                            'Evidencia subida correctamente',
+                            'success'
+                        );
                         loadCandidateEvidence(candidateId);
                     } else {
                         alert('Error al subir la evidencia.');
                         loadCandidateEvidence(candidateId);
                     }
                 },
-                error: function() {
+                error: function () {
                     alert('Error al procesar la solicitud.');
                     loadCandidateEvidence(candidateId);
-                }
+                },
             });
         });
-        
+
         fileInput.trigger('click');
     });
 
@@ -786,15 +806,18 @@ $(document).ready(function () {
             } else if (fieldValue.find('textarea').length) {
                 value = fieldValue.find('textarea').val();
             }
-            
+
             // Validación especial para status
-            if (field === 'status' && value == 2) { // 2 = inscrito
+            if (field === 'status' && value == 2) {
+                // 2 = inscrito
                 const candidateDetails = button.closest('.candidate-details');
                 const ulsaIdField = candidateDetails.find('[data-field="ulsa_id"] .field-text');
                 const ulsaIdValue = ulsaIdField.text().trim();
-                
+
                 if (!ulsaIdValue || ulsaIdValue === 'Sin asignar') {
-                    alert('No se puede inscribir el candidato. Debe tener una Clave ULSA asignada primero.');
+                    alert(
+                        'No se puede inscribir el candidato. Debe tener una Clave ULSA asignada primero.'
+                    );
                     // Revertir el cambio en el select
                     const select = fieldValue.find('select');
                     const originalValue = select.data('original-value');
@@ -802,7 +825,7 @@ $(document).ready(function () {
                     return;
                 }
             }
-            
+
             // Actualizar en la base de datos
             $.ajax({
                 url: '',
@@ -834,11 +857,17 @@ $(document).ready(function () {
                         // Mostrar mensajes específicos para ciertos campos
                         if (field === 'program_id') {
                             const candidateDetails = button.closest('.candidate-details');
-                            const statusField = candidateDetails.find('[data-field="status"] .field-text');
+                            const statusField = candidateDetails.find(
+                                '[data-field="status"] .field-text'
+                            );
                             const statusText = statusField.text().trim().toLowerCase();
-                            
+
                             if (statusText === 'inscrito') {
-                                displayMessage(candidateDetails, 'Programa actualizado en candidato y estudiante', 'success');
+                                displayMessage(
+                                    candidateDetails,
+                                    'Programa actualizado en candidato y estudiante',
+                                    'success'
+                                );
                             } else {
                                 displayMessage(
                                     candidateDetails,
@@ -847,17 +876,28 @@ $(document).ready(function () {
                                 );
                             }
                         } else if (field === 'ulsa_id') {
-                            const candidateId = button.closest('.candidate-details').data('candidateId');
-                            displayMessage(button.closest('.candidate-details'), 'Clave ULSA actualizada correctamente', 'success');
+                            const candidateId = button
+                                .closest('.candidate-details')
+                                .data('candidateId');
+                            displayMessage(
+                                button.closest('.candidate-details'),
+                                'Clave ULSA actualizada correctamente',
+                                'success'
+                            );
                             // Revalidar el estado del dropdown de status
                             updateStatusDropdownState(candidateId);
                         } else if (field === 'status') {
-                            const message = value == 2 
-                                ? 'Candidato inscrito y agregado como estudiante' 
-                                : value == 3
-                                ? 'Candidato dado de baja'
-                                : 'Status actualizado a pendiente';
-                            displayMessage(button.closest('.candidate-details'), message, 'success');
+                            const message =
+                                value == 2
+                                    ? 'Candidato inscrito y agregado como estudiante'
+                                    : value == 3
+                                      ? 'Candidato dado de baja'
+                                      : 'Status actualizado a pendiente';
+                            displayMessage(
+                                button.closest('.candidate-details'),
+                                message,
+                                'success'
+                            );
                         }
 
                         // Recargar tabla si es necesario
@@ -886,13 +926,13 @@ $(document).ready(function () {
             // Entrar en modo edición
             fieldValue.addClass('editing');
             button.html('<i class="fas fa-save"></i>');
-            
+
             // Guardar valor original para el select
             const select = fieldValue.find('select');
             if (select.length) {
                 select.data('original-value', select.val());
             }
-            
+
             // Enfocar el campo de entrada
             const input = fieldValue.find('input, select, textarea');
             if (input.length) {
@@ -908,11 +948,11 @@ $(document).ready(function () {
         const candidateId = checkbox.closest('.candidate-details').data('candidateId');
         const field = fieldValue.data('field');
         const value = checkbox.is(':checked');
-        
+
         // Actualizar texto inmediatamente
         const fieldText = fieldValue.find('.field-text');
         fieldText.text(value ? 'Aprobado' : 'Pendiente');
-        
+
         // Actualizar en la base de datos
         $.ajax({
             url: '',
@@ -956,14 +996,17 @@ $(document).ready(function () {
         const ulsaIdField = candidateDetails.find('[data-field="ulsa_id"] .field-text');
         const statusSelect = candidateDetails.find('[data-field="status"] select');
         const statusFieldValue = candidateDetails.find('[data-field="status"]');
-        
+
         const ulsaIdValue = ulsaIdField.text().trim();
         const hasUlsaId = ulsaIdValue && ulsaIdValue !== 'Sin asignar';
         const currentStatus = parseInt(statusSelect.val());
-        
+
         if (!hasUlsaId && currentStatus !== 2) {
             // Si no tiene ULSA ID y no está inscrito, deshabilitar opción de inscrito
-            statusSelect.find('option[value="2"]').prop('disabled', true).text('inscrito (requiere Clave ULSA)');
+            statusSelect
+                .find('option[value="2"]')
+                .prop('disabled', true)
+                .text('inscrito (requiere Clave ULSA)');
         } else {
             // Si tiene ULSA ID o ya está inscrito, habilitar todas las opciones
             statusSelect.find('option[value="2"]').prop('disabled', false).text('inscrito');
@@ -971,21 +1014,21 @@ $(document).ready(function () {
     }
 
     // Manejar checkbox de clave ULSA
-    $("#tieneClaveUlsa").change(function() {
-        if ($(this).is(":checked")) {
-            $("#claveUlsaGroup").slideDown();
-            $("#claveUlsa").prop("required", true);
+    $('#tieneClaveUlsa').change(function () {
+        if ($(this).is(':checked')) {
+            $('#claveUlsaGroup').slideDown();
+            $('#claveUlsa').prop('required', true);
         } else {
-            $("#claveUlsaGroup").slideUp();
-            $("#claveUlsa").prop("required", false).val("");
+            $('#claveUlsaGroup').slideUp();
+            $('#claveUlsa').prop('required', false).val('');
         }
     });
 
     // Inicializar navegación
-    setupBtnsGC("btn-crear");
-    setupBtnsGC("btn-consultar");
-    setupBtnsGC("btn-eliminar");
+    setupBtnsGC('btn-crear');
+    setupBtnsGC('btn-consultar');
+    setupBtnsGC('btn-eliminar');
 
     // Mostrar sección de registro por defecto
-    $("#btn-crear").click();
-}); 
+    $('#btn-crear').click();
+});

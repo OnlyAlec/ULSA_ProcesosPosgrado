@@ -75,12 +75,12 @@ try {
             );
         } elseif ($_POST['action'] === 'getPrograms') {
             $programs = getPrograms();
-            $res = array_map(fn ($program) => $program->toArray(), $programs);
+            $res = array_map(fn($program) => $program->toArray(), $programs);
         } elseif ($_POST['action'] === 'getCandidateDescriptions') {
             $res = getCandidateDescriptions();
         } elseif ($_POST['action'] === 'getTableCandidates') {
             $res = array_values(
-                array_map(fn ($candidate) => $candidate->getJSON(), getCandidates()),
+                array_map(fn($candidate) => $candidate->getJSON(), getCandidates()),
             );
         } elseif ($_POST['action'] === 'getCandidateDetails') {
             if (empty($_POST['candidateID'])) {
@@ -131,10 +131,20 @@ try {
 
             // Generar nombre único para el archivo
             $fileInfo = pathinfo($_FILES['file']['name']);
-            $fileName = uniqid() . '_' . preg_replace('/[^a-zA-Z0-9_.-]/', '_', $fileInfo['filename']) . '.' . $fileInfo['extension'];
+            $fileName =
+                uniqid() .
+                '_' .
+                preg_replace('/[^a-zA-Z0-9_.-]/', '_', $fileInfo['filename']) .
+                '.' .
+                $fileInfo['extension'];
             $filePath = '/uploads/GC/' . $fileName;
 
-            if (move_uploaded_file($_FILES['file']['tmp_name'], $_SERVER['DOCUMENT_ROOT'] . $filePath)) {
+            if (
+                move_uploaded_file(
+                    $_FILES['file']['tmp_name'],
+                    $_SERVER['DOCUMENT_ROOT'] . $filePath,
+                )
+            ) {
                 $res = insertCandidateEvidence($_POST['candidateID'], $filePath);
             } else {
                 throw new RuntimeException('Error al mover el archivo.');
@@ -466,8 +476,8 @@ get_head('GC');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Gestión de Candidatos');
-?>
+    get_header('Gestión de Candidatos');
+    ?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
