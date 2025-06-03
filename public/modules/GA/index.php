@@ -1,8 +1,8 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
-require_once INCLUDES_DIR . "/utilities/database.php";
-require_once INCLUDES_DIR . "/utilities/responseHTTP.php";
-require_once INCLUDES_DIR . "/models/student.php";
+require_once INCLUDES_DIR . '/utilities/database.php';
+require_once INCLUDES_DIR . '/utilities/responseHTTP.php';
+require_once INCLUDES_DIR . '/models/student.php';
 ob_start();
 
 try {
@@ -13,20 +13,30 @@ try {
         $regex = '/^[A-Za-z]$/';
         $uploadDir = __DIR__ . '/uploads/';
 
-        if ($_POST["action"] === "registerFromExcel" && isset($_FILES['gaExcelFile'])) {
+        if ($_POST['action'] === 'registerFromExcel' && isset($_FILES['gaExcelFile'])) {
             if ($_FILES['gaExcelFile']['error'] !== UPLOAD_ERR_OK) {
                 throw new RuntimeException('Error uploading file.');
             }
 
             $fileTmpPath = $_FILES['gaExcelFile']['tmp_name'];
-            $fileName = str_replace(' ', '_', htmlspecialchars($_FILES['gaExcelFile']['name'], ENT_QUOTES, 'UTF-8'));
+            $fileName = str_replace(
+                ' ',
+                '_',
+                htmlspecialchars($_FILES['gaExcelFile']['name'], ENT_QUOTES, 'UTF-8'),
+            );
             $ext = strtolower(pathinfo($_FILES['gaExcelFile']['name'], PATHINFO_EXTENSION));
 
             if (!in_array($ext, $allowedExtensions)) {
                 throw new RuntimeException('Invalid file type.');
             }
 
-            if (!preg_match($regex, $_POST["claveUlsaCol"]) || !preg_match($regex, $_POST["nombreCol"]) || !preg_match($regex, $_POST["apellidosCol"]) || !preg_match($regex, $_POST["carreraCol"]) || !preg_match($regex, $_POST["emailCol"])) {
+            if (
+                !preg_match($regex, $_POST['claveUlsaCol']) ||
+                !preg_match($regex, $_POST['nombreCol']) ||
+                !preg_match($regex, $_POST['apellidosCol']) ||
+                !preg_match($regex, $_POST['carreraCol']) ||
+                !preg_match($regex, $_POST['emailCol'])
+            ) {
                 throw new RuntimeException('Invalid column index.');
             }
 
@@ -40,51 +50,59 @@ try {
                 throw new RuntimeException('Error uploading file.');
             }
 
-            $res = restartDatabaseFromExcel("$uploadDir$fileName", $_POST["claveUlsaCol"], $_POST["nombreCol"], $_POST["apellidosCol"], $_POST["carreraCol"], $_POST["emailCol"]);
-
-        } elseif ($_POST["action"] === "getPrograms") {
+            $res = restartDatabaseFromExcel(
+                "$uploadDir$fileName",
+                $_POST['claveUlsaCol'],
+                $_POST['nombreCol'],
+                $_POST['apellidosCol'],
+                $_POST['carreraCol'],
+                $_POST['emailCol'],
+            );
+        } elseif ($_POST['action'] === 'getPrograms') {
             $programs = getPrograms();
-            $res = array_map(fn ($program) => $program->getName(), $programs);
-
-        } elseif ($_POST["action"] === "registerOneStudent") {
-
-            if (!preg_match('/^\d{6}$/', $_POST["claveUlsa"])) {
+            $res = array_map(fn($program) => $program->getName(), $programs);
+        } elseif ($_POST['action'] === 'registerOneStudent') {
+            if (!preg_match('/^\d{6}$/', $_POST['claveUlsa'])) {
                 throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
             }
-            if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST["nombre"])) {
+            if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST['nombre'])) {
                 throw new RuntimeException('Nombre invalido. Solo se permiten letras y espacios.');
             }
-            if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST["apellidos"])) {
-                throw new RuntimeException('Apellidos invalidos. Solo se permiten letras y espacios.');
+            if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST['apellidos'])) {
+                throw new RuntimeException(
+                    'Apellidos invalidos. Solo se permiten letras y espacios.',
+                );
             }
-            if (empty($_POST["carrera"])) {
+            if (empty($_POST['carrera'])) {
                 throw new RuntimeException('Carrera no puede estar vacia.');
             }
-            if (!filter_var($_POST["email"], FILTER_VALIDATE_EMAIL)) {
+            if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
                 throw new RuntimeException('Correo electronico invalido.');
             }
-            $res = insertOneStudent($_POST["claveUlsa"], $_POST["nombre"], $_POST["apellidos"], $_POST["carrera"], $_POST["email"]);
-
-        } elseif ($_POST["action"] === "getTableStudents") {
-            $res = array_values(array_map(fn ($student) => $student->getJSON(), getStudents()));
-
-        } elseif ($_POST["action"] === "deleteOneStudent") {
-            if (!preg_match('/^\d{6}$/', $_POST["claveUlsaDelete"])) {
+            $res = insertOneStudent(
+                $_POST['claveUlsa'],
+                $_POST['nombre'],
+                $_POST['apellidos'],
+                $_POST['carrera'],
+                $_POST['email'],
+            );
+        } elseif ($_POST['action'] === 'getTableStudents') {
+            $res = array_values(array_map(fn($student) => $student->getJSON(), getStudents()));
+        } elseif ($_POST['action'] === 'deleteOneStudent') {
+            if (!preg_match('/^\d{6}$/', $_POST['claveUlsaDelete'])) {
                 throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
             }
-            $res = deleteStudent($_POST["claveUlsaDelete"]);
-
-        } elseif ($_POST["action"] === "deleteAllStudents") {
+            $res = deleteStudent($_POST['claveUlsaDelete']);
+        } elseif ($_POST['action'] === 'deleteAllStudents') {
             $res = deleteAllStudents();
         }
 
         echo responseOK($res);
-        exit;
+        exit();
     }
-
 } catch (RuntimeException $e) {
     echo responseInternalError($e->getMessage());
-    exit;
+    exit();
 }
 ob_end_flush();
 ?>
@@ -92,13 +110,14 @@ ob_end_flush();
 
 <?php
 require_once INCLUDES_DIR . '/templates/head.php';
-get_head("GA");
+get_head('GA');
 ?>
 
 <body style="display: block;">
-    <?php require_once INCLUDES_DIR . '/templates/header.php';
-get_header("Gestión de Alumnos");
-?>
+    <?php
+    require_once INCLUDES_DIR . '/templates/header.php';
+    get_header('Gestión de Alumnos');
+    ?>
 
     <main class="container content marco">
         <!-- Botones Nav -->

@@ -44,7 +44,7 @@ class Candidate
         int $id = 0,
         int $userID = 0,
         ?int $ulsaID = null,
-        ?string $email2 = null
+        ?string $email2 = null,
     ) {
         $this->setFirstName(ucwords($firstName));
         $this->setLastName(ucwords($lastName));
@@ -59,7 +59,7 @@ class Candidate
         $this->id = $id;
         $this->userID = $userID;
         $this->ulsaID = $ulsaID; // Este valor viene del JOIN con user
-        
+
         // Valores por defecto
         $this->programCoordinatorApprovalFlag = false;
         $this->programCoordinatorDecision = null;
@@ -305,7 +305,9 @@ class Candidate
     public function setInterviewDateTime(string $datetime): void
     {
         if (empty($datetime)) {
-            throw new InvalidArgumentException('La fecha y hora de entrevista no puede estar vacía');
+            throw new InvalidArgumentException(
+                'La fecha y hora de entrevista no puede estar vacía',
+            );
         }
         $this->interviewDateTime = $datetime;
     }
@@ -435,4 +437,4 @@ class Candidate
     {
         return $this->toArray();
     }
-} 
+}

@@ -18,13 +18,13 @@ function insertOneCandidate(
     int $programaAcademico,
     string $fechaSolicitudEntrevista,
     string $fechaHoraEntrevista,
-    ?int $claveUlsa = null
+    ?int $claveUlsa = null,
 ): bool {
     try {
         // Convertir fechas al formato esperado por PostgreSQL
         $fechaSolicitud = date('Y-m-d H:i:s', strtotime($fechaSolicitudEntrevista));
         $fechaEntrevista = date('Y-m-d H:i:s', strtotime($fechaHoraEntrevista));
-        
+
         return insertCandidate(
             $nombre,
             $apellidos,
@@ -36,10 +36,10 @@ function insertOneCandidate(
             $programaAcademico,
             $fechaSolicitud,
             $fechaEntrevista,
-            $claveUlsa
+            $claveUlsa,
         );
     } catch (\Exception $e) {
         ErrorList::add("Error al insertar candidato: {$e->getMessage()}");
         return false;
     }
-} 
+}
