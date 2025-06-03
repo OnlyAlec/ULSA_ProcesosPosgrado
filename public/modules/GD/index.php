@@ -76,7 +76,7 @@ try {
             );
         } elseif ($_POST['action'] === 'getTableProfessor') {
             $res = array_values(
-                array_map(fn ($professor) => $professor->getJSON(), getProfessors()),
+                array_map(fn($professor) => $professor->getJSON(), getProfessors()),
             );
         } elseif ($_POST['action'] === 'deleteOneProfessor') {
             if (!preg_match('/^\d{6}$/', $_POST['claveUlsaDelete'])) {
@@ -144,10 +144,10 @@ try {
             ];
         } elseif ($_POST['action'] === 'getSubjects') {
             $res = getSubjects();
-            $res = array_map(fn ($subject) => $subject->toArray(), $res);
+            $res = array_map(fn($subject) => $subject->toArray(), $res);
         } elseif ($_POST['action'] === 'getPrograms') {
             $res = getPrograms();
-            $res = array_map(fn ($program) => $program->toArray(), $res);
+            $res = array_map(fn($program) => $program->toArray(), $res);
         }
 
         echo responseOK($res);
@@ -228,8 +228,8 @@ get_head('GD');
     
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Gestión de Profesores');
-?>
+    get_header('Gestión de Profesores');
+    ?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
