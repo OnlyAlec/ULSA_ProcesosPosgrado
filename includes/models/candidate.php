@@ -17,7 +17,6 @@ class Candidate
     private string $interviewDateTime;
     private bool $programCoordinatorApprovalFlag;
     private ?string $programCoordinatorDecision;
-    private bool $candidatePendingFlag;
     private bool $admissionsPendingFlag;
     private ?string $admissionsPendingDescription;
     private bool $registrarPendingFlag;
@@ -28,7 +27,8 @@ class Candidate
     private ?string $gradChiefPendingDescription;
     private bool $programCoordinatorPendingFlag;
     private ?string $programCoordinatorPendingDescription;
-    private bool $status;
+    private int $status; // Ahora es int (FK a candidatedescription)
+    private ?string $statusDescription; // Descripción del status
     private ?string $programName;
 
     public function __construct(
@@ -63,7 +63,6 @@ class Candidate
         // Valores por defecto
         $this->programCoordinatorApprovalFlag = false;
         $this->programCoordinatorDecision = null;
-        $this->candidatePendingFlag = false;
         $this->admissionsPendingFlag = false;
         $this->admissionsPendingDescription = null;
         $this->registrarPendingFlag = false;
@@ -74,7 +73,8 @@ class Candidate
         $this->gradChiefPendingDescription = null;
         $this->programCoordinatorPendingFlag = false;
         $this->programCoordinatorPendingDescription = null;
-        $this->status = false;
+        $this->status = 1; // Por defecto status 1 (pendiente)
+        $this->statusDescription = 'pendiente';
         $this->programName = null;
     }
 
@@ -159,11 +159,6 @@ class Candidate
         return $this->programCoordinatorDecision;
     }
 
-    public function getCandidatePendingFlag(): bool
-    {
-        return $this->candidatePendingFlag;
-    }
-
     public function getAdmissionsPendingFlag(): bool
     {
         return $this->admissionsPendingFlag;
@@ -214,9 +209,14 @@ class Candidate
         return $this->programCoordinatorPendingDescription;
     }
 
-    public function getStatus(): bool
+    public function getStatus(): int
     {
         return $this->status;
+    }
+
+    public function getStatusDescription(): ?string
+    {
+        return $this->statusDescription;
     }
 
     public function getProgramName(): ?string
@@ -328,11 +328,6 @@ class Candidate
         $this->programCoordinatorDecision = $decision;
     }
 
-    public function setCandidatePendingFlag(bool $flag): void
-    {
-        $this->candidatePendingFlag = $flag;
-    }
-
     public function setAdmissionsPendingFlag(bool $flag): void
     {
         $this->admissionsPendingFlag = $flag;
@@ -383,9 +378,17 @@ class Candidate
         $this->programCoordinatorPendingDescription = $description;
     }
 
-    public function setStatus(bool $status): void
+    public function setStatus(int $status): void
     {
+        if ($status < 1) {
+            throw new InvalidArgumentException('El status no es válido');
+        }
         $this->status = $status;
+    }
+
+    public function setStatusDescription(?string $description): void
+    {
+        $this->statusDescription = $description;
     }
 
     public function setProgramName(?string $programName): void
@@ -412,7 +415,6 @@ class Candidate
             'interviewDateTime' => $this->interviewDateTime,
             'programCoordinatorApprovalFlag' => $this->programCoordinatorApprovalFlag,
             'programCoordinatorDecision' => $this->programCoordinatorDecision,
-            'candidatePendingFlag' => $this->candidatePendingFlag,
             'admissionsPendingFlag' => $this->admissionsPendingFlag,
             'admissionsPendingDescription' => $this->admissionsPendingDescription,
             'registrarPendingFlag' => $this->registrarPendingFlag,
@@ -424,6 +426,7 @@ class Candidate
             'programCoordinatorPendingFlag' => $this->programCoordinatorPendingFlag,
             'programCoordinatorPendingDescription' => $this->programCoordinatorPendingDescription,
             'status' => $this->status,
+            'statusDescription' => $this->statusDescription,
             'programName' => $this->programName
         ];
     }

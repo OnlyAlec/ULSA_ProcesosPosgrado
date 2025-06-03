@@ -160,9 +160,23 @@ $(document).ready(function () {
 
                 if (res.success && Array.isArray(res.data) && res.data.length > 0) {
                     res.data.forEach(function (candidate) {
-                        const statusIcon = candidate.status 
-                            ? '<span class="status-badge active"><i class="fas fa-check"></i> Activo</span>'
-                            : '<span class="status-badge inactive"><i class="fas fa-minus"></i> Pendiente</span>';
+                        let statusIcon;
+                        let statusClass;
+                        
+                        // Determinar icono y clase según el status
+                        switch(candidate.status) {
+                            case 1: // Pendiente
+                                statusIcon = '<span class="status-badge pending"><i class="fas fa-clock"></i> Pendiente</span>';
+                                break;
+                            case 2: // Inscrito
+                                statusIcon = '<span class="status-badge active"><i class="fas fa-check"></i> Inscrito</span>';
+                                break;
+                            case 3: // Baja
+                                statusIcon = '<span class="status-badge inactive"><i class="fas fa-times"></i> Baja</span>';
+                                break;
+                            default:
+                                statusIcon = '<span class="status-badge pending"><i class="fas fa-question"></i> Desconocido</span>';
+                        }
                         
                         let row = `<tr>
                                 <td>${candidate.admissionFolio}</td>
@@ -225,8 +239,14 @@ $(document).ready(function () {
                         // Cargar programas para el selector
                         loadProgramsForCandidate(candidate.id, candidate.programID);
                         
-                        // Verificar y actualizar estado del checkbox de status
-                        updateStatusCheckboxState(candidate.id);
+                        // Cargar descripciones de status
+                        loadStatusDescriptions(candidate.id, candidate.status);
+                        
+                        // Cargar evidencias
+                        loadCandidateEvidence(candidate.id);
+                        
+                        // Verificar y actualizar estado del dropdown de status
+                        updateStatusDropdownState(candidate.id);
                     } else {
                         displayMessage(row, 'Error al obtener detalles del candidato', 'error');
                     }
@@ -397,13 +417,13 @@ $(document).ready(function () {
                     <div class='editable-field'>
                         <span class='field-label'>Status:</span>
                         <div class='field-value' data-field='status'>
-                            <div class='checkbox-wrapper'>
-                                <input type='checkbox' class='form-check-input status-checkbox' 
-                                       ${(candidate.status || false) ? 'checked' : ''}>
-                                <span class='field-text status-text'>
-                                    ${(candidate.status || false) ? 'Activo' : 'Pendiente'}
-                                </span>
-                            </div>
+                            <span class='field-text status-text'>${candidate.statusDescription || 'pendiente'}</span>
+                            <select class='form-control form-control-sm status-select'>
+                                <option value=''>Cargando...</option>
+                            </select>
+                            <button class='btn btn-sm btn-outline-primary btn-edit-field'>
+                                <i class='fas fa-edit'></i>
+                            </button>
                         </div>
                     </div>
                     
@@ -431,17 +451,6 @@ $(document).ready(function () {
                         </div>
                     </div>
                     
-                    <!-- Candidato Pendiente (sin descripción) -->
-                    <div class='editable-field'>
-                        <span class='field-label'>Candidato Pendiente:</span>
-                        <div class='field-value' data-field='candidate_pending_flag'>
-                            <div class='checkbox-wrapper'>
-                                <input type='checkbox' class='form-check-input' ${candidate.candidatePendingFlag || false ? 'checked' : ''}>
-                                <span class='field-text'>${candidate.candidatePendingFlag || false ? 'Sí' : 'No'}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
                     <!-- Grupos de Flag + Descripción -->
                     ${createPendingFieldGroup('Promoción y Admisiones', 'admissions_pending_flag', candidate.admissionsPendingFlag || false, 'admissions_pending_description', candidate.admissionsPendingDescription)}
                     
@@ -452,6 +461,21 @@ $(document).ready(function () {
                     ${createPendingFieldGroup('Jefe Posgrado', 'grad_chief_pending_flag', candidate.gradChiefPendingFlag || false, 'grad_chief_pending_description', candidate.gradChiefPendingDescription)}
                     
                     ${createPendingFieldGroup('Coordinador Programa', 'program_coordinator_pending_flag', candidate.programCoordinatorPendingFlag || false, 'program_coordinator_pending_description', candidate.programCoordinatorPendingDescription)}
+                </div>
+
+                <!-- Evidencias -->
+                <div class='field-group'>
+                    <h6><i class='fas fa-paperclip'></i> Evidencias</h6>
+                    <div class='evidence-section'>
+                        <div class='mb-3'>
+                            <button class='btn btn-sm btn-primary upload-evidence' data-candidate-id='${candidate.id}'>
+                                <i class='fas fa-upload'></i> Subir Evidencia
+                            </button>
+                        </div>
+                        <div class='evidence-list' id='evidence-list-${candidate.id}'>
+                            <p class='text-muted'>Cargando evidencias...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -582,6 +606,104 @@ $(document).ready(function () {
         });
     }
 
+    // Cargar descripciones de status para el selector
+    function loadStatusDescriptions(candidateId, currentStatus) {
+        $.ajax({
+            url: "",
+            type: "POST",
+            data: { action: "getCandidateDescriptions" },
+            success: function (response) {
+                let res = typeof response === "string" ? JSON.parse(response) : response;
+                
+                if (res.success && Array.isArray(res.data)) {
+                    const select = $(`.candidate-details[data-candidate-id='${candidateId}'] .status-select`);
+                    select.empty();
+                    
+                    res.data.forEach(function (status) {
+                        const selected = status.id == currentStatus ? 'selected' : '';
+                        select.append(`<option value="${status.id}" ${selected}>${status.description}</option>`);
+                    });
+                }
+            }
+        });
+    }
+
+    // Cargar evidencias del candidato
+    function loadCandidateEvidence(candidateId) {
+        $.ajax({
+            url: "",
+            type: "POST",
+            data: { action: "getCandidateEvidence", candidateID: candidateId },
+            success: function (response) {
+                let res = typeof response === "string" ? JSON.parse(response) : response;
+                const evidenceList = $(`#evidence-list-${candidateId}`);
+                
+                if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+                    evidenceList.empty();
+                    res.data.forEach(function(evidence) {
+                        evidenceList.append(`
+                            <div class='evidence-item mb-2'>
+                                <i class='fas fa-file-alt text-primary'></i>
+                                <a href='${evidence.path}' download='${evidence.name}' class='ml-2'>
+                                    ${evidence.name}
+                                </a>
+                            </div>
+                        `);
+                    });
+                } else {
+                    evidenceList.html('<p class="text-muted">No hay evidencias disponibles.</p>');
+                }
+            },
+            error: function() {
+                $(`#evidence-list-${candidateId}`).html('<p class="text-danger">Error al cargar evidencias.</p>');
+            }
+        });
+    }
+
+    // Manejar subida de evidencias
+    $(document).on('click', '.upload-evidence', function() {
+        const candidateId = $(this).data('candidateId');
+        const fileInput = $('<input type="file" accept="*/*">');
+        
+        fileInput.on('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('candidateID', candidateId);
+            formData.append('action', 'uploadEvidence');
+            
+            $.ajax({
+                url: '',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                beforeSend: function() {
+                    $(`#evidence-list-${candidateId}`).html('<p class="text-info">Subiendo archivo...</p>');
+                },
+                success: function(response) {
+                    let res = typeof response === 'string' ? JSON.parse(response) : response;
+                    
+                    if (res.success) {
+                        displayMessage($(`.candidate-details[data-candidate-id='${candidateId}']`), 'Evidencia subida correctamente', 'success');
+                        loadCandidateEvidence(candidateId);
+                    } else {
+                        alert('Error al subir la evidencia.');
+                        loadCandidateEvidence(candidateId);
+                    }
+                },
+                error: function() {
+                    alert('Error al procesar la solicitud.');
+                    loadCandidateEvidence(candidateId);
+                }
+            });
+        });
+        
+        fileInput.trigger('click');
+    });
+
     // Manejar edición de campos
     $(document).on('click', '.btn-edit-field', function() {
         const button = $(this);
@@ -600,6 +722,22 @@ $(document).ready(function () {
                 value = fieldValue.find('select').val();
             } else if (fieldValue.find('textarea').length) {
                 value = fieldValue.find('textarea').val();
+            }
+            
+            // Validación especial para status
+            if (field === 'status' && value == 2) { // 2 = inscrito
+                const candidateDetails = button.closest('.candidate-details');
+                const ulsaIdField = candidateDetails.find('[data-field="ulsa_id"] .field-text');
+                const ulsaIdValue = ulsaIdField.text().trim();
+                
+                if (!ulsaIdValue || ulsaIdValue === 'Sin asignar') {
+                    alert('No se puede inscribir el candidato. Debe tener una Clave ULSA asignada primero.');
+                    // Revertir el cambio en el select
+                    const select = fieldValue.find('select');
+                    const originalValue = select.data('original-value');
+                    select.val(originalValue);
+                    return;
+                }
             }
             
             // Actualizar en la base de datos
@@ -634,9 +772,9 @@ $(document).ready(function () {
                         if (field === 'program_id') {
                             const candidateDetails = button.closest('.candidate-details');
                             const statusField = candidateDetails.find('[data-field="status"] .field-text');
-                            const isActive = statusField.text().trim() === 'Activo';
+                            const statusText = statusField.text().trim().toLowerCase();
                             
-                            if (isActive) {
+                            if (statusText === 'inscrito') {
                                 displayMessage(candidateDetails, 'Programa actualizado en candidato y estudiante', 'success');
                             } else {
                                 displayMessage(candidateDetails, 'Programa actualizado en candidato', 'success');
@@ -644,8 +782,15 @@ $(document).ready(function () {
                         } else if (field === 'ulsa_id') {
                             const candidateId = button.closest('.candidate-details').data('candidateId');
                             displayMessage(button.closest('.candidate-details'), 'Clave ULSA actualizada correctamente', 'success');
-                            // Revalidar el estado del checkbox de status
-                            recheckStatusAfterUlsaUpdate(candidateId);
+                            // Revalidar el estado del dropdown de status
+                            updateStatusDropdownState(candidateId);
+                        } else if (field === 'status') {
+                            const message = value == 2 
+                                ? 'Candidato inscrito y agregado como estudiante' 
+                                : value == 3
+                                ? 'Candidato dado de baja'
+                                : 'Status actualizado a pendiente';
+                            displayMessage(button.closest('.candidate-details'), message, 'success');
                         }
                         
                         // Recargar tabla si es necesario
@@ -668,6 +813,12 @@ $(document).ready(function () {
             fieldValue.addClass('editing');
             button.html('<i class="fas fa-save"></i>');
             
+            // Guardar valor original para el select
+            const select = fieldValue.find('select');
+            if (select.length) {
+                select.data('original-value', select.val());
+            }
+            
             // Enfocar el campo de entrada
             const input = fieldValue.find('input, select, textarea');
             if (input.length) {
@@ -684,27 +835,9 @@ $(document).ready(function () {
         const field = fieldValue.data('field');
         const value = checkbox.is(':checked');
         
-        // VALIDACIÓN ESPECIAL PARA STATUS: Verificar ULSA ID antes de activar
-        if (field === 'status' && value) {
-            const candidateDetails = checkbox.closest('.candidate-details');
-            const ulsaIdField = candidateDetails.find('[data-field="ulsa_id"] .field-text');
-            const ulsaIdValue = ulsaIdField.text().trim();
-            
-            if (!ulsaIdValue || ulsaIdValue === 'Sin asignar') {
-                // Revertir el cambio inmediatamente
-                checkbox.prop('checked', false);
-                alert('No se puede activar el candidato. Debe tener una Clave ULSA asignada primero.');
-                return; // Salir de la función sin hacer la actualización
-            }
-        }
-        
         // Actualizar texto inmediatamente
         const fieldText = fieldValue.find('.field-text');
-        if (field === 'status') {
-            fieldText.text(value ? 'Activo' : 'Pendiente');
-        } else {
-            fieldText.text(value ? 'Aprobado' : 'Pendiente');
-        }
+        fieldText.text(value ? 'Aprobado' : 'Pendiente');
         
         // Actualizar en la base de datos
         $.ajax({
@@ -723,27 +856,18 @@ $(document).ready(function () {
                 let res = typeof response === 'string' ? JSON.parse(response) : response;
                 
                 if (res.success) {
-                    // Mostrar mensaje de confirmación
-                    if (field === 'status') {
-                        const message = value 
-                            ? 'Candidato activado y agregado como estudiante' 
-                            : 'Candidato desactivado y removido de estudiantes';
-                        displayMessage(checkbox.closest('.candidate-details'), message, 'success');
-                    }
-                    
-                    // Recargar tabla
-                    loadCandidatesTable();
+                    // Mostrar mensaje de confirmación si es necesario
                 } else {
                     // Revertir cambio si falla
                     checkbox.prop('checked', !value);
-                    fieldText.text(!value ? (field === 'status' ? 'Activo' : 'Aprobado') : 'Pendiente');
+                    fieldText.text(!value ? 'Aprobado' : 'Pendiente');
                     alert('Error al actualizar: ' + (res.message || 'Error desconocido'));
                 }
             },
             error: function() {
                 // Revertir cambio si falla
                 checkbox.prop('checked', !value);
-                fieldText.text(!value ? (field === 'status' ? 'Activo' : 'Aprobado') : 'Pendiente');
+                fieldText.text(!value ? 'Aprobado' : 'Pendiente');
                 alert('Error al procesar la solicitud');
             },
             complete: function() {
@@ -751,6 +875,26 @@ $(document).ready(function () {
             }
         });
     });
+
+    // Verificar y actualizar estado del dropdown de status basado en ULSA ID
+    function updateStatusDropdownState(candidateId) {
+        const candidateDetails = $(`.candidate-details[data-candidate-id='${candidateId}']`);
+        const ulsaIdField = candidateDetails.find('[data-field="ulsa_id"] .field-text');
+        const statusSelect = candidateDetails.find('[data-field="status"] select');
+        const statusFieldValue = candidateDetails.find('[data-field="status"]');
+        
+        const ulsaIdValue = ulsaIdField.text().trim();
+        const hasUlsaId = ulsaIdValue && ulsaIdValue !== 'Sin asignar';
+        const currentStatus = parseInt(statusSelect.val());
+        
+        if (!hasUlsaId && currentStatus !== 2) {
+            // Si no tiene ULSA ID y no está inscrito, deshabilitar opción de inscrito
+            statusSelect.find('option[value="2"]').prop('disabled', true).text('inscrito (requiere Clave ULSA)');
+        } else {
+            // Si tiene ULSA ID o ya está inscrito, habilitar todas las opciones
+            statusSelect.find('option[value="2"]').prop('disabled', false).text('inscrito');
+        }
+    }
 
     // Manejar checkbox de clave ULSA
     $("#tieneClaveUlsa").change(function() {
@@ -770,43 +914,4 @@ $(document).ready(function () {
 
     // Mostrar sección de registro por defecto
     $("#btn-crear").click();
-
-    // Verificar y actualizar estado del checkbox de status basado en ULSA ID
-    function updateStatusCheckboxState(candidateId) {
-        const candidateDetails = $(`.candidate-details[data-candidate-id='${candidateId}']`);
-        const ulsaIdField = candidateDetails.find('[data-field="ulsa_id"] .field-text');
-        const statusCheckbox = candidateDetails.find('[data-field="status"] input[type="checkbox"]');
-        const statusWrapper = candidateDetails.find('[data-field="status"] .checkbox-wrapper');
-        
-        const ulsaIdValue = ulsaIdField.text().trim();
-        const hasUlsaId = ulsaIdValue && ulsaIdValue !== 'Sin asignar';
-        const isCurrentlyActive = statusCheckbox.is(':checked');
-        
-        if (!hasUlsaId && !isCurrentlyActive) {
-            // Si no tiene ULSA ID y no está activo, deshabilitar checkbox y agregar tooltip
-            statusCheckbox.prop('disabled', true);
-            statusWrapper.attr('title', 'Requiere Clave ULSA para activar');
-            statusWrapper.css('opacity', '0.6');
-        } else {
-            // Si tiene ULSA ID o ya está activo, habilitar checkbox
-            statusCheckbox.prop('disabled', false);
-            statusWrapper.removeAttr('title');
-            statusWrapper.css('opacity', '1');
-        }
-    }
-
-    // Manejar actualización de ULSA ID para revalidar checkbox de status
-    $(document).on('DOMSubtreeModified', '[data-field="ulsa_id"] .field-text', function() {
-        const candidateId = $(this).closest('.candidate-details').data('candidateId');
-        if (candidateId) {
-            updateStatusCheckboxState(candidateId);
-        }
-    });
-
-    // También verificar cuando se actualiza exitosamente el campo ULSA ID
-    function recheckStatusAfterUlsaUpdate(candidateId) {
-        setTimeout(() => {
-            updateStatusCheckboxState(candidateId);
-        }, 100);
-    }
 }); 

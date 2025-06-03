@@ -69,6 +69,9 @@ try {
             $programs = getPrograms();
             $res = array_map(fn ($program) => $program->toArray(), $programs);
         }
+        elseif ($_POST["action"] === "getCandidateDescriptions") {
+            $res = getCandidateDescriptions();
+        }
         elseif ($_POST["action"] === "getTableCandidates") {
             $res = array_values(
                 array_map(fn($candidate) => $candidate->getJSON(), getCandidates())
@@ -111,6 +114,34 @@ try {
             } else {
                 $res = updateCandidateField($candidateID, $field, $value);
             }
+        }
+        elseif ($_POST["action"] === "uploadEvidence") {
+            if (!isset($_POST['candidateID']) || !isset($_FILES['file'])) {
+                throw new RuntimeException('Faltan datos para subir la evidencia.');
+            }
+            
+            // Crear directorio si no existe
+            $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/GC/';
+            if (!file_exists($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+            
+            // Generar nombre único para el archivo
+            $fileInfo = pathinfo($_FILES['file']['name']);
+            $fileName = uniqid() . '_' . preg_replace('/[^a-zA-Z0-9_.-]/', '_', $fileInfo['filename']) . '.' . $fileInfo['extension'];
+            $filePath = '/uploads/GC/' . $fileName;
+            
+            if (move_uploaded_file($_FILES['file']['tmp_name'], $_SERVER['DOCUMENT_ROOT'] . $filePath)) {
+                $res = insertCandidateEvidence($_POST['candidateID'], $filePath);
+            } else {
+                throw new RuntimeException('Error al mover el archivo.');
+            }
+        }
+        elseif ($_POST["action"] === "getCandidateEvidence") {
+            if (!isset($_POST['candidateID'])) {
+                throw new RuntimeException('Falta el ID del candidato para obtener evidencias.');
+            }
+            $res = getCandidateEvidence($_POST['candidateID']);
         }
         elseif ($_POST["action"] === "deleteOneCandidate") {
             if (!preg_match('/^[A-Za-z0-9\-]+$/', $_POST["folioAdmisionDelete"])) {
@@ -225,6 +256,11 @@ get_head("GC");
     }
     
     .status-badge.inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-badge.pending {
         background-color: #fff3cd;
         color: #856404;
     }
@@ -392,6 +428,38 @@ get_head("GC");
     .form-group.row.mb-4:has(.form-check) {
         align-items: center;
         min-height: 3rem;
+    }
+    
+    /* Estilos para la sección de evidencias */
+    .evidence-section {
+        padding: 0.5rem 0;
+    }
+    
+    .evidence-list {
+        max-height: 200px;
+        overflow-y: auto;
+        padding: 0.5rem;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .evidence-item {
+        padding: 0.25rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .evidence-item:last-child {
+        border-bottom: none;
+    }
+    
+    .evidence-item a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    
+    .evidence-item a:hover {
+        text-decoration: underline;
     }
 </style>
 

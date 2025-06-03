@@ -16,15 +16,14 @@
     },
     "GD": {
         "name": "Gestión de Docentes",
-        "description": "Registro, consulta y eliminación de docentes.",
+        "description": "Registro, consulta y eliminación de docentes. Asignación de materias.",
         "icon": "fas fa-solid fa-calculator"
     },
     "FA": {
         "name": "Firma de Actas",
-        "description": "Firma de actas de calificaciones finales.",
+        "description": "Seguimiento a la firma de actas de calificaciones finales.",
         "icon": "fas fa-solid fa-pen-nib"
     },
-
     "GC": {
         "name": "Gestión de Candidatos",
         "description": "Registro de candidatos y conversión a alumnos.",
