@@ -861,9 +861,13 @@ $(document).ready(function () {
                                 '[data-field="status"] .field-text'
                             );
                             const statusText = statusField.text().trim().toLowerCase();
-                            
+
                             if (statusText === 'Inscrito') {
-                                displayMessage(candidateDetails, 'Programa actualizado en candidato y estudiante', 'success');
+                                displayMessage(
+                                    candidateDetails,
+                                    'Programa actualizado en candidato y estudiante',
+                                    'success'
+                                );
                             } else {
                                 displayMessage(
                                     candidateDetails,
@@ -999,7 +1003,10 @@ $(document).ready(function () {
 
         if (!hasUlsaId && currentStatus !== 2) {
             // Si no tiene ULSA ID y no está inscrito, deshabilitar opción de inscrito
-            statusSelect.find('option[value="2"]').prop('disabled', true).text('Inscrito (requiere Clave ULSA)');
+            statusSelect
+                .find('option[value="2"]')
+                .prop('disabled', true)
+                .text('Inscrito (requiere Clave ULSA)');
         } else {
             // Si tiene ULSA ID o ya está inscrito, habilitar todas las opciones
             statusSelect.find('option[value="2"]').prop('disabled', false).text('Inscrito');
