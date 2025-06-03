@@ -57,6 +57,7 @@ public/modules/**/uploads/
 public/modules/**/reports/
 public/uploads/
 
+
 # GRAPHS .gitignore
 public/assets/graphs/*
 includes/config/constants.php
