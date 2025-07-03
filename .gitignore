@@ -48,7 +48,6 @@ jsconfig.json
 .php-cs-fixer.cache
 fiveserver.config.js
 
-
 #  XLSX/PDF
 public/assets/pdf/*
 public/assets/xls/*
@@ -57,7 +56,9 @@ public/modules/**/uploads/
 public/modules/**/reports/
 public/uploads/
 
-
 # GRAPHS .gitignore
 public/assets/graphs/*
+includes/config/constants.php
+
+# Others
 includes/config/constants.php
