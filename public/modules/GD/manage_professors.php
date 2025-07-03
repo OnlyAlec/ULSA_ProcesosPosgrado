@@ -3,13 +3,13 @@
 require_once VENDOR_DIR . '/autoload.php';
 require_once INCLUDES_DIR . '/utilities/util.php';
 require_once INCLUDES_DIR . '/utilities/handleErrors.php';
+require_once INCLUDES_DIR . '/utilities/database.php';
 
 function restartDatabaseFromExcel(
     $filePath,
     $ulsaIdColumn,
     $nameColumn,
     $lastnameColumn,
-    $careerColumn,
     $emailColumn,
 ) {
     ErrorList::clear();
@@ -17,79 +17,64 @@ function restartDatabaseFromExcel(
     $ulsaIdColumn = strtoupper($ulsaIdColumn);
     $nameColumn = strtoupper($nameColumn);
     $lastnameColumn = strtoupper($lastnameColumn);
-    $careerColumn = strtoupper($careerColumn);
     $emailColumn = strtoupper($emailColumn);
 
     try {
-        $data = loadExcelData(
-            $filePath,
-            $ulsaIdColumn,
-            $nameColumn,
-            $lastnameColumn,
-            $careerColumn,
-            $emailColumn,
-        );
+        $data = loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $emailColumn);
         if (empty($data['ulsa_ids'])) {
             throw new RuntimeException('El archivo Excel no contiene datos validos.');
         }
-        deleteAllStudents();
+        deleteAllProfessors();
         insertDataIntoDatabase($data);
 
-        return 'Reinicio completado!';
+        return [
+            'success' => true,
+            'errors' => ErrorList::getAll(),
+        ];
     } catch (RuntimeException $e) {
         throw new RuntimeException(message: $e->getMessage());
     }
 }
 
-function insertOneStudent($ulsaId, $name, $lastname, $career, $email)
+function insertOneProfessor($ulsaId, $name, $lastname, $email)
 {
     ErrorList::clear();
 
     $ulsaId = trim($ulsaId);
     $name = trim($name);
     $lastname = trim($lastname);
-    $career = trim($career);
     $email = trim($email);
 
     try {
-        $user = getStudentByUlsaID($ulsaId);
-        if ($user) {
-            throw new RuntimeException(message: 'Estudiante ya existente');
-        }
+        $db = getDatabaseConnection();
 
-        $career = getProgramByName($career);
-        $careerID = !$career ? insertProgram($career, true) : $career->getId();
-        $userID = insertUser($ulsaId, $name, $lastname, $email, true);
+        $stmt = $db->prepare(
+            'INSERT INTO public.user (first_name, last_name, ulsa_id, email) VALUES (:first_name, :last_name, :ulsa_id, :email) RETURNING id',
+        );
+        $stmt->execute([
+            ':first_name' => $name,
+            ':last_name' => $lastname,
+            ':ulsa_id' => $ulsaId,
+            ':email' => $email,
+        ]);
+        $userId = $stmt->fetchColumn();
 
-        if (!insertStudent($userID, $careerID)) {
-            throw new RuntimeException(message: 'Error en el registro');
-        }
-        return 'Registro correcto!';
+        $stmt = $db->prepare('INSERT INTO professor (user_id) VALUES (:user_id)');
+        $stmt->execute([
+            ':user_id' => $userId,
+        ]);
+
+        return [
+            'success' => true,
+            'errors' => ErrorList::getAll(),
+        ];
     } catch (RuntimeException $e) {
         throw new RuntimeException(message: $e->getMessage());
     }
 }
 
-function deleteOneStudent($ulsaId)
+function loadExcelData($filePath, $ulsaIdColumn, $nameColumn, $lastnameColumn, $emailColumn)
 {
-    ErrorList::clear();
-    $ulsaId = trim($ulsaId);
-
-    if (!deleteStudent($ulsaId)) {
-        throw new RuntimeException('No se encontro ningun estudiante con el ID proporcionado.');
-    }
-
-    return 'Estudiante eliminado!';
-}
-
-function loadExcelData(
-    $filePath,
-    $ulsaIdColumn,
-    $nameColumn,
-    $lastnameColumn,
-    $careerColumn,
-    $emailColumn,
-) {
     $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
     $reader->setReadDataOnly(true);
     $spreadsheet = $reader->load($filePath);
@@ -99,7 +84,6 @@ function loadExcelData(
         'ulsa_ids' => [],
         'first_names' => [],
         'last_names' => [],
-        'careers' => [],
         'emails' => [],
     ];
 
@@ -110,7 +94,6 @@ function loadExcelData(
         $ulsaId = trim($sheet->getCell("{$ulsaIdColumn}{$rowIndex}")->getValue());
         $firstName = trim($sheet->getCell("{$nameColumn}{$rowIndex}")->getValue());
         $lastName = trim($sheet->getCell("{$lastnameColumn}{$rowIndex}")->getValue());
-        $career = trim($sheet->getCell("{$careerColumn}{$rowIndex}")->getValue());
         $email = trim($sheet->getCell("{$emailColumn}{$rowIndex}")->getValue());
 
         if (!preg_match('/^\d{6}$/', $ulsaId)) {
@@ -125,10 +108,6 @@ function loadExcelData(
             ErrorList::add("Fila {$rowIndex}: Apellidos invalidos.\n");
             continue;
         }
-        if (empty($career)) {
-            ErrorList::add("Fila {$rowIndex}: Carrera vacia.\n");
-            continue;
-        }
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             ErrorList::add("Fila {$rowIndex}: Correo electrOnico invalido.\n");
             continue;
@@ -137,7 +116,6 @@ function loadExcelData(
         $data['ulsa_ids'][] = intval($ulsaId);
         $data['first_names'][] = $firstName;
         $data['last_names'][] = $lastName;
-        $data['careers'][] = $career;
         $data['emails'][] = $email;
     }
 
@@ -147,27 +125,34 @@ function loadExcelData(
 function insertDataIntoDatabase($data)
 {
     try {
-        $careers = array_unique($data['careers']);
-        $careerIds = [];
-        foreach ($careers as $career) {
-            $careerIds[$career] = insertProgram($career, true);
-        }
+        $db = getDatabaseConnection();
+        $db->beginTransaction();
 
-        $usersIds = [];
-        for ($i = 0; $i < count($data['ulsa_ids']); $i++) {
-            $usersIds[] = insertUser(
-                $data['ulsa_ids'][$i],
-                $data['first_names'][$i],
-                $data['last_names'][$i],
-                $data['emails'][$i],
-                true,
+        // Insertar nombres y apellidos
+        $userIds = [];
+        for ($i = 0; $i < count($data['first_names']); $i++) {
+            $stmt = $db->prepare(
+                'INSERT INTO public.user (first_name, last_name, ulsa_id, email) VALUES (:first_name, :last_name, :ulsa_id, :email) RETURNING id',
             );
+            $stmt->execute([
+                ':first_name' => $data['first_names'][$i],
+                ':last_name' => $data['last_names'][$i],
+                ':ulsa_id' => $data['ulsa_ids'][$i],
+                ':email' => $data['emails'][$i],
+            ]);
+            $userIds[] = $db->lastInsertId();
         }
 
-        for ($i = 0; $i < count($usersIds); $i++) {
-            insertStudent($usersIds[$i], $careerIds[$data['careers'][$i]]);
+        // Insertar estudiantes
+        for ($i = 0; $i < count($data['ulsa_ids']); $i++) {
+            $stmt = $db->prepare('INSERT INTO professor (user_id) VALUES (:user_id)');
+            $stmt->execute([
+                ':user_id' => $userIds[$i],
+            ]);
         }
+        $db->commit();
     } catch (PDOException $e) {
-        throw new RuntimeException('No se pueden agregar nuevos datos');
+        $db->rollBack();
+        ErrorList::add($e->getMessage());
     }
 }
