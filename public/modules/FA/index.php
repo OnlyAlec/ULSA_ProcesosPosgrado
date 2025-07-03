@@ -20,7 +20,9 @@ try {
 
             case 'toggleAbsent':
                 if (!isset($_POST['id']) || !isset($_POST['state'])) {
-                    throw new RuntimeException('Faltan datos para actualizar el estado de asistencia.');
+                    throw new RuntimeException(
+                        'Faltan datos para actualizar el estado de asistencia.',
+                    );
                 }
                 $res = updateWillBeAbsent($_POST['id'], $_POST['state']);
                 break;
@@ -81,8 +83,8 @@ get_head('FA');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Firma de Actas');
-?>
+    get_header('Firma de Actas');
+    ?>
 
     <main class="container content marco">
         <div class="sectionsFA">

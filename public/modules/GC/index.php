@@ -19,7 +19,9 @@ try {
                     throw new RuntimeException('Número de Bloque inválido. Debe ser entre 1 y 5.');
                 }
                 if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST['nombre'])) {
-                    throw new RuntimeException('Nombre inválido. Solo se permiten letras y espacios.');
+                    throw new RuntimeException(
+                        'Nombre inválido. Solo se permiten letras y espacios.',
+                    );
                 }
                 if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST['apellidos'])) {
                     throw new RuntimeException(
@@ -36,9 +38,14 @@ try {
                     throw new RuntimeException('Correo electrónico 2 inválido.');
                 }
                 if (!preg_match('/^\d{10}$/', $_POST['celular'])) {
-                    throw new RuntimeException('Número de celular inválido. Debe tener 10 dígitos.');
+                    throw new RuntimeException(
+                        'Número de celular inválido. Debe tener 10 dígitos.',
+                    );
                 }
-                if (empty($_POST['programaAcademico']) || !is_numeric($_POST['programaAcademico'])) {
+                if (
+                    empty($_POST['programaAcademico']) ||
+                    !is_numeric($_POST['programaAcademico'])
+                ) {
                     throw new RuntimeException('Programa Académico no válido.');
                 }
                 if (empty($_POST['fechaSolicitudEntrevista'])) {
@@ -47,7 +54,9 @@ try {
                     );
                 }
                 if (empty($_POST['fechaHoraEntrevista'])) {
-                    throw new RuntimeException('Fecha y Hora de Entrevista no pueden estar vacías.');
+                    throw new RuntimeException(
+                        'Fecha y Hora de Entrevista no pueden estar vacías.',
+                    );
                 }
 
                 // Validar clave ULSA si se proporciona
@@ -78,7 +87,7 @@ try {
 
             case 'getPrograms':
                 $programs = getPrograms();
-                $res = array_map(fn ($program) => $program->toArray(), $programs);
+                $res = array_map(fn($program) => $program->toArray(), $programs);
                 break;
 
             case 'getCandidateDescriptions':
@@ -87,7 +96,7 @@ try {
 
             case 'getTableCandidates':
                 $res = array_values(
-                    array_map(fn ($candidate) => $candidate->getJSON(), getCandidates()),
+                    array_map(fn($candidate) => $candidate->getJSON(), getCandidates()),
                 );
                 break;
 
@@ -113,7 +122,11 @@ try {
                 break;
 
             case 'updateCandidateField':
-                if (empty($_POST['candidateID']) || empty($_POST['field']) || !isset($_POST['value'])) {
+                if (
+                    empty($_POST['candidateID']) ||
+                    empty($_POST['field']) ||
+                    !isset($_POST['value'])
+                ) {
                     throw new RuntimeException('Datos incompletos para actualización.');
                 }
 
@@ -166,7 +179,9 @@ try {
 
             case 'getCandidateEvidence':
                 if (!isset($_POST['candidateID'])) {
-                    throw new RuntimeException('Falta el ID del candidato para obtener evidencias.');
+                    throw new RuntimeException(
+                        'Falta el ID del candidato para obtener evidencias.',
+                    );
                 }
                 $res = getCandidateEvidence($_POST['candidateID']);
                 break;
@@ -201,8 +216,8 @@ get_head('GC');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Gestión de Candidatos');
-?>
+    get_header('Gestión de Candidatos');
+    ?>
 
     <main class="container content marco">
         <!-- Botones Nav -->

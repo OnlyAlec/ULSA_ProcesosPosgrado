@@ -64,10 +64,14 @@ try {
 
             case 'registerOneProfessor':
                 if (!preg_match('/^\d{6}$/', $_POST['claveUlsa'])) {
-                    throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
+                    throw new RuntimeException(
+                        'Clave ULSA invalida. Debe ser un numero de 6 digitos.',
+                    );
                 }
                 if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST['nombre'])) {
-                    throw new RuntimeException('Nombre invalido. Solo se permiten letras y espacios.');
+                    throw new RuntimeException(
+                        'Nombre invalido. Solo se permiten letras y espacios.',
+                    );
                 }
                 if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST['apellidos'])) {
                     throw new RuntimeException(
@@ -87,13 +91,15 @@ try {
 
             case 'getTableProfessor':
                 $res = array_values(
-                    array_map(fn ($professor) => $professor->getJSON(), getProfessors()),
+                    array_map(fn($professor) => $professor->getJSON(), getProfessors()),
                 );
                 break;
 
             case 'deleteOneProfessor':
                 if (!preg_match('/^\d{6}$/', $_POST['claveUlsaDelete'])) {
-                    throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
+                    throw new RuntimeException(
+                        'Clave ULSA invalida. Debe ser un numero de 6 digitos.',
+                    );
                 }
                 $res = deleteProfessorByUlsaId($_POST['claveUlsaDelete']);
                 break;
@@ -104,7 +110,9 @@ try {
 
             case 'getProfessorDetails':
                 if (!preg_match('/^\d{6}$/', $_POST['ulsaID'])) {
-                    throw new RuntimeException('Clave ULSA invalida. Debe ser un numero de 6 digitos.');
+                    throw new RuntimeException(
+                        'Clave ULSA invalida. Debe ser un numero de 6 digitos.',
+                    );
                 }
                 $res = getProfessorSubjectsAndProgramsByUlsaID($_POST['ulsaID']);
                 break;
@@ -115,7 +123,9 @@ try {
                     !isset($_POST['subjectId']) ||
                     !isset($_POST['programId'])
                 ) {
-                    throw new RuntimeException('Faltan datos para eliminar la materia del programa.');
+                    throw new RuntimeException(
+                        'Faltan datos para eliminar la materia del programa.',
+                    );
                 }
                 $res = deleteProgramSubject(
                     $_POST['professorId'],
@@ -153,12 +163,12 @@ try {
 
             case 'getSubjects':
                 $res = getSubjects();
-                $res = array_map(fn ($subject) => $subject->toArray(), $res);
+                $res = array_map(fn($subject) => $subject->toArray(), $res);
                 break;
 
             case 'getPrograms':
                 $res = getPrograms();
-                $res = array_map(fn ($program) => $program->toArray(), $res);
+                $res = array_map(fn($program) => $program->toArray(), $res);
                 break;
 
             default:
@@ -185,8 +195,8 @@ get_head('GD');
     
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Gestión de Profesores');
-?>
+    get_header('Gestión de Profesores');
+    ?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
