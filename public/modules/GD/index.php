@@ -14,13 +14,13 @@ try {
         $uploadDir = __DIR__ . '/uploads/';
 
         $action = $_POST['action'] ?? '';
-        
+
         switch ($action) {
             case 'registerFromExcel':
                 if (!isset($_FILES['gdExcelFile'])) {
                     throw new RuntimeException('Archivo Excel requerido.');
                 }
-                
+
                 if ($_FILES['gdExcelFile']['error'] !== UPLOAD_ERR_OK) {
                     throw new RuntimeException('Error uploading file.');
                 }
@@ -87,7 +87,7 @@ try {
 
             case 'getTableProfessor':
                 $res = array_values(
-                    array_map(fn($professor) => $professor->getJSON(), getProfessors()),
+                    array_map(fn ($professor) => $professor->getJSON(), getProfessors()),
                 );
                 break;
 
@@ -153,12 +153,12 @@ try {
 
             case 'getSubjects':
                 $res = getSubjects();
-                $res = array_map(fn($subject) => $subject->toArray(), $res);
+                $res = array_map(fn ($subject) => $subject->toArray(), $res);
                 break;
 
             case 'getPrograms':
                 $res = getPrograms();
-                $res = array_map(fn($program) => $program->toArray(), $res);
+                $res = array_map(fn ($program) => $program->toArray(), $res);
                 break;
 
             default:
@@ -185,8 +185,8 @@ get_head('GD');
     
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-    get_header('Gestión de Profesores');
-    ?>
+get_header('Gestión de Profesores');
+?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
