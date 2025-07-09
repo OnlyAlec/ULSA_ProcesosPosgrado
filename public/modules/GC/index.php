@@ -327,7 +327,6 @@ get_head('GC');
         font-style: italic;
     }
     
-    /* Estilos para grupos de pendientes */
     .pending-group {
         margin-bottom: 1rem;
         border: 1px solid #e9ecef;
@@ -378,7 +377,6 @@ get_head('GC');
         width: 100px;
     }
     
-    /* Mejorar el espaciado y centrado del checkbox de Clave ULSA */
     .form-check {
         display: flex;
         align-items: center;
@@ -403,7 +401,6 @@ get_head('GC');
         margin-top: 1rem;
     }
     
-    /* Corrección específica para el checkbox de Clave ULSA */
     .form-group .form-check {
         display: flex;
         align-items: center;
@@ -427,20 +424,17 @@ get_head('GC');
         font-weight: normal;
     }
     
-    /* Asegurar que el checkbox esté perfectamente alineado */
     #tieneClaveUlsa {
         vertical-align: middle;
         margin-top: 0 !important;
         margin-bottom: 0 !important;
     }
     
-    /* Contenedor del checkbox con mejor espaciado */
     .form-group.row.mb-4:has(.form-check) {
         align-items: center;
         min-height: 3rem;
     }
     
-    /* Estilos para la sección de evidencias */
     .evidence-section {
         padding: 0.5rem 0;
     }
