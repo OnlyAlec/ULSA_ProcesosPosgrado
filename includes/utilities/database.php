@@ -1795,7 +1795,7 @@ function getActiveStudents(): array
                 'ulsaID' => $row['ulsa_id'],
                 'fullName' => $row['first_name'] . ' ' . $row['last_name'],
                 'programName' => $row['career'],
-                'email' => $row['ulsa_email']
+                'email' => $row['ulsa_email'],
             ];
         }
 
@@ -1855,7 +1855,7 @@ function getQuittedStudents(): array
                 $row['status'],
                 $row['quitreason_id'],
                 $row['quitstatus_id'],
-                $row['id']
+                $row['id'],
             );
 
             // Establecer información adicional
@@ -1930,7 +1930,7 @@ function getQuittedByID(int $id): ?Quitted
             $row['status'],
             $row['quitreason_id'],
             $row['quitstatus_id'],
-            $row['id']
+            $row['id'],
         );
 
         // Establecer información adicional
@@ -1962,7 +1962,7 @@ function getQuitDescriptions(): array
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $descriptions[] = [
                 'id' => $row['id'],
-                'description' => $row['description']
+                'description' => $row['description'],
             ];
         }
 
@@ -1987,7 +1987,7 @@ function getQuitReasons(): array
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $reasons[] = [
                 'id' => $row['id'],
-                'description' => $row['description']
+                'description' => $row['description'],
             ];
         }
 
@@ -2012,7 +2012,7 @@ function getQuitStatuses(): array
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $statuses[] = [
                 'id' => $row['id'],
-                'description' => $row['description']
+                'description' => $row['description'],
             ];
         }
 
@@ -2034,7 +2034,7 @@ function insertQuitted(
     ?string $returningAt = null,
     ?int $status = null,
     ?int $quitReasonID = null,
-    ?int $quitStatusID = null
+    ?int $quitStatusID = null,
 ): bool {
     try {
         $db = getDatabaseConnection();
@@ -2088,7 +2088,7 @@ function updateQuittedField($quittedID, string $field, $value): bool
             'returning_at',
             'status',
             'quitreason_id',
-            'quitstatus_id'
+            'quitstatus_id',
         ];
 
         if (!in_array($field, $allowedFields)) {
@@ -2189,6 +2189,8 @@ function getQuittedCommentsAndEvidence($quittedID): array
 
         return ['comments' => $comments, 'evidence' => $evidence];
     } catch (\PDOException $e) {
-        throw new \RuntimeException('Error al obtener comentarios y evidencias: ' . $e->getMessage());
+        throw new \RuntimeException(
+            'Error al obtener comentarios y evidencias: ' . $e->getMessage(),
+        );
     }
 }

@@ -31,7 +31,7 @@ class Quitted
         ?int $status = null,
         ?int $quitReasonID = null,
         ?int $quitStatusID = null,
-        ?int $id = null
+        ?int $id = null,
     ) {
         $this->studentID = $studentID;
         $this->quitDescriptionID = $quitDescriptionID;
@@ -214,7 +214,7 @@ class Quitted
             'quitReasonID' => $this->quitReasonID,
             'quitReasonName' => $this->quitReasonName,
             'quitStatusID' => $this->quitStatusID,
-            'quitStatusName' => $this->quitStatusName
+            'quitStatusName' => $this->quitStatusName,
         ];
     }
 

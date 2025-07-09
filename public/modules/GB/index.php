@@ -28,12 +28,12 @@ try {
                 $_POST['returningAt'] ?: null,
                 null, // status field no longer used
                 $_POST['quitReasonID'] ? (int) $_POST['quitReasonID'] : null,
-                (int) $_POST['quitStatusID']
+                (int) $_POST['quitStatusID'],
             );
         } elseif ($_POST['action'] === 'getActiveStudents') {
             $res = getActiveStudents();
         } elseif ($_POST['action'] === 'getQuittedStudents') {
-            $res = array_map(fn ($quitted) => $quitted->getJSON(), getQuittedStudents());
+            $res = array_map(fn($quitted) => $quitted->getJSON(), getQuittedStudents());
         } elseif ($_POST['action'] === 'getQuittedDetails') {
             if (empty($_POST['quittedID'])) {
                 throw new RuntimeException('ID de baja no proporcionado.');
@@ -70,10 +70,20 @@ try {
 
             // Generar nombre único para el archivo
             $fileInfo = pathinfo($_FILES['file']['name']);
-            $fileName = uniqid() . '_' . preg_replace('/[^a-zA-Z0-9_.-]/', '_', $fileInfo['filename']) . '.' . $fileInfo['extension'];
+            $fileName =
+                uniqid() .
+                '_' .
+                preg_replace('/[^a-zA-Z0-9_.-]/', '_', $fileInfo['filename']) .
+                '.' .
+                $fileInfo['extension'];
             $filePath = '/uploads/GB/' . $fileName;
 
-            if (move_uploaded_file($_FILES['file']['tmp_name'], $_SERVER['DOCUMENT_ROOT'] . $filePath)) {
+            if (
+                move_uploaded_file(
+                    $_FILES['file']['tmp_name'],
+                    $_SERVER['DOCUMENT_ROOT'] . $filePath,
+                )
+            ) {
                 $res = insertQuittedEvidence($_POST['quittedID'], $filePath);
             } else {
                 throw new RuntimeException('Error al mover el archivo.');
@@ -86,7 +96,9 @@ try {
             $res = insertQuittedComment($_POST['quittedID'], $_POST['comment'], $_POST['author']);
         } elseif ($_POST['action'] === 'getQuittedCommentsAndEvidence') {
             if (!isset($_POST['quittedID'])) {
-                throw new RuntimeException('Falta el ID de la baja para obtener comentarios y evidencias.');
+                throw new RuntimeException(
+                    'Falta el ID de la baja para obtener comentarios y evidencias.',
+                );
             }
             $res = getQuittedCommentsAndEvidence($_POST['quittedID']);
         }
@@ -319,8 +331,8 @@ get_head('GB');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Gestión de Bajas');
-?>
+    get_header('Gestión de Bajas');
+    ?>
 
     <main class="container content marco">
         <!-- Botones Nav -->

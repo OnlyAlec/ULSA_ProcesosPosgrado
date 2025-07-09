@@ -27,16 +27,26 @@ $(document).ready(function () {
 
                 if (res.success) {
                     if (form.find('input[name="action"]').val() === 'registerQuit') {
-                        displayMessage($('#registrar'), 'Baja registrada correctamente.', 'success');
+                        displayMessage(
+                            $('#registrar'),
+                            'Baja registrada correctamente.',
+                            'success'
+                        );
                         form[0].reset();
                         $('.quit-form-row').remove();
-                        $('#tableActiveStudents tbody').find('.btn-primary').removeClass('btn-primary').addClass('btn-outline-primary');
+                        $('#tableActiveStudents tbody')
+                            .find('.btn-primary')
+                            .removeClass('btn-primary')
+                            .addClass('btn-outline-primary');
                         loadActiveStudents();
-                        
+
                         // Scroll hacia arriba para mostrar el mensaje
-                        $('html, body').animate({
-                            scrollTop: $('#registrar').offset().top - 100
-                        }, 500);
+                        $('html, body').animate(
+                            {
+                                scrollTop: $('#registrar').offset().top - 100,
+                            },
+                            500
+                        );
                     } else {
                         displayMessage(form, 'Acción realizada correctamente');
                     }
@@ -75,12 +85,12 @@ $(document).ready(function () {
         if (pos && pos.length > 0) {
             // Remover mensajes anteriores
             pos.find('.alert').remove();
-            
+
             const newDiv = document.createElement('div');
             newDiv.className =
                 type == 'success' ? 'alert alert-success mt-3' : 'alert alert-danger mt-3';
             newDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
-            
+
             // Si es un contenedor, agregar al inicio; si es un formulario, agregar antes
             if (pos.hasClass('sectionGB')) {
                 pos.prepend(newDiv);
