@@ -9,156 +9,192 @@ try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         require_once 'manage_candidates.php';
 
-        if ($_POST['action'] === 'registerOneCandidate') {
-            // Validaciones
-            if (!preg_match('/^[A-Za-z0-9\-]+$/', $_POST['folioAdmision'])) {
-                throw new RuntimeException('Folio de Admisión inválido.');
-            }
-            if (!preg_match('/^[1-5]$/', $_POST['numeroBloque'])) {
-                throw new RuntimeException('Número de Bloque inválido. Debe ser entre 1 y 5.');
-            }
-            if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST['nombre'])) {
-                throw new RuntimeException('Nombre inválido. Solo se permiten letras y espacios.');
-            }
-            if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST['apellidos'])) {
-                throw new RuntimeException(
-                    'Apellidos inválidos. Solo se permiten letras y espacios.',
-                );
-            }
-            if (!filter_var($_POST['correo1'], FILTER_VALIDATE_EMAIL)) {
-                throw new RuntimeException('Correo electrónico 1 inválido.');
-            }
-            if (
-                !empty($_POST['correo2']) &&
-                !filter_var($_POST['correo2'], FILTER_VALIDATE_EMAIL)
-            ) {
-                throw new RuntimeException('Correo electrónico 2 inválido.');
-            }
-            if (!preg_match('/^\d{10}$/', $_POST['celular'])) {
-                throw new RuntimeException('Número de celular inválido. Debe tener 10 dígitos.');
-            }
-            if (empty($_POST['programaAcademico']) || !is_numeric($_POST['programaAcademico'])) {
-                throw new RuntimeException('Programa Académico no válido.');
-            }
-            if (empty($_POST['fechaSolicitudEntrevista'])) {
-                throw new RuntimeException(
-                    'Fecha de Solicitud de Entrevista no puede estar vacía.',
-                );
-            }
-            if (empty($_POST['fechaHoraEntrevista'])) {
-                throw new RuntimeException('Fecha y Hora de Entrevista no pueden estar vacías.');
-            }
-
-            // Validar clave ULSA si se proporciona
-            $claveUlsa = null;
-            if (isset($_POST['tieneClaveUlsa']) && $_POST['tieneClaveUlsa'] === 'true') {
-                if (!preg_match('/^\d{6}$/', $_POST['claveUlsa'])) {
+        switch ($_POST['action']) {
+            case 'registerOneCandidate':
+                // Validaciones
+                if (!preg_match('/^[A-Za-z0-9\-]+$/', $_POST['folioAdmision'])) {
+                    throw new RuntimeException('Folio de Admisión inválido.');
+                }
+                if (!preg_match('/^[1-5]$/', $_POST['numeroBloque'])) {
+                    throw new RuntimeException('Número de Bloque inválido. Debe ser entre 1 y 5.');
+                }
+                if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST['nombre'])) {
                     throw new RuntimeException(
-                        'Clave ULSA inválida. Debe ser un número de 6 dígitos.',
+                        'Nombre inválido. Solo se permiten letras y espacios.',
                     );
                 }
-                $claveUlsa = (int) $_POST['claveUlsa'];
-            }
-
-            $res = insertOneCandidate(
-                $_POST['folioAdmision'],
-                (int) $_POST['numeroBloque'],
-                $_POST['nombre'],
-                $_POST['apellidos'],
-                $_POST['correo1'],
-                $_POST['correo2'] ?: null,
-                $_POST['celular'],
-                (int) $_POST['programaAcademico'],
-                $_POST['fechaSolicitudEntrevista'],
-                $_POST['fechaHoraEntrevista'],
-                $claveUlsa,
-            );
-        } elseif ($_POST['action'] === 'getPrograms') {
-            $programs = getPrograms();
-            $res = array_map(fn($program) => $program->toArray(), $programs);
-        } elseif ($_POST['action'] === 'getCandidateDescriptions') {
-            $res = getCandidateDescriptions();
-        } elseif ($_POST['action'] === 'getTableCandidates') {
-            $res = array_values(
-                array_map(fn($candidate) => $candidate->getJSON(), getCandidates()),
-            );
-        } elseif ($_POST['action'] === 'getCandidateDetails') {
-            if (empty($_POST['candidateID'])) {
-                throw new RuntimeException('ID del candidato no proporcionado.');
-            }
-
-            $candidates = getCandidates();
-            $candidate = null;
-            foreach ($candidates as $c) {
-                if ($c->getID() == $_POST['candidateID']) {
-                    $candidate = $c;
-                    break;
+                if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/', $_POST['apellidos'])) {
+                    throw new RuntimeException(
+                        'Apellidos inválidos. Solo se permiten letras y espacios.',
+                    );
                 }
-            }
+                if (!filter_var($_POST['correo1'], FILTER_VALIDATE_EMAIL)) {
+                    throw new RuntimeException('Correo electrónico 1 inválido.');
+                }
+                if (
+                    !empty($_POST['correo2']) &&
+                    !filter_var($_POST['correo2'], FILTER_VALIDATE_EMAIL)
+                ) {
+                    throw new RuntimeException('Correo electrónico 2 inválido.');
+                }
+                if (!preg_match('/^\d{10}$/', $_POST['celular'])) {
+                    throw new RuntimeException(
+                        'Número de celular inválido. Debe tener 10 dígitos.',
+                    );
+                }
+                if (
+                    empty($_POST['programaAcademico']) ||
+                    !is_numeric($_POST['programaAcademico'])
+                ) {
+                    throw new RuntimeException('Programa Académico no válido.');
+                }
+                if (empty($_POST['fechaSolicitudEntrevista'])) {
+                    throw new RuntimeException(
+                        'Fecha de Solicitud de Entrevista no puede estar vacía.',
+                    );
+                }
+                if (empty($_POST['fechaHoraEntrevista'])) {
+                    throw new RuntimeException(
+                        'Fecha y Hora de Entrevista no pueden estar vacías.',
+                    );
+                }
 
-            if ($candidate) {
-                $res = $candidate->getJSON();
-            } else {
-                throw new RuntimeException('Candidato no encontrado.');
-            }
-        } elseif ($_POST['action'] === 'updateCandidateField') {
-            if (empty($_POST['candidateID']) || empty($_POST['field']) || !isset($_POST['value'])) {
-                throw new RuntimeException('Datos incompletos para actualización.');
-            }
+                // Validar clave ULSA si se proporciona
+                $claveUlsa = null;
+                if (isset($_POST['tieneClaveUlsa']) && $_POST['tieneClaveUlsa'] === 'true') {
+                    if (!preg_match('/^\d{6}$/', $_POST['claveUlsa'])) {
+                        throw new RuntimeException(
+                            'Clave ULSA inválida. Debe ser un número de 6 dígitos.',
+                        );
+                    }
+                    $claveUlsa = (int) $_POST['claveUlsa'];
+                }
 
-            $candidateID = (int) $_POST['candidateID'];
-            $field = $_POST['field'];
-            $value = $_POST['value'];
+                $res = insertOneCandidate(
+                    $_POST['folioAdmision'],
+                    (int) $_POST['numeroBloque'],
+                    $_POST['nombre'],
+                    $_POST['apellidos'],
+                    $_POST['correo1'],
+                    $_POST['correo2'] ?: null,
+                    $_POST['celular'],
+                    (int) $_POST['programaAcademico'],
+                    $_POST['fechaSolicitudEntrevista'],
+                    $_POST['fechaHoraEntrevista'],
+                    $claveUlsa,
+                );
+                break;
 
-            // Campos que pertenecen a la tabla user
-            $userFields = ['first_name', 'last_name', 'email'];
+            case 'getPrograms':
+                $programs = getPrograms();
+                $res = array_map(fn($program) => $program->toArray(), $programs);
+                break;
 
-            if (in_array($field, $userFields)) {
-                $res = updateCandidateUserField($candidateID, $field, $value);
-            } else {
-                $res = updateCandidateField($candidateID, $field, $value);
-            }
-        } elseif ($_POST['action'] === 'uploadEvidence') {
-            if (!isset($_POST['candidateID']) || !isset($_FILES['file'])) {
-                throw new RuntimeException('Faltan datos para subir la evidencia.');
-            }
+            case 'getCandidateDescriptions':
+                $res = getCandidateDescriptions();
+                break;
 
-            // Crear directorio si no existe
-            $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/GC/';
-            if (!file_exists($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
+            case 'getTableCandidates':
+                $res = array_values(
+                    array_map(fn($candidate) => $candidate->getJSON(), getCandidates()),
+                );
+                break;
 
-            // Generar nombre único para el archivo
-            $fileInfo = pathinfo($_FILES['file']['name']);
-            $fileName =
-                uniqid() .
-                '_' .
-                preg_replace('/[^a-zA-Z0-9_.-]/', '_', $fileInfo['filename']) .
-                '.' .
-                $fileInfo['extension'];
-            $filePath = '/uploads/GC/' . $fileName;
+            case 'getCandidateDetails':
+                if (empty($_POST['candidateID'])) {
+                    throw new RuntimeException('ID del candidato no proporcionado.');
+                }
 
-            if (
-                move_uploaded_file(
-                    $_FILES['file']['tmp_name'],
-                    $_SERVER['DOCUMENT_ROOT'] . $filePath,
-                )
-            ) {
-                $res = insertCandidateEvidence($_POST['candidateID'], $filePath);
-            } else {
-                throw new RuntimeException('Error al mover el archivo.');
-            }
-        } elseif ($_POST['action'] === 'getCandidateEvidence') {
-            if (!isset($_POST['candidateID'])) {
-                throw new RuntimeException('Falta el ID del candidato para obtener evidencias.');
-            }
-            $res = getCandidateEvidence($_POST['candidateID']);
-        } elseif ($_POST['action'] === 'deleteOneCandidate') {
-            if (!preg_match('/^[A-Za-z0-9\-]+$/', $_POST['folioAdmisionDelete'])) {
-                throw new RuntimeException('Folio de Admisión inválido.');
-            }
-            $res = deleteCandidateByAdmissionFolio($_POST['folioAdmisionDelete']);
+                $candidates = getCandidates();
+                $candidate = null;
+                foreach ($candidates as $c) {
+                    if ($c->getID() == $_POST['candidateID']) {
+                        $candidate = $c;
+                        break;
+                    }
+                }
+
+                if ($candidate) {
+                    $res = $candidate->getJSON();
+                } else {
+                    throw new RuntimeException('Candidato no encontrado.');
+                }
+                break;
+
+            case 'updateCandidateField':
+                if (
+                    empty($_POST['candidateID']) ||
+                    empty($_POST['field']) ||
+                    !isset($_POST['value'])
+                ) {
+                    throw new RuntimeException('Datos incompletos para actualización.');
+                }
+
+                $candidateID = (int) $_POST['candidateID'];
+                $field = $_POST['field'];
+                $value = $_POST['value'];
+
+                // Campos que pertenecen a la tabla user
+                $userFields = ['first_name', 'last_name', 'email'];
+
+                if (in_array($field, $userFields)) {
+                    $res = updateCandidateUserField($candidateID, $field, $value);
+                } else {
+                    $res = updateCandidateField($candidateID, $field, $value);
+                }
+                break;
+
+            case 'uploadEvidence':
+                if (!isset($_POST['candidateID']) || !isset($_FILES['file'])) {
+                    throw new RuntimeException('Faltan datos para subir la evidencia.');
+                }
+
+                // Crear directorio si no existe
+                $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/GC/';
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+
+                // Generar nombre único para el archivo
+                $fileInfo = pathinfo($_FILES['file']['name']);
+                $fileName =
+                    uniqid() .
+                    '_' .
+                    preg_replace('/[^a-zA-Z0-9_.-]/', '_', $fileInfo['filename']) .
+                    '.' .
+                    $fileInfo['extension'];
+                $filePath = '/uploads/GC/' . $fileName;
+
+                if (
+                    move_uploaded_file(
+                        $_FILES['file']['tmp_name'],
+                        $_SERVER['DOCUMENT_ROOT'] . $filePath,
+                    )
+                ) {
+                    $res = insertCandidateEvidence($_POST['candidateID'], $filePath);
+                } else {
+                    throw new RuntimeException('Error al mover el archivo.');
+                }
+                break;
+
+            case 'getCandidateEvidence':
+                if (!isset($_POST['candidateID'])) {
+                    throw new RuntimeException(
+                        'Falta el ID del candidato para obtener evidencias.',
+                    );
+                }
+                $res = getCandidateEvidence($_POST['candidateID']);
+                break;
+
+            case 'deleteOneCandidate':
+                if (!preg_match('/^[A-Za-z0-9\-]+$/', $_POST['folioAdmisionDelete'])) {
+                    throw new RuntimeException('Folio de Admisión inválido.');
+                }
+                $res = deleteCandidateByAdmissionFolio($_POST['folioAdmisionDelete']);
+                break;
+
+            default:
+                throw new RuntimeException('Acción no válida.');
         }
 
         echo responseOK($res);
@@ -176,296 +212,6 @@ ob_end_flush();
 require_once INCLUDES_DIR . '/templates/head.php';
 get_head('GC');
 ?>
-
-<style>
-    .candidate-details {
-        background-color: #f8fafc;
-        padding: 1.5rem;
-        border-radius: 12px;
-        margin-top: 1rem;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    
-    .field-group {
-        margin-bottom: 1.25rem;
-        padding: 0.75rem;
-        background-color: #fff;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
-    }
-    
-    .field-group h6 {
-        color: #4a5568;
-        margin-bottom: 0.75rem;
-        font-weight: 600;
-    }
-    
-    .editable-field {
-        display: flex;
-        align-items: center;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid #f1f3f5;
-    }
-    
-    .editable-field:last-child {
-        border-bottom: none;
-    }
-    
-    .field-label {
-        font-weight: 500;
-        color: #6c757d;
-        width: 200px;
-        font-size: 0.9rem;
-    }
-    
-    .field-value {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .field-value input,
-    .field-value select,
-    .field-value textarea {
-        display: none;
-        flex: 1;
-    }
-    
-    .field-value.editing input,
-    .field-value.editing select,
-    .field-value.editing textarea {
-        display: block;
-    }
-    
-    .field-value.editing .field-text {
-        display: none;
-    }
-    
-    .field-text {
-        flex: 1;
-        color: #212529;
-    }
-    
-    .btn-edit-field {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
-    }
-    
-    .status-badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 12px;
-        font-size: 0.85rem;
-        font-weight: 500;
-    }
-    
-    .status-badge.active {
-        background-color: #d4edda;
-        color: #155724;
-    }
-    
-    .status-badge.inactive {
-        background-color: #f8d7da;
-        color: #721c24;
-    }
-    
-    .status-badge.pending {
-        background-color: #fff3cd;
-        color: #856404;
-    }
-    
-    .checkbox-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .form-check-input {
-        cursor: pointer;
-        width: 1.25rem;
-        height: 1.25rem;
-        margin-right: 0.5rem;
-    }
-    
-    .form-check-input:focus {
-        border-color: #80bdff;
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
-    
-    .form-check-input:checked {
-        background-color: #007bff;
-        border-color: #007bff;
-    }
-    
-    .editable-field .checkbox-wrapper {
-        min-height: 2rem;
-        align-items: center;
-    }
-    
-    .field-value input[type="checkbox"] {
-        display: block !important;
-        position: relative;
-        width: 1.25rem;
-        height: 1.25rem;
-        margin: 0;
-        flex-shrink: 0;
-    }
-    
-    .field-value input[type="checkbox"]:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-    
-    .checkbox-wrapper[title] {
-        cursor: help;
-    }
-    
-    .checkbox-wrapper[title] .field-text {
-        color: #6c757d;
-        font-style: italic;
-    }
-    
-    .pending-group {
-        margin-bottom: 1rem;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        background-color: #f8f9fa;
-        overflow: hidden;
-    }
-    
-    .pending-group-header {
-        background-color: #e9ecef;
-        padding: 0.5rem 0.75rem;
-        border-bottom: 1px solid #dee2e6;
-    }
-    
-    .pending-group-title {
-        margin: 0;
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #495057;
-    }
-    
-    .pending-group-title i {
-        margin-right: 0.5rem;
-        color: #6c757d;
-    }
-    
-    .pending-group-content {
-        padding: 0.75rem;
-        background-color: #fff;
-    }
-    
-    .pending-group-content .editable-field {
-        margin-bottom: 0.75rem;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid #f1f3f5;
-    }
-    
-    .pending-group-content .editable-field:last-child {
-        margin-bottom: 0;
-        border-bottom: none;
-    }
-    
-    .pending-flag .field-label {
-        width: 80px;
-    }
-    
-    .pending-description .field-label {
-        width: 100px;
-    }
-    
-    .form-check {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1.5rem;
-        padding: 0.75rem 0;
-    }
-    
-    .form-check-input {
-        margin: 0;
-        flex-shrink: 0;
-        width: 1.25rem;
-        height: 1.25rem;
-    }
-    
-    .form-check-label {
-        line-height: 1.4;
-        margin: 0;
-    }
-    
-    #claveUlsaGroup .form-group {
-        margin-top: 1rem;
-    }
-    
-    .form-group .form-check {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 0;
-        padding: 0;
-    }
-    
-    .form-group .form-check .form-check-input {
-        margin: 0 !important;
-        margin-right: 0.75rem !important;
-        flex-shrink: 0;
-        position: static !important;
-        transform: none !important;
-    }
-    
-    .form-group .form-check .form-check-label {
-        margin: 0;
-        line-height: 1.5;
-        cursor: pointer;
-        font-weight: normal;
-    }
-    
-    #tieneClaveUlsa {
-        vertical-align: middle;
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
-    }
-    
-    .form-group.row.mb-4:has(.form-check) {
-        align-items: center;
-        min-height: 3rem;
-    }
-    
-    .evidence-section {
-        padding: 0.5rem 0;
-    }
-    
-    .evidence-list {
-        max-height: 200px;
-        overflow-y: auto;
-        padding: 0.5rem;
-        background-color: #f8f9fa;
-        border-radius: 4px;
-        border: 1px solid #e9ecef;
-    }
-    
-    .evidence-item {
-        padding: 0.25rem 0;
-        border-bottom: 1px solid #e9ecef;
-    }
-    
-    .evidence-item:last-child {
-        border-bottom: none;
-    }
-    
-    .evidence-item a {
-        color: #007bff;
-        text-decoration: none;
-    }
-    
-    .evidence-item a:hover {
-        text-decoration: underline;
-    }
-</style>
 
 <body style="display: block;">
     <?php

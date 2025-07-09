@@ -307,17 +307,22 @@ $(function () {
         });
 
         $.ajax({
-            url: 'generate_report.php',
+            url: '',
             type: 'POST',
-            data: { students: JSON.stringify(allStudents), filename: filename },
-            success: function (response) {
-                const result = JSON.parse(response);
-                const fileUrl = result.url;
-
-                window.open(fileUrl, '_blank');
+            data: {
+                action: 'generateReport',
+                students: JSON.stringify(allStudents),
+                statusField: 'sedStatus',
+                filename: filename,
+            },
+            success: function () {
+                const publicUrl = `/assets/pdf/${filename}.pdf?t=${Date.now()}`;
+                window.open(publicUrl, '_blank');
             },
             error: function (xhr) {
-                const errorMsg = xhr.responseText || 'Error al procesar la solicitud';
+                const errorMsg =
+                    xhr.responseText ||
+                    'Error al procesar la solicitud del Reporte de Evaluación Docente';
                 displayMessage($('.sectionsSED'), errorMsg, 'error');
             },
         });

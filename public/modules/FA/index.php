@@ -6,45 +6,62 @@ ob_start();
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if ($_POST['action'] === 'getProgramSubjects') {
-            $res = getProgramSubjects();
-        } elseif ($_POST['action'] === 'toggleSigned') {
-            if (!isset($_POST['id']) || !isset($_POST['state'])) {
-                throw new RuntimeException('Faltan datos para actualizar el estado de firma.');
-            }
-            $res = updateHasSigned($_POST['id'], $_POST['state']);
-        } elseif ($_POST['action'] === 'toggleAbsent') {
-            if (!isset($_POST['id']) || !isset($_POST['state'])) {
-                throw new RuntimeException('Faltan datos para actualizar el estado de asistencia.');
-            }
-            $res = updateWillBeAbsent($_POST['id'], $_POST['state']);
-        } elseif ($_POST['action'] === 'addComment') {
-            if (!isset($_POST['id']) || !isset($_POST['comment']) || !isset($_POST['author'])) {
-                throw new RuntimeException('Faltan datos para agregar un comentario.');
-            }
-            $res = insertComment($_POST['id'], $_POST['comment'], $_POST['author']);
-        } elseif ($_POST['action'] === 'uploadEvidence') {
-            if (!isset($_POST['id']) || !isset($_FILES['file'])) {
-                throw new RuntimeException('Faltan datos para subir la evidencia.');
-            }
-            $filePath = '/uploads/FA/' . $_FILES['file']['name'];
-            if (
-                move_uploaded_file(
-                    $_FILES['file']['tmp_name'],
-                    $_SERVER['DOCUMENT_ROOT'] . $filePath,
-                )
-            ) {
-                $res = insertEvidence($_POST['id'], $filePath);
-            } else {
-                throw new RuntimeException('Error al mover el archivo.');
-            }
-        } elseif ($_POST['action'] === 'getCommentsAndEvidence') {
-            if (!isset($_POST['id'])) {
-                throw new RuntimeException(
-                    'Faltan datos para obtener los comentarios y la evidencia.',
-                );
-            }
-            $res = getCommentsAndEvidence($_POST['id']);
+        switch ($_POST['action']) {
+            case 'getProgramSubjects':
+                $res = getProgramSubjects();
+                break;
+
+            case 'toggleSigned':
+                if (!isset($_POST['id']) || !isset($_POST['state'])) {
+                    throw new RuntimeException('Faltan datos para actualizar el estado de firma.');
+                }
+                $res = updateHasSigned($_POST['id'], $_POST['state']);
+                break;
+
+            case 'toggleAbsent':
+                if (!isset($_POST['id']) || !isset($_POST['state'])) {
+                    throw new RuntimeException(
+                        'Faltan datos para actualizar el estado de asistencia.',
+                    );
+                }
+                $res = updateWillBeAbsent($_POST['id'], $_POST['state']);
+                break;
+
+            case 'addComment':
+                if (!isset($_POST['id']) || !isset($_POST['comment']) || !isset($_POST['author'])) {
+                    throw new RuntimeException('Faltan datos para agregar un comentario.');
+                }
+                $res = insertComment($_POST['id'], $_POST['comment'], $_POST['author']);
+                break;
+
+            case 'uploadEvidence':
+                if (!isset($_POST['id']) || !isset($_FILES['file'])) {
+                    throw new RuntimeException('Faltan datos para subir la evidencia.');
+                }
+                $filePath = '/uploads/FA/' . $_FILES['file']['name'];
+                if (
+                    move_uploaded_file(
+                        $_FILES['file']['tmp_name'],
+                        $_SERVER['DOCUMENT_ROOT'] . $filePath,
+                    )
+                ) {
+                    $res = insertEvidence($_POST['id'], $filePath);
+                } else {
+                    throw new RuntimeException('Error al mover el archivo.');
+                }
+                break;
+
+            case 'getCommentsAndEvidence':
+                if (!isset($_POST['id'])) {
+                    throw new RuntimeException(
+                        'Faltan datos para obtener los comentarios y la evidencia.',
+                    );
+                }
+                $res = getCommentsAndEvidence($_POST['id']);
+                break;
+
+            default:
+                throw new RuntimeException('Acción no reconocida.');
         }
 
         echo responseOK($res);
@@ -62,27 +79,6 @@ ob_end_flush();
 require_once INCLUDES_DIR . '/templates/head.php';
 get_head('FA');
 ?>
-
-<head>
-    <style>
-        .form-check-input {
-            width: 1.4em;
-            height: 1.4em;
-            accent-color: #0d6efd; 
-            border-radius: 0.25em;
-            transition: transform 0.1s;
-        }
-
-        .form-check-input:checked {
-            transform: scale(1.1);
-        }
-
-        .form-check-label {
-            margin-left: 0.4em;
-            font-weight: 500;
-        }
-    </style>
-</head>
 
 <body style="display: block;">
     <?php
