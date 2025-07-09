@@ -1857,7 +1857,7 @@ function getQuittedStudents(): array
                 $row['quitstatus_id'],
                 $row['id']
             );
-            
+
             // Establecer información adicional
             $quitted->setStudentName($row['first_name'] . ' ' . $row['last_name']);
             $quitted->setStudentUlsaID($row['ulsa_id']);
@@ -1865,7 +1865,7 @@ function getQuittedStudents(): array
             $quitted->setQuitDescriptionName($row['quit_description'] ?? '');
             $quitted->setQuitReasonName($row['quit_reason'] ?? '');
             $quitted->setQuitStatusName($row['quit_status'] ?? '');
-            
+
             $quittedDB[] = $quitted;
         }
 
@@ -1932,7 +1932,7 @@ function getQuittedByID(int $id): ?Quitted
             $row['quitstatus_id'],
             $row['id']
         );
-        
+
         // Establecer información adicional
         $quitted->setStudentName($row['first_name'] . ' ' . $row['last_name']);
         $quitted->setStudentUlsaID($row['ulsa_id']);
@@ -1940,7 +1940,7 @@ function getQuittedByID(int $id): ?Quitted
         $quitted->setQuitDescriptionName($row['quit_description'] ?? '');
         $quitted->setQuitReasonName($row['quit_reason'] ?? '');
         $quitted->setQuitStatusName($row['quit_status'] ?? '');
-        
+
         return $quitted;
     } catch (\PDOException $e) {
         throw new \RuntimeException("Error al obtener baja por ID: {$e->getMessage()}");
@@ -2047,7 +2047,7 @@ function insertQuitted(
                     :official_applying_at, :nofficial_applying_at, :returning_at,
                     :status, :quitreason_id, :quitstatus_id
                   )';
-        
+
         $stmt = $db->prepare($query);
         $stmt->bindParam(':student_id', $studentID);
         $stmt->bindParam(':quitdescription_id', $quitDescriptionID);
@@ -2078,7 +2078,7 @@ function updateQuittedField($quittedID, string $field, $value): bool
 {
     try {
         $db = getDatabaseConnection();
-        
+
         // Lista de campos permitidos
         $allowedFields = [
             'quitdescription_id',

@@ -33,12 +33,12 @@ try {
         } elseif ($_POST['action'] === 'getActiveStudents') {
             $res = getActiveStudents();
         } elseif ($_POST['action'] === 'getQuittedStudents') {
-            $res = array_map(fn($quitted) => $quitted->getJSON(), getQuittedStudents());
+            $res = array_map(fn ($quitted) => $quitted->getJSON(), getQuittedStudents());
         } elseif ($_POST['action'] === 'getQuittedDetails') {
             if (empty($_POST['quittedID'])) {
                 throw new RuntimeException('ID de baja no proporcionado.');
             }
-            
+
             $quitted = getQuittedByID((int) $_POST['quittedID']);
             if ($quitted) {
                 $res = $quitted->getJSON();
@@ -55,7 +55,7 @@ try {
             if (empty($_POST['quittedID']) || empty($_POST['field']) || !isset($_POST['value'])) {
                 throw new RuntimeException('Datos incompletos para actualización.');
             }
-            
+
             $res = updateQuittedField((int) $_POST['quittedID'], $_POST['field'], $_POST['value']);
         } elseif ($_POST['action'] === 'uploadQuittedEvidence') {
             if (!isset($_POST['quittedID']) || !isset($_FILES['file'])) {
@@ -82,7 +82,7 @@ try {
             if (empty($_POST['quittedID']) || empty($_POST['comment']) || empty($_POST['author'])) {
                 throw new RuntimeException('Faltan datos para agregar el comentario.');
             }
-            
+
             $res = insertQuittedComment($_POST['quittedID'], $_POST['comment'], $_POST['author']);
         } elseif ($_POST['action'] === 'getQuittedCommentsAndEvidence') {
             if (!isset($_POST['quittedID'])) {
@@ -319,8 +319,8 @@ get_head('GB');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-    get_header('Gestión de Bajas');
-    ?>
+get_header('Gestión de Bajas');
+?>
 
     <main class="container content marco">
         <!-- Botones Nav -->

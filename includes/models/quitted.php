@@ -12,7 +12,7 @@ class Quitted
     private ?int $status;
     private ?int $quitReasonID;
     private ?int $quitStatusID;
-    
+
     // Propiedades adicionales para información relacionada
     private ?string $studentName;
     private ?int $studentUlsaID;
@@ -42,7 +42,7 @@ class Quitted
         $this->status = $status;
         $this->quitReasonID = $quitReasonID;
         $this->quitStatusID = $quitStatusID;
-        
+
         if ($id !== null) {
             $this->id = $id;
         }
@@ -223,4 +223,4 @@ class Quitted
     {
         return $this->toArray();
     }
-} 
+}
