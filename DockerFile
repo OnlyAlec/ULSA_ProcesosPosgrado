@@ -4,7 +4,8 @@ WORKDIR /var/www/html/gpp
 
 COPY package*.json ./
 
-RUN npm install
+ENV NODE_ENV=production
+RUN npm ci
 
 FROM php:8.3.19-fpm-bookworm
 
