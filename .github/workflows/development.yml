@@ -5,87 +5,30 @@ on:
 
 jobs:
     deploy:
-        runs-on: ubuntu-latest
+        runs-on: self-hosted
         environment: Credentials Dev
         steps:
-            - name: Checkout código
+            - name: Checkout code
               uses: actions/checkout@v4
-
-            - name: Save SSH Private Key
-              run: |
-                  mkdir -p ~/.ssh
-                  echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
-                  chmod 600 ~/.ssh/deploy_key
-              env:
-                  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
             - name: Backup .env
-              run: |
-                  ssh -i ~/.ssh/deploy_key \
-                  -o StrictHostKeyChecking=no \
-                  -p ${{ secrets.PORT }} \
-                  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-                  "cp ${{ secrets.SSH_PATH }}/.env /tmp/.env-backup"
+              run: cp ${{ secrets.SSH_PATH }}/.env /tmp/.env-backup
 
-            - name: Pre-cleanup with sudo
-              run: |
-                  ssh -i ~/.ssh/deploy_key \
-                  -o StrictHostKeyChecking=no \
-                  -p ${{ secrets.PORT }} \
-                  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-                  "sudo rm -rf ${{ secrets.SSH_PATH }}/.* && sudo rm -rf ${{ secrets.SSH_PATH }}/*"
-
-            - name: Deploy to Server
-              uses: appleboy/scp-action@v0.1.7
-              with:
-                  host: ${{ secrets.SSH_HOST }}
-                  username: ${{ secrets.SSH_USER }}
-                  key: ${{ secrets.SSH_PRIVATE_KEY }}
-                  port: ${{ secrets.PORT }}
-                  source: "./*"
-                  target: ${{ secrets.SSH_PATH }}
-                  rm: false
-
-            - name: Change ownership and permissions to nginx
-              run: |
-                  ssh -i ~/.ssh/deploy_key \
-                  -o StrictHostKeyChecking=no \
-                  -p ${{ secrets.PORT }} \
-                  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-                  sudo /usr/bin/chown -R nginx:nginx ${{ secrets.SSH_PATH }}
-                  sudo /usr/bin/chmod -R 2775 ${{ secrets.SSH_PATH }}/public
-                  EOF
+            - name: Sync files
+              run: rsync -av --delete ./ ${{ secrets.SSH_PATH }}
 
             - name: Restore .env
-              run: |
-                  ssh -i ~/.ssh/deploy_key \
-                  -o StrictHostKeyChecking=no \
-                  -p ${{ secrets.PORT }} \
-                  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-                    "mv /tmp/.env-backup ${{ secrets.SSH_PATH }}/.env"
+              run: mv /tmp/.env-backup ${{ secrets.SSH_PATH }}/.env
     node:
         needs: deploy
-        runs-on: ubuntu-latest
+        runs-on: self-hosted
         environment: Credentials Dev
         steps:
-            - name: Checkout código
-              uses: actions/checkout@v4
+            - name: Recreate image
+              run: cd ${{ secrets.SSH_PATH }} && ${{ secrets.IMAGE }}
 
-            - name: Save SSH Private Key
-              run: |
-                  mkdir -p ~/.ssh
-                  echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
-                  chmod 600 ~/.ssh/deploy_key
-              env:
-                  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-
-            - name: Setup Node.js in remote
-              run: |
-                  ssh -i ~/.ssh/deploy_key \
-                  -o StrictHostKeyChecking=no \
-                  -p ${{ secrets.PORT }} \
-                  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-                    "cd ${{ secrets.SSH_PATH }} && npm install"
-
-            - name: Install dependencies
-              run: npm install
+            - name: Recreate container
+              run: ${{ secrets.CONTAINER }} && sleep 5
+            
+            - name: Healthcheck
+              run: curl -f https://ulsa.onlyalec.site/gpp || exit 1

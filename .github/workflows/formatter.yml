@@ -1,6 +1,10 @@
 name: Code Style
 
-on: [push]
+on:
+  push:
+    branches-ignore:
+      - 'main'
+      - 'development'
 
 jobs:
     php-cs-fixer:
