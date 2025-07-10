@@ -612,7 +612,6 @@ footer .footerTop .logotipo {
     overflow: hidden;
 }
 footer .footerTop .logotipo h3 {
-    display: inline-block;
     vertical-align: top;
     color: #fff;
     margin: 0;
@@ -723,10 +722,6 @@ footer .footerMiddle nav ul li {
     padding: 1px 10px;
     display: inline-block;
     margin-bottom: 10px;
-}
-footer ul > li {
-    display: inline-block;
-    vertical-align: top;
 }
 
 footer .footerBottom {
@@ -1148,4 +1143,73 @@ footer .tab-pane p {
 
 .evidence-item a:hover {
     text-decoration: underline;
+}
+
+.quitted-details {
+    background-color: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-top: 1rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.student-info {
+    background-color: #e9ecef;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+}
+
+.quit-form-card {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.alert i {
+    margin-right: 0.5rem;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 4px solid #17a2b8;
+}
+
+.btn-select-student {
+    min-width: 40px;
+    height: 35px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.btn-select-student:hover {
+    transform: scale(1.05);
+}
+
+.btn-select-student i {
+    font-size: 1.1rem;
 }
