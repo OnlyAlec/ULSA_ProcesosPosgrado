@@ -7,100 +7,125 @@ ob_start();
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if ($_POST['action'] === 'registerQuit') {
-            // Validaciones
-            if (empty($_POST['studentID']) || !is_numeric($_POST['studentID'])) {
-                throw new RuntimeException('ID de estudiante no válido.');
-            }
-            if (empty($_POST['quitDescriptionID']) || !is_numeric($_POST['quitDescriptionID'])) {
-                throw new RuntimeException('Tipo de baja no válido.');
-            }
-            if (empty($_POST['quitStatusID']) || !is_numeric($_POST['quitStatusID'])) {
-                throw new RuntimeException('Estado de baja no válido.');
-            }
+        switch ($_POST['action']) {
+            case 'registerQuit':
+                // Validaciones
+                if (empty($_POST['studentID']) || !is_numeric($_POST['studentID'])) {
+                    throw new RuntimeException('ID de estudiante no válido.');
+                }
+                if (empty($_POST['quitDescriptionID']) || !is_numeric($_POST['quitDescriptionID'])) {
+                    throw new RuntimeException('Tipo de baja no válido.');
+                }
+                if (empty($_POST['quitStatusID']) || !is_numeric($_POST['quitStatusID'])) {
+                    throw new RuntimeException('Estado de baja no válido.');
+                }
 
-            $res = insertQuitted(
-                (int) $_POST['studentID'],
-                (int) $_POST['quitDescriptionID'],
-                $_POST['requestedAt'] ?: null,
-                $_POST['officialApplyingAt'] ?: null,
-                $_POST['nofficialApplyingAt'] ?: null,
-                $_POST['returningAt'] ?: null,
-                null, // status field no longer used
-                $_POST['quitReasonID'] ? (int) $_POST['quitReasonID'] : null,
-                (int) $_POST['quitStatusID'],
-            );
-        } elseif ($_POST['action'] === 'getActiveStudents') {
-            $res = getActiveStudents();
-        } elseif ($_POST['action'] === 'getQuittedStudents') {
-            $res = array_map(fn($quitted) => $quitted->getJSON(), getQuittedStudents());
-        } elseif ($_POST['action'] === 'getQuittedDetails') {
-            if (empty($_POST['quittedID'])) {
-                throw new RuntimeException('ID de baja no proporcionado.');
-            }
-
-            $quitted = getQuittedByID((int) $_POST['quittedID']);
-            if ($quitted) {
-                $res = $quitted->getJSON();
-            } else {
-                throw new RuntimeException('Baja no encontrada.');
-            }
-        } elseif ($_POST['action'] === 'getQuitDescriptions') {
-            $res = getQuitDescriptions();
-        } elseif ($_POST['action'] === 'getQuitReasons') {
-            $res = getQuitReasons();
-        } elseif ($_POST['action'] === 'getQuitStatuses') {
-            $res = getQuitStatuses();
-        } elseif ($_POST['action'] === 'updateQuittedField') {
-            if (empty($_POST['quittedID']) || empty($_POST['field']) || !isset($_POST['value'])) {
-                throw new RuntimeException('Datos incompletos para actualización.');
-            }
-
-            $res = updateQuittedField((int) $_POST['quittedID'], $_POST['field'], $_POST['value']);
-        } elseif ($_POST['action'] === 'uploadQuittedEvidence') {
-            if (!isset($_POST['quittedID']) || !isset($_FILES['file'])) {
-                throw new RuntimeException('Faltan datos para subir la evidencia.');
-            }
-
-            // Crear directorio si no existe
-            $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/GB/';
-            if (!file_exists($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-
-            // Generar nombre único para el archivo
-            $fileInfo = pathinfo($_FILES['file']['name']);
-            $fileName =
-                uniqid() .
-                '_' .
-                preg_replace('/[^a-zA-Z0-9_.-]/', '_', $fileInfo['filename']) .
-                '.' .
-                $fileInfo['extension'];
-            $filePath = '/uploads/GB/' . $fileName;
-
-            if (
-                move_uploaded_file(
-                    $_FILES['file']['tmp_name'],
-                    $_SERVER['DOCUMENT_ROOT'] . $filePath,
-                )
-            ) {
-                $res = insertQuittedEvidence($_POST['quittedID'], $filePath);
-            } else {
-                throw new RuntimeException('Error al mover el archivo.');
-            }
-        } elseif ($_POST['action'] === 'addQuittedComment') {
-            if (empty($_POST['quittedID']) || empty($_POST['comment']) || empty($_POST['author'])) {
-                throw new RuntimeException('Faltan datos para agregar el comentario.');
-            }
-
-            $res = insertQuittedComment($_POST['quittedID'], $_POST['comment'], $_POST['author']);
-        } elseif ($_POST['action'] === 'getQuittedCommentsAndEvidence') {
-            if (!isset($_POST['quittedID'])) {
-                throw new RuntimeException(
-                    'Falta el ID de la baja para obtener comentarios y evidencias.',
+                $res = insertQuitted(
+                    (int) $_POST['studentID'],
+                    (int) $_POST['quitDescriptionID'],
+                    $_POST['requestedAt'] ?: null,
+                    $_POST['officialApplyingAt'] ?: null,
+                    $_POST['nofficialApplyingAt'] ?: null,
+                    $_POST['returningAt'] ?: null,
+                    null, // status field no longer used
+                    $_POST['quitReasonID'] ? (int) $_POST['quitReasonID'] : null,
+                    (int) $_POST['quitStatusID'],
                 );
-            }
-            $res = getQuittedCommentsAndEvidence($_POST['quittedID']);
+                break;
+
+            case 'getActiveStudents':
+                $res = getActiveStudents();
+                break;
+
+            case 'getQuittedStudents':
+                $res = array_map(fn($quitted) => $quitted->getJSON(), getQuittedStudents());
+                break;
+
+            case 'getQuittedDetails':
+                if (empty($_POST['quittedID'])) {
+                    throw new RuntimeException('ID de baja no proporcionado.');
+                }
+
+                $quitted = getQuittedByID((int) $_POST['quittedID']);
+                if ($quitted) {
+                    $res = $quitted->getJSON();
+                } else {
+                    throw new RuntimeException('Baja no encontrada.');
+                }
+                break;
+
+            case 'getQuitDescriptions':
+                $res = getQuitDescriptions();
+                break;
+
+            case 'getQuitReasons':
+                $res = getQuitReasons();
+                break;
+
+            case 'getQuitStatuses':
+                $res = getQuitStatuses();
+                break;
+
+            case 'updateQuittedField':
+                if (empty($_POST['quittedID']) || empty($_POST['field']) || !isset($_POST['value'])) {
+                    throw new RuntimeException('Datos incompletos para actualización.');
+                }
+
+                $res = updateQuittedField((int) $_POST['quittedID'], $_POST['field'], $_POST['value']);
+                break;
+
+            case 'uploadQuittedEvidence':
+                if (!isset($_POST['quittedID']) || !isset($_FILES['file'])) {
+                    throw new RuntimeException('Faltan datos para subir la evidencia.');
+                }
+
+                // Crear directorio si no existe
+                $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/GB/';
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+
+                // Generar nombre único para el archivo
+                $fileInfo = pathinfo($_FILES['file']['name']);
+                $fileName =
+                    uniqid() .
+                    '_' .
+                    preg_replace('/[^a-zA-Z0-9_.-]/', '_', $fileInfo['filename']) .
+                    '.' .
+                    $fileInfo['extension'];
+                $filePath = "/uploads/GB/$fileName";
+
+                if (
+                    move_uploaded_file(
+                        $_FILES['file']['tmp_name'],
+                        $_SERVER['DOCUMENT_ROOT'] . $filePath,
+                    )
+                ) {
+                    $res = insertQuittedEvidence($_POST['quittedID'], $filePath);
+                } else {
+                    throw new RuntimeException('Error al mover el archivo.');
+                }
+                break;
+
+            case 'addQuittedComment':
+                if (empty($_POST['quittedID']) || empty($_POST['comment']) || empty($_POST['author'])) {
+                    throw new RuntimeException('Faltan datos para agregar el comentario.');
+                }
+
+                $res = insertQuittedComment($_POST['quittedID'], $_POST['comment'], $_POST['author']);
+                break;
+
+            case 'getQuittedCommentsAndEvidence':
+                if (!isset($_POST['quittedID'])) {
+                    throw new RuntimeException(
+                        'Falta el ID de la baja para obtener comentarios y evidencias.',
+                    );
+                }
+                $res = getQuittedCommentsAndEvidence($_POST['quittedID']);
+                break;
+
+            default:
+                throw new RuntimeException('Acción no válida.');
         }
 
         echo responseOK($res);
