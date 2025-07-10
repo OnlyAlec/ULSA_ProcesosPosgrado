@@ -2,9 +2,6 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . '/../includes/config/constants.php';
 require_once INCLUDES_DIR . '/utilities/database.php';
 require_once INCLUDES_DIR . '/utilities/responseHTTP.php';
-require_once INCLUDES_DIR . '/models/student.php';
-require_once INCLUDES_DIR . '/utilities/util.php';
-require_once INCLUDES_DIR . '/utilities/generate_report.php';
 
 ob_start();
 
@@ -19,16 +16,8 @@ try {
             switch ($_POST['action']) {
                 case 'getTableStudents':
                     $res = array_values(
-                        array_map(fn($student) => $student->getJSON(), getStudents()),
+                        array_map(fn ($student) => $student->getJSON(), getStudents()),
                     );
-                    break;
-                case 'getMissing':
-                    //? Not in use
-                    $res = showStudentsAFIByStatus('missing');
-                    break;
-                case 'getConfirm':
-                    //? Not in use
-                    $res = showStudentsAFIByStatus('confirm');
                     break;
                 case 'setStatus':
                     $res = changeStatusAFI($_POST['ulsaID']);
@@ -39,13 +28,6 @@ try {
                     break;
                 case 'setConfigDate':
                     $res = updateConfig($_POST['type'], $_POST['date']);
-                    break;
-                case 'generateReport':
-                    $res = generateReport(
-                        $_POST['students'],
-                        $_POST['statusField'],
-                        $_POST['filename'],
-                    );
                     break;
             }
         } elseif (count($_FILES) > 0) {
@@ -69,7 +51,7 @@ try {
 
                 if (in_array($ext, $allowedExtensions)) {
                     if (!is_dir($uploadDir)) {
-                        if (!mkdir($uploadDir, 0755, true)) {
+                        if (!mkdir($uploadDir, 02775, true)) {
                             throw new RuntimeException('Error creating upload directory.');
                         }
                     }
@@ -78,40 +60,6 @@ try {
                     }
 
                     $res = init_process("$uploadDir$fileName");
-                }
-            } elseif (isset($_FILES['excelForms']) && isset($_FILES['excelAlumni'])) {
-                $fileTmpPath1 = $_FILES['excelForms']['tmp_name'];
-                $fileTmpPath2 = $_FILES['excelAlumni']['tmp_name'];
-
-                $fileName1 = str_replace(
-                    ' ',
-                    '_',
-                    htmlspecialchars($_FILES['excelForms']['name'], ENT_QUOTES, 'UTF-8'),
-                );
-                $fileName2 = str_replace(
-                    ' ',
-                    '_',
-                    htmlspecialchars($_FILES['excelAlumni']['name'], ENT_QUOTES, 'UTF-8'),
-                );
-
-                $ext1 = strtolower(pathinfo($_FILES['excelForms']['name'], PATHINFO_EXTENSION));
-                $ext2 = strtolower(pathinfo($_FILES['excelAlumni']['name'], PATHINFO_EXTENSION));
-
-                if (in_array($ext1, $allowedExtensions) && in_array($ext2, $allowedExtensions)) {
-                    if (!is_dir($uploadDir)) {
-                        if (!mkdir($uploadDir, 0755, true)) {
-                            throw new RuntimeException('Error creating directory for XLSX files.');
-                        }
-                    }
-
-                    if (
-                        !move_uploaded_file($fileTmpPath1, "$uploadDir$fileName1") ||
-                        !move_uploaded_file($fileTmpPath2, "$uploadDir$fileName2")
-                    ) {
-                        throw new RuntimeException('Error uploading file.');
-                    }
-
-                    $res = process_multiple_excels($uploadDir, $fileName1, $fileName2);
                 }
             }
         }
@@ -128,9 +76,9 @@ try {
     exit();
 }
 
-$masterProgramsDataForPage = array_map(fn($program) => $program->getName(), getMastersPrograms());
+$masterProgramsDataForPage = array_map(fn ($program) => $program->getName(), getMastersPrograms());
 $specialtyProgramsDataForPage = array_map(
-    fn($program) => $program->getName(),
+    fn ($program) => $program->getName(),
     getSpecialtyPrograms(),
 );
 
@@ -146,8 +94,8 @@ get_head('AFI');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-    get_header('Avisos de Fechas Importantes');
-    ?>
+get_header('Avisos de Fechas Importantes');
+?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
@@ -163,73 +111,21 @@ get_head('AFI');
             </button>
         </div>
         <!-- Forms -->
-        <div id="forms" class="sectionAFI" style="display: none;">
+        <div id="forms" class="sectionAFI">
             <h3>Subir archivo de Excel:</h3>
-            <p>El sistema ofrece 2 opciones para poder importar la confirmación de los alumnos a GPP.</p>
-            <ul>
-                <li>
-                    Importar <b>únicamente</b> el archivo Excel generado por Microsoft Forms.
-                </li>
-                <li>
-                    Importar <b>2 archivos de Excel</b>, la lista completa de alumnos y el archivo Excel generado por
-                    Microsoft
-                    Forms.
-                </li>
-            </ul>
+            <p>El sistema ofrece importar el archivo Excel generado por <b>Microsoft Forms</b> para poder sincronizar la
+                confirmación de los alumnos al sistema GPP.</p>
             <p>Una vez realizada la importación, se le mostrara una tabla de los <b>alumnos sin confirmar</b> el aviso
                 de fechas importantes.</p>
-            <div class="row justify-content-around">
-                <button id="btn-forms-msf" class="col-5 btn btn-danger p-5">
-                    <i class="fab fa-wpforms fa-2x mb-2"></i>
-                    <h4>Únicamente Microsoft Forms</h4>
-                </button>
-                <button id="btn-forms-lst" class="col-5  btn btn-danger p-5">
-                    <i class="fas fa-copy fa-2x mb-2"></i>
-                    <h4>Lista de Alumnos y Microsoft Forms</h4>
-                </button>
-            </div>
-            <div id="forms-msf" class="my-5 subSectionAFI" style="display: none;">
-                <h4>Únicamente Microsoft Forms</h4>
+            <div id="forms-msf" class="my-5 subSectionAFI">
                 <p class="d-flex justify-content-end">
                     <b>Los datos sobreescribiran la base de datos.</b>
                 </p>
                 <form action="" method="post" enctype="multipart/form-data" class="form-box custom-file formsForm">
                     <div class="form-group row">
-                        <label for="excelFile" class="col-md-3 col-form-label">Excel</label>
+                        <label for="excelFile" class="col-md-3 col-form-label">Archivo Excel</label>
                         <div class="col-md-8 custom-file ml-2">
                             <input type="file" id="excelFile" name="excelFile" accept=".xls,.xlsx"
-                                class="custom-file-input" required>
-                            <label class="custom-file-label" for="customFile" data-browse="Examinar">
-                                Seleccionar archivo...
-                            </label>
-                        </div>
-                        <button type="submit" class="btn btn-outline-primary mt-2 mx-auto" style="width: 200px;">
-                            <i class="fas fa-file-import mr-2"></i>
-                            <span>Importar datos</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-            <div id="forms-lst" class="my-5 subSectionAFI" style="display: none;">
-                <h4>Lista de alumnos y Microsoft Forms</h4>
-                <p class="d-flex justify-content-end">
-                    <b>Los datos no modificaran la base de datos.</b>
-                </p>
-                <form action="" method="post" enctype="multipart/form-data" class="form-box custom-file formsForm">
-                    <div class="form-group row">
-                        <label for="excelForms" class="col-md-3 col-form-label">Excel Microsoft Forms</label>
-                        <div class="col-md-8 custom-file ml-2">
-                            <input type="file" id="excelForms" name="excelForms" accept=".xls,.xlsx"
-                                class="custom-file-input" required>
-                            <label class="custom-file-label" for="customFile" data-browse="Examinar">
-                                Seleccionar archivo...
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="excelAlumni" class="col-md-3 col-form-label">Excel Lista de Alumnos</label>
-                        <div class="col-md-8 custom-file ml-2">
-                            <input type="file" id="excelAlumni" name="excelAlumni" accept=".xls,.xlsx"
                                 class="custom-file-input" required>
                             <label class="custom-file-label" for="customFile" data-browse="Examinar">
                                 Seleccionar archivo...
@@ -261,7 +157,7 @@ get_head('AFI');
                     <div class="d-flex align-items-center h-100">
                         <div class="mr-3"><i class="fas fa-filter fa-2x"></i></div>
                         <div>
-                            <h5 class="mb-1">Estudiantes filtrados:</h5>
+                            <h5 class="mb-1">Estudiantes no han realizado:</h5>
                             <p id="totalFiltered" class="h3 mb-0 font-weight-bold"></p>
                         </div>
                     </div>
@@ -275,31 +171,27 @@ get_head('AFI');
             </div>
             <div class="form-box">
                 <div class="form-group row">
-                    <label for="selectMaster" class="col-md-3 col-form-label">Por maestría</label>
-                    <div class="col-md-8 ml-2 datalist">
-                        <input type="text" id="selectMaster" class="datalist-input w-100" placeholder="Seleccionar"
-                            readonly>
+                    <label for="programType" class="col-md-4 col-form-label">
+                        Seleccionar Programa:
+                    </label>
+                    <div class="col-md-7 ml-2 datalist">
+                        <input type="text" id="programType" class="datalist-input w-100"
+                            placeholder="Seleccionar Tipo de Programa:" readonly>
                         <i class="fas fa-search icono filter"></i>
                         <ul style="display: none;">
-                            <?php foreach (getMastersPrograms() as $master) {
-                                $master = $master->getName();
-                                echo "<li>$master</li>";
-                            } ?>
+                            <li data-value="">Todos</li>
+                            <li data-value="masters">Maestría</li>
+                            <li data-value="specialties">Especialidad</li>
                         </ul>
                     </div>
                 </div>
-                <div class="form-group row">
-                    <label for="selectSpecialty" class="col-md-3 col-form-label">Por especialidad:</label>
-                    <div class="col-md-8 ml-2 datalist">
-                        <input type="text" id="selectSpecialty" class="datalist-input w-100" placeholder="Seleccionar"
-                            readonly>
+                <div id="filterArea" class="form-group row" style="display:none;">
+                    <label for="programArea" class="col-md-4 col-form-label">Seleccionar Área:</label>
+                    <div class="col-md-7 ml-2 datalist">
+                        <input type="text" id="programArea" class="datalist-input w-100"
+                            placeholder="Seleccione un área" readonly>
                         <i class="fas fa-search icono filter"></i>
-                        <ul style="display: none;">
-                            <?php foreach (getSpecialtyPrograms() as $special) {
-                                $special = $special->getName();
-                                echo "<li>$special</li>";
-                            } ?>
-                        </ul>
+                        <ul style="display: none;"></ul>
                     </div>
                 </div>
             </div>
@@ -327,62 +219,44 @@ get_head('AFI');
         <div id="gestor" class="sectionAFI" style="display:none;">
             <h3>Gestión de confirmación de Alumnos:</h3>
             <p>A continuación se mostraran todos los <b>alumnos faltantes de confirmar el AFI</b>, donde se podrá
-                indicar en el
-                sistema que ya confirmaron pero por alguna cuestión <b>no se pudo confirmar</b> en el Forms o directo en
+                indicar en el sistema que ya confirmaron pero por alguna cuestión <b>no se pudo confirmar</b> en el
+                Forms o directo en
                 el sistema.
             </p>
             <p>
                 <b>Evita el marcado manual</b> de la confirmación del alumno, como alternativa puedes mandar un
                 <b>recordatorio por correo electrónico</b>.
             </p>
-
-            <div class="row mb-2">
-
-                <div class="col-md-9 mt-1">
-                    <div class="form-box">
-                        <div class="form-group row">
-                            <label for="programTypeGestor" class="col-md-4 col-form-label">
-                                Seleccionar Programa:
-                            </label>
-                            <div class="col-md-7 ml-2 datalist">
-                                <input type="text" id="programTypeGestor" class="datalist-input w-100"
-                                    placeholder="Seleccionar Tipo de Programa:" readonly>
-                                <i class="fas fa-search icono filter"></i>
-                                <ul style="display: none;">
-                                    <li data-value="">Todos</li>
-                                    <li data-value="masters">Maestría</li>
-                                    <li data-value="specialties">Especialidad</li>
-                                </ul>
-                            </div>
-                        </div>
+            <div class="form-box">
+                <div class="form-group row">
+                    <label for="programTypeGestor" class="col-md-4 col-form-label">
+                        Seleccionar Programa:
+                    </label>
+                    <div class="col-md-7 ml-2 datalist">
+                        <input type="text" id="programTypeGestor" class="datalist-input w-100"
+                            placeholder="Seleccionar Tipo de Programa:" readonly>
+                        <i class="fas fa-search icono filter"></i>
+                        <ul style="display: none;">
+                            <li data-value="">Todos</li>
+                            <li data-value="masters">Maestría</li>
+                            <li data-value="specialties">Especialidad</li>
+                        </ul>
                     </div>
-
-                    <div id="filterAreaGestor" class="mt-1" style="display:none;">
-                        <div class="form-box">
-                            <div class="form-group row">
-                                <label for="programAreaGestor" class="col-md-4 col-form-label">Seleccionar Área:</label>
-                                <div class="col-md-7 ml-2 datalist">
-                                    <input type="text" id="programAreaGestor" class="datalist-input w-100"
-                                        placeholder="Seleccione un área" readonly>
-                                    <i class="fas fa-search icono filter"></i>
-                                    <ul style="display: none;"></ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>    
-
-                <div class="col-md-1">
-                    <button id="generateReport_AFI" type="button"
-                        class="bg-danger text-white p-3 rounded d-flex flex-column justify-content-center align-items-center"
-                        style="height: 115px;" data-filename="reporte_avisos">
-                        <i class="fas fa-file-pdf fa-2x pb-2"></i>
-                        <b>Reporte</b>
-                    </button>
                 </div>
-
             </div>
-        
+            <div id="filterAreaGestor" class="mt-1" style="display:none;">
+                <div class="form-box">
+                    <div class="form-group row">
+                        <label for="programAreaGestor" class="col-md-4 col-form-label">Seleccionar Área:</label>
+                        <div class="col-md-7 ml-2 datalist">
+                            <input type="text" id="programAreaGestor" class="datalist-input w-100"
+                                placeholder="Seleccione un área" readonly>
+                            <i class="fas fa-search icono filter"></i>
+                            <ul style="display: none;"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <hr>
             <div class="form-group row justify-content-center mt-4">
                 <button id="removeFilter" class="btn btn-outline-success mr-2" style="width: 230px;">
@@ -413,7 +287,8 @@ get_head('AFI');
         <div id="config" class="sectionAFI" style="display:none;">
             <h3>Configuración de fechas:</h3>
             <p>
-                A continuación se podrá configurar las fechas de cada cuatrimestre para el inicio del proceso, cuando
+                A continuación se podrá configurar las fechas de cada cuatrimestre para el inicio del proceso,
+                cuando
                 llegue el dia indicado se
                 <b>reiniciaran los indicadores de los alumnos</b>.
             </p>
@@ -458,18 +333,23 @@ get_head('AFI');
 
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
+    <script>
+        window.afiPreloadedData = {
+            masters: <?= json_encode($masterProgramsDataForPage) ?>,
+            specialties: <?= json_encode($specialtyProgramsDataForPage) ?>
+        };
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery.min.js') ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery-ui.js') ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/datepicker-es.js') ?>"></script>
-    <script src="<?= filePathToUrl(
-        PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/bootstrap.min.js',
-    ) ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/sidebarmenu.js') ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/scripts.js') ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/forms.js') ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/gestor.js') ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/settings.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery.min.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery-ui.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/datepicker-es.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/bootstrap.min.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/sidebarmenu.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/scripts.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/forms.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/gestor.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/settings.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/table.js'); ?>"></script>
 </body>
 
 </html>
