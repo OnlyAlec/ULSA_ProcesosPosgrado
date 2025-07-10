@@ -83,8 +83,8 @@ get_head('FA');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Firma de Actas');
-?>
+    get_header('Firma de Actas');
+    ?>
 
     <main class="container content marco">
         <div class="sectionsFA">
