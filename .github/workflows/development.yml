@@ -8,7 +8,7 @@ jobs:
         runs-on: self-hosted
         environment: Credentials Dev
         steps:
-            - name: Checkout código
+            - name: Checkout code
               uses: actions/checkout@v4
 
             - name: Backup .env
