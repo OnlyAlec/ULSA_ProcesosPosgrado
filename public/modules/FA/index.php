@@ -83,8 +83,8 @@ get_head('FA');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-    get_header('Firma de Actas');
-    ?>
+get_header('Firma de Actas');
+?>
 
     <main class="container content marco">
         <div class="sectionsFA">
@@ -132,9 +132,10 @@ get_head('FA');
 
         <!-- BOTONES INFERIORES -->
         <div class="d-flex justify-content-end mb-3">
-            <button id="generateReport" class="btn btn-outline-primary" style="width: 200px;" data-filename="reporte_programas">
+            <!-- TODO: @SofiBecerril -->
+            <!-- <button id="generateReport" class="btn btn-outline-primary" style="width: 200px;" data-filename="reporte_programas">
                 <span>Generar Reporte</span>
-            </button>
+            </button> -->
         </div>
     </main>
 
@@ -168,11 +169,12 @@ get_head('FA');
 
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
-    <script src="<?= ASSETS_PATH ?>/js/jquery.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/bootstrap/bootstrap.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/util.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/sidebarmenu.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/FA/scripts.js"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery.min.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/popper.min.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/bootstrap.min.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/util.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/sidebarmenu.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/FA/scripts.js'); ?>"></script>
 </body>
 
 </html>
