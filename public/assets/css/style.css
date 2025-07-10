@@ -1151,7 +1151,7 @@ footer .tab-pane p {
     border-radius: 12px;
     margin-top: 1rem;
     border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .student-info {
@@ -1166,13 +1166,13 @@ footer .tab-pane p {
     padding: 1.5rem;
     border-radius: 8px;
     border: 1px solid #e9ecef;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .alert {
     border-radius: 8px;
     border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .alert i {

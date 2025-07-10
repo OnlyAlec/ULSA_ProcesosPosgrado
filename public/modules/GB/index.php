@@ -33,7 +33,7 @@ try {
         } elseif ($_POST['action'] === 'getActiveStudents') {
             $res = getActiveStudents();
         } elseif ($_POST['action'] === 'getQuittedStudents') {
-            $res = array_map(fn ($quitted) => $quitted->getJSON(), getQuittedStudents());
+            $res = array_map(fn($quitted) => $quitted->getJSON(), getQuittedStudents());
         } elseif ($_POST['action'] === 'getQuittedDetails') {
             if (empty($_POST['quittedID'])) {
                 throw new RuntimeException('ID de baja no proporcionado.');
@@ -122,8 +122,8 @@ get_head('GB');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Gestión de Bajas');
-?>
+    get_header('Gestión de Bajas');
+    ?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
