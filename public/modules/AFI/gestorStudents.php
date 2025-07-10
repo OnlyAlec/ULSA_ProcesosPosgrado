@@ -10,9 +10,9 @@ function showStudentsAFIByStatus($status)
     }
     $filteredStudents = array_filter(
         $studentsDB,
-        fn($student) => $status == 'missing' ? !$student->getAfi() : $student->getAfi(),
+        fn ($student) => $status == 'missing' ? !$student->getAfi() : $student->getAfi(),
     );
-    return array_values(array_map(fn($student) => $student->getJSON(), $filteredStudents));
+    return array_values(array_map(fn ($student) => $student->getJSON(), $filteredStudents));
 }
 
 function changeStatusAFI($ulsaID)
