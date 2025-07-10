@@ -59,9 +59,17 @@ $(function () {
         filterArea = 'programArea'
     ) {
         const tBody = $('#' + tableID)?.find('tbody');
+        tBody.find('.noResults').remove();
         const rows = tBody.find('tr');
-        const selectedType =
-            $('#' + filterType)?.data('value') == 'masters' ? 'MAESTRÍA' : 'ESPECIALIDAD' || '';
+
+        let selectedType = '';
+        const typeValue = $('#' + filterType)?.data('value');
+        if (typeValue == 'masters') {
+            selectedType = 'MAESTRÍA';
+        } else if (typeValue == 'specialties') {
+            selectedType = 'ESPECIALIDAD';
+        }
+
         const selectedArea =
             $('#' + filterArea)
                 ?.data('value')
@@ -70,8 +78,6 @@ $(function () {
         if (rows.length === 0) {
             return;
         }
-
-        tBody.find('.noResults').remove();
 
         rows.each(function () {
             const row = $(this);
@@ -149,7 +155,7 @@ $(function () {
     initDatalist($('#programType, #programArea').closest('.datalist'));
     initDatalist($('#programTypeGestor, #programAreaGestor').closest('.datalist'));
 
-    handleProgramTypeChange('#programType', '#programArea, #programAreaGestor', 'tableStudents');
+    handleProgramTypeChange('#programType', '#programArea', 'tableStudents');
     handleProgramTypeChange('#programTypeGestor', '#programAreaGestor', 'tableStudentsConfirm');
 
     $('#programArea').on('input', function () {

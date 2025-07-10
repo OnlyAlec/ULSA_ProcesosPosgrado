@@ -55,16 +55,21 @@ $(function () {
 
     function applyFiltersAreaType() {
         const tBody = $('#studentsTable')?.find('tbody');
+        tBody.find('.noResults').remove();
         const rows = tBody.find('tr');
-        const selectedType =
-            $('#programType')?.data('value') == 'masters' ? 'MAESTRÍA' : 'ESPECIALIDAD' || '';
+
+        let selectedType = '';
+        const typeValue = $('#programType')?.data('value');
+        if (typeValue == 'masters') {
+            selectedType = 'MAESTRÍA';
+        } else if (typeValue == 'specialties') {
+            selectedType = 'ESPECIALIDAD';
+        }
         const selectedArea = $('#programArea')?.data('value').toUpperCase() || '';
 
         if (rows.length === 0) {
             return;
         }
-
-        tBody.find('.noResults').remove();
 
         rows.each(function () {
             const row = $(this);
@@ -375,10 +380,6 @@ $('#onlyMissing').on('click', function () {
     const rows = tableBody.find('tr');
     let found = false;
 
-    $('#programType').val('');
-    $('#programArea').val('');
-    $('#filterArea').hide();
-
     $('.studentCheckbox').prop('checked', false);
     $('#confirmChanges').prop('disabled', true);
     $('#selectedCount').text('0');
@@ -409,10 +410,6 @@ $('#onlyConfirm').on('click', function () {
     const rows = tableBody.find('tr');
     let found = false;
 
-    $('#programType').val('');
-    $('#programArea').val('');
-    $('#filterArea').hide();
-
     $('.studentCheckbox').prop('checked', false);
     $('#confirmChanges').prop('disabled', true);
     $('#selectedCount').text('0');
@@ -439,26 +436,17 @@ $('#onlyConfirm').on('click', function () {
 });
 
 $('#removeFilter').on('click', function () {
-    const tableBody = $('#studentsTable').find('tbody');
-    const rows = tableBody.find('tr');
-
-    $('#programType').val('');
-    $('#programArea').val('');
-    $('#filterArea').hide();
-
+    const $tbody = $('#studentsTable').find('tbody');
+    $tbody.find('tr').show();
     $('.studentCheckbox').prop('checked', false);
     $('#confirmChanges').prop('disabled', true);
     $('#selectedCount').text('0');
     $('#selectAll').prop('checked', false);
 
-    tableBody.find('tr.noResults').remove();
+    $tbody.find('tr.noResults').remove();
 
-    rows.each(function () {
-        $(this).show();
-    });
-
-    if (tableBody.find('tr:visible').length == 0)
-        tableBody.append(
+    if ($tbody.find('tr:visible').length == 0)
+        $tbody.append(
             '<tr><td colspan="5" class="text-center">No se encontraron alumnos</td></tr>'
         );
 });

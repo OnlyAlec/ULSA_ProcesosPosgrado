@@ -226,11 +226,13 @@ get_head('GB');
 
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
-    <script src="<?= ASSETS_PATH ?>/js/jquery.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/bootstrap/bootstrap.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/util.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/sidebarmenu.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/GB/script.js"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery.min.js') ?>"></script>
+    <script src="<?= filePathToUrl(
+        PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/bootstrap.min.js',
+    ) ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/util.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/sidebarmenu.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/GB/script.js') ?>"></script>
 </body>
 
 </html>

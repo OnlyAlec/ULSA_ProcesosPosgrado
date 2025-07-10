@@ -35,6 +35,7 @@ try {
                         : responseBadRequest('Student not found');
                     break;
                 case '':
+                    // ??? Not exist funtion
                     $res = array_map(
                         fn($program) => $program->getName(),
                         getProgramsFiltered($_POST['action']),
@@ -112,8 +113,8 @@ get_head('SED');
                             <i class="fas fa-search icono filter"></i>
                             <ul style="display: none;">
                                 <li data-value="">Todos</li>
-                                <li data-value="getMasters">Maestría</li>
-                                <li data-value="getSpecialty">Especialidad</li>
+                                <li data-value="masters">Maestría</li>
+                                <li data-value="specialties">Especialidad</li>
                             </ul>
                         </div>
                     </div>
@@ -164,6 +165,7 @@ get_head('SED');
                     <th><input type="checkbox" id="selectAll" style="width: 20px; height: 20px;"></th>
                     <th>Clave ULSA</th>
                     <th>Nombre Completo</th>
+                    <th>Programa</th>
                     <th>Correo</th>
                     <th>Acciones</th>
                 </tr>
@@ -234,6 +236,12 @@ get_head('SED');
 
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
+    <script>
+        window.sedPreloadedData = {
+            masters: <?= json_encode($masterProgramsDataForPage) ?>,
+            specialties: <?= json_encode($specialtyProgramsDataForPage) ?>
+        };
+    </script>
     <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery.min.js') ?>"></script>
     <script src="<?= filePathToUrl(
         PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/popper.min.js',
