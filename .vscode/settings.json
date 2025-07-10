@@ -1,0 +1,4 @@
+{
+    "php-cs-fixer.executablePath": "O:\\ULSA_ProcesosPosgrado\\vendor\\bin\\php-cs-fixer.bat",
+    "php-cs-fixer.onsave": true
+}
