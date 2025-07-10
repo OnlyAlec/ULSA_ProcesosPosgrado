@@ -91,7 +91,7 @@ try {
 
             case 'getTableProfessor':
                 $res = array_values(
-                    array_map(fn($professor) => $professor->getJSON(), getProfessors()),
+                    array_map(fn ($professor) => $professor->getJSON(), getProfessors()),
                 );
                 break;
 
@@ -163,12 +163,12 @@ try {
 
             case 'getSubjects':
                 $res = getSubjects();
-                $res = array_map(fn($subject) => $subject->toArray(), $res);
+                $res = array_map(fn ($subject) => $subject->toArray(), $res);
                 break;
 
             case 'getPrograms':
                 $res = getPrograms();
-                $res = array_map(fn($program) => $program->toArray(), $res);
+                $res = array_map(fn ($program) => $program->toArray(), $res);
                 break;
 
             default:
@@ -195,8 +195,8 @@ get_head('GD');
     
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-    get_header('Gestión de Profesores');
-    ?>
+get_header('Gestión de Profesores');
+?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
@@ -388,11 +388,11 @@ get_head('GD');
 
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
-    <script src="<?= ASSETS_PATH ?>/js/jquery.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/bootstrap/bootstrap.min.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/util.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/sidebarmenu.js"></script>
-    <script src="<?= ASSETS_PATH ?>/js/GD/scripts.js"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery.min.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/bootstrap.min.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/util.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/sidebarmenu.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/GD/script.js'); ?>"></script>
 </body>
 
 </html>
