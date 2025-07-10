@@ -20,7 +20,6 @@ $(document).ready(function () {
                 try {
                     res = typeof response === 'string' ? JSON.parse(response) : response;
                 } catch (e) {
-                    console.error('Error al parsear la respuesta:', response);
                     displayMessage(form, 'Respuesta inválida del servidor.', 'error');
                     return;
                 }
@@ -72,7 +71,6 @@ $(document).ready(function () {
                 } else {
                     displayMessage(form, errorMsg, 'error');
                 }
-                console.error('Error AJAX:', xhr.responseText);
             },
             complete: function () {
                 form.find("button[type='submit']").prop('disabled', false);
@@ -152,7 +150,6 @@ $(document).ready(function () {
                 try {
                     res = typeof response === 'string' ? JSON.parse(response) : response;
                 } catch (e) {
-                    console.error('Error al parsear la respuesta:', response);
                     tableBody
                         .empty()
                         .html(
@@ -184,7 +181,6 @@ $(document).ready(function () {
                 }
             },
             error: function (xhr) {
-                console.error('Error AJAX:', xhr.responseText);
                 tableBody
                     .empty()
                     .html(
@@ -420,7 +416,6 @@ $(document).ready(function () {
                 try {
                     res = typeof response === 'string' ? JSON.parse(response) : response;
                 } catch (e) {
-                    console.error('Error al parsear la respuesta:', response);
                     tableBody
                         .empty()
                         .html(
@@ -457,7 +452,6 @@ $(document).ready(function () {
                 }
             },
             error: function (xhr) {
-                console.error('Error AJAX:', xhr.responseText);
                 tableBody
                     .empty()
                     .html(
