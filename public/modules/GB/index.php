@@ -13,7 +13,10 @@ try {
                 if (empty($_POST['studentID']) || !is_numeric($_POST['studentID'])) {
                     throw new RuntimeException('ID de estudiante no válido.');
                 }
-                if (empty($_POST['quitDescriptionID']) || !is_numeric($_POST['quitDescriptionID'])) {
+                if (
+                    empty($_POST['quitDescriptionID']) ||
+                    !is_numeric($_POST['quitDescriptionID'])
+                ) {
                     throw new RuntimeException('Tipo de baja no válido.');
                 }
                 if (empty($_POST['quitStatusID']) || !is_numeric($_POST['quitStatusID'])) {
@@ -38,7 +41,7 @@ try {
                 break;
 
             case 'getQuittedStudents':
-                $res = array_map(fn ($quitted) => $quitted->getJSON(), getQuittedStudents());
+                $res = array_map(fn($quitted) => $quitted->getJSON(), getQuittedStudents());
                 break;
 
             case 'getQuittedDetails':
@@ -67,11 +70,19 @@ try {
                 break;
 
             case 'updateQuittedField':
-                if (empty($_POST['quittedID']) || empty($_POST['field']) || !isset($_POST['value'])) {
+                if (
+                    empty($_POST['quittedID']) ||
+                    empty($_POST['field']) ||
+                    !isset($_POST['value'])
+                ) {
                     throw new RuntimeException('Datos incompletos para actualización.');
                 }
 
-                $res = updateQuittedField((int) $_POST['quittedID'], $_POST['field'], $_POST['value']);
+                $res = updateQuittedField(
+                    (int) $_POST['quittedID'],
+                    $_POST['field'],
+                    $_POST['value'],
+                );
                 break;
 
             case 'uploadQuittedEvidence':
@@ -108,11 +119,19 @@ try {
                 break;
 
             case 'addQuittedComment':
-                if (empty($_POST['quittedID']) || empty($_POST['comment']) || empty($_POST['author'])) {
+                if (
+                    empty($_POST['quittedID']) ||
+                    empty($_POST['comment']) ||
+                    empty($_POST['author'])
+                ) {
                     throw new RuntimeException('Faltan datos para agregar el comentario.');
                 }
 
-                $res = insertQuittedComment($_POST['quittedID'], $_POST['comment'], $_POST['author']);
+                $res = insertQuittedComment(
+                    $_POST['quittedID'],
+                    $_POST['comment'],
+                    $_POST['author'],
+                );
                 break;
 
             case 'getQuittedCommentsAndEvidence':
@@ -147,8 +166,8 @@ get_head('GB');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Gestión de Bajas');
-?>
+    get_header('Gestión de Bajas');
+    ?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
