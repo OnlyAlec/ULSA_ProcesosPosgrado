@@ -87,7 +87,7 @@ try {
 
             case 'getPrograms':
                 $programs = getPrograms();
-                $res = array_map(fn ($program) => $program->toArray(), $programs);
+                $res = array_map(fn($program) => $program->toArray(), $programs);
                 break;
 
             case 'getCandidateDescriptions':
@@ -96,7 +96,7 @@ try {
 
             case 'getTableCandidates':
                 $res = array_values(
-                    array_map(fn ($candidate) => $candidate->getJSON(), getCandidates()),
+                    array_map(fn($candidate) => $candidate->getJSON(), getCandidates()),
                 );
                 break;
 
@@ -216,8 +216,8 @@ get_head('GC');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Gestión de Candidatos');
-?>
+    get_header('Gestión de Candidatos');
+    ?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
