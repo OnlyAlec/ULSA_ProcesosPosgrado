@@ -71,7 +71,6 @@ $(function () {
             return;
         }
 
-
         rows.each(function () {
             const row = $(this);
             const area = row.data('carrer').toUpperCase();

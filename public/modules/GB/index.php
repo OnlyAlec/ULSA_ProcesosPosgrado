@@ -41,7 +41,7 @@ try {
                 break;
 
             case 'getQuittedStudents':
-                $res = array_map(fn ($quitted) => $quitted->getJSON(), getQuittedStudents());
+                $res = array_map(fn($quitted) => $quitted->getJSON(), getQuittedStudents());
                 break;
 
             case 'getQuittedDetails':
@@ -166,8 +166,8 @@ get_head('GB');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Gestión de Bajas');
-?>
+    get_header('Gestión de Bajas');
+    ?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
@@ -226,11 +226,13 @@ get_header('Gestión de Bajas');
 
     <?php include INCLUDES_DIR . '/templates/footer.php'; ?>
 
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery.min.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/bootstrap.min.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/util.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/sidebarmenu.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/GB/script.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery.min.js') ?>"></script>
+    <script src="<?= filePathToUrl(
+        PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/bootstrap.min.js',
+    ) ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/util.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/sidebarmenu.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/GB/script.js') ?>"></script>
 </body>
 
 </html>

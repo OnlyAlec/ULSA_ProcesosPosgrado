@@ -16,7 +16,7 @@ try {
             switch ($_POST['action']) {
                 case 'getTableStudents':
                     $res = array_values(
-                        array_map(fn ($student) => $student->getJSON(), getStudents()),
+                        array_map(fn($student) => $student->getJSON(), getStudents()),
                     );
                     break;
                 case 'setStatus':
@@ -76,9 +76,9 @@ try {
     exit();
 }
 
-$masterProgramsDataForPage = array_map(fn ($program) => $program->getName(), getMastersPrograms());
+$masterProgramsDataForPage = array_map(fn($program) => $program->getName(), getMastersPrograms());
 $specialtyProgramsDataForPage = array_map(
-    fn ($program) => $program->getName(),
+    fn($program) => $program->getName(),
     getSpecialtyPrograms(),
 );
 
@@ -94,8 +94,8 @@ get_head('AFI');
 <body style="display: block;">
     <?php
     require_once INCLUDES_DIR . '/templates/header.php';
-get_header('Avisos de Fechas Importantes');
-?>
+    get_header('Avisos de Fechas Importantes');
+    ?>
 
     <main class="container content marco">
         <!-- Botones Nav -->
@@ -340,16 +340,18 @@ get_header('Avisos de Fechas Importantes');
         };
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery.min.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery-ui.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/datepicker-es.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/bootstrap.min.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/sidebarmenu.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/scripts.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/forms.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/gestor.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/settings.js'); ?>"></script>
-    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/table.js'); ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery.min.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/jquery-ui.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/datepicker-es.js') ?>"></script>
+    <script src="<?= filePathToUrl(
+        PUBLIC_DIR . ASSETS_PATH . '/js/bootstrap/bootstrap.min.js',
+    ) ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/sidebarmenu.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/scripts.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/forms.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/gestor.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/settings.js') ?>"></script>
+    <script src="<?= filePathToUrl(PUBLIC_DIR . ASSETS_PATH . '/js/AFI/table.js') ?>"></script>
 </body>
 
 </html>
