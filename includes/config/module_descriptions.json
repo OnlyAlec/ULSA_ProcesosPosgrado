@@ -28,5 +28,10 @@
         "name": "Gestión de Candidatos",
         "description": "Registro de candidatos y conversión a alumnos.",
         "icon": "fas fa-solid fa-school"
+    },
+    "GB": {
+        "name": "Gestión de Bajas",
+        "description": "Registro y seguimiento de bajas de alumnos.",
+        "icon": "fas fa-solid fa-door-open"
     }
 }

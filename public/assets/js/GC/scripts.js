@@ -464,7 +464,7 @@ $(document).ready(function () {
                     </div>
                     
                     <div class='editable-field'>
-                        <span class='field-label'>Decisión del Coordinador:</span>
+                        <span class='field-label'>Dictamen del Coordinador según Entrevista:</span>
                         <div class='field-value' data-field='program_coordinator_decision'>
                             <span class='field-text'>${candidate.programCoordinatorDecision || 'Sin decisión'}</span>
                             <textarea class='form-control form-control-sm' rows='2' maxlength='500'>${candidate.programCoordinatorDecision || ''}</textarea>

@@ -6,6 +6,7 @@ require_once INCLUDES_DIR . '/models/student.php';
 require_once INCLUDES_DIR . '/models/professor.php';
 require_once INCLUDES_DIR . '/models/subject.php';
 require_once INCLUDES_DIR . '/models/candidate.php';
+require_once INCLUDES_DIR . '/models/quitted.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2));
 $dotenv->load();
@@ -1761,5 +1762,435 @@ function getCandidateEvidence($candidateID): array
         return $evidence;
     } catch (\PDOException $e) {
         throw new \RuntimeException('Error al obtener evidencia de candidato: ' . $e->getMessage());
+    }
+}
+
+//^ QUITTED FUNCTIONS
+
+/**
+ * @return array
+ */
+function getActiveStudents(): array
+{
+    try {
+        $studentsDB = [];
+        $db = getDatabaseConnection();
+        $query = 'SELECT s.id,
+                    INITCAP(u.last_name) AS last_name, 
+                    INITCAP(u.first_name) AS first_name, 
+                    u.ulsa_id, 
+                    INITCAP(TRIM(p.career)) AS career, 
+                    u.email AS ulsa_email
+                FROM public.user u
+                JOIN student s ON s.user_id = u.id 
+                JOIN program p ON s.program_id = p.id
+                WHERE s.id NOT IN (SELECT student_id FROM quitted)
+                ORDER BY u.ulsa_id';
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $studentsDB[] = [
+                'id' => $row['id'],
+                'ulsaID' => $row['ulsa_id'],
+                'fullName' => $row['first_name'] . ' ' . $row['last_name'],
+                'programName' => $row['career'],
+                'email' => $row['ulsa_email'],
+            ];
+        }
+
+        return $studentsDB;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error al obtener estudiantes activos: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add("Error inesperado al obtener estudiantes activos: {$e->getMessage()}");
+        return [];
+    }
+}
+
+/**
+ * @return Quitted[]
+ */
+function getQuittedStudents(): array
+{
+    try {
+        $quittedDB = [];
+        $db = getDatabaseConnection();
+        $query = 'SELECT q.id,
+                    q.student_id,
+                    q.quitdescription_id,
+                    q.requested_at,
+                    q.official_applying_at,
+                    q.nofficial_applying_at,
+                    q.returning_at,
+                    q.status,
+                    q.quitreason_id,
+                    q.quitstatus_id,
+                    INITCAP(u.first_name) AS first_name,
+                    INITCAP(u.last_name) AS last_name,
+                    u.ulsa_id,
+                    INITCAP(TRIM(p.career)) AS program_name,
+                    qd.description AS quit_description,
+                    qr.description AS quit_reason,
+                    qs.description AS quit_status
+                FROM quitted q
+                JOIN student s ON q.student_id = s.id
+                JOIN public.user u ON s.user_id = u.id
+                JOIN program p ON s.program_id = p.id
+                LEFT JOIN quitdescription qd ON q.quitdescription_id = qd.id
+                LEFT JOIN quitreason qr ON q.quitreason_id = qr.id
+                LEFT JOIN quitstatus qs ON q.quitstatus_id = qs.id
+                ORDER BY q.requested_at DESC';
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $quitted = new Quitted(
+                $row['student_id'],
+                $row['quitdescription_id'],
+                $row['requested_at'],
+                $row['official_applying_at'],
+                $row['nofficial_applying_at'],
+                $row['returning_at'],
+                $row['status'],
+                $row['quitreason_id'],
+                $row['quitstatus_id'],
+                $row['id'],
+            );
+
+            // Establecer información adicional
+            $quitted->setStudentName($row['first_name'] . ' ' . $row['last_name']);
+            $quitted->setStudentUlsaID($row['ulsa_id']);
+            $quitted->setProgramName($row['program_name']);
+            $quitted->setQuitDescriptionName($row['quit_description'] ?? '');
+            $quitted->setQuitReasonName($row['quit_reason'] ?? '');
+            $quitted->setQuitStatusName($row['quit_status'] ?? '');
+
+            $quittedDB[] = $quitted;
+        }
+
+        return $quittedDB;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error al obtener bajas: {$e->getMessage()}");
+    } catch (\Exception $e) {
+        ErrorList::add("Error inesperado al obtener bajas: {$e->getMessage()}");
+        return [];
+    }
+}
+
+/**
+ * @return Quitted|null
+ */
+function getQuittedByID(int $id): ?Quitted
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = 'SELECT q.id,
+                    q.student_id,
+                    q.quitdescription_id,
+                    q.requested_at,
+                    q.official_applying_at,
+                    q.nofficial_applying_at,
+                    q.returning_at,
+                    q.status,
+                    q.quitreason_id,
+                    q.quitstatus_id,
+                    INITCAP(u.first_name) AS first_name,
+                    INITCAP(u.last_name) AS last_name,
+                    u.ulsa_id,
+                    INITCAP(TRIM(p.career)) AS program_name,
+                    qd.description AS quit_description,
+                    qr.description AS quit_reason,
+                    qs.description AS quit_status
+                FROM quitted q
+                JOIN student s ON q.student_id = s.id
+                JOIN public.user u ON s.user_id = u.id
+                JOIN program p ON s.program_id = p.id
+                LEFT JOIN quitdescription qd ON q.quitdescription_id = qd.id
+                LEFT JOIN quitreason qr ON q.quitreason_id = qr.id
+                LEFT JOIN quitstatus qs ON q.quitstatus_id = qs.id
+                WHERE q.id = :id';
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row === false) {
+            ErrorList::add("No se encontró baja con ID: $id");
+            return null;
+        }
+
+        $quitted = new Quitted(
+            $row['student_id'],
+            $row['quitdescription_id'],
+            $row['requested_at'],
+            $row['official_applying_at'],
+            $row['nofficial_applying_at'],
+            $row['returning_at'],
+            $row['status'],
+            $row['quitreason_id'],
+            $row['quitstatus_id'],
+            $row['id'],
+        );
+
+        // Establecer información adicional
+        $quitted->setStudentName($row['first_name'] . ' ' . $row['last_name']);
+        $quitted->setStudentUlsaID($row['ulsa_id']);
+        $quitted->setProgramName($row['program_name']);
+        $quitted->setQuitDescriptionName($row['quit_description'] ?? '');
+        $quitted->setQuitReasonName($row['quit_reason'] ?? '');
+        $quitted->setQuitStatusName($row['quit_status'] ?? '');
+
+        return $quitted;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error al obtener baja por ID: {$e->getMessage()}");
+    }
+}
+
+/**
+ * @return array
+ */
+function getQuitDescriptions(): array
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = 'SELECT id, description FROM quitdescription ORDER BY id';
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+
+        $descriptions = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $descriptions[] = [
+                'id' => $row['id'],
+                'description' => $row['description'],
+            ];
+        }
+
+        return $descriptions;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error al obtener descripciones de baja: {$e->getMessage()}");
+    }
+}
+
+/**
+ * @return array
+ */
+function getQuitReasons(): array
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = 'SELECT id, description FROM quitreason ORDER BY id';
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+
+        $reasons = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $reasons[] = [
+                'id' => $row['id'],
+                'description' => $row['description'],
+            ];
+        }
+
+        return $reasons;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error al obtener razones de baja: {$e->getMessage()}");
+    }
+}
+
+/**
+ * @return array
+ */
+function getQuitStatuses(): array
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = 'SELECT id, description FROM quitstatus ORDER BY id';
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+
+        $statuses = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $statuses[] = [
+                'id' => $row['id'],
+                'description' => $row['description'],
+            ];
+        }
+
+        return $statuses;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error al obtener estados de baja: {$e->getMessage()}");
+    }
+}
+
+/**
+ * @return bool
+ */
+function insertQuitted(
+    int $studentID,
+    int $quitDescriptionID,
+    ?string $requestedAt = null,
+    ?string $officialApplyingAt = null,
+    ?string $nofficialApplyingAt = null,
+    ?string $returningAt = null,
+    ?int $status = null,
+    ?int $quitReasonID = null,
+    ?int $quitStatusID = null,
+): bool {
+    try {
+        $db = getDatabaseConnection();
+        $query = 'INSERT INTO quitted (
+                    student_id, quitdescription_id, requested_at, 
+                    official_applying_at, nofficial_applying_at, returning_at,
+                    status, quitreason_id, quitstatus_id
+                  ) VALUES (
+                    :student_id, :quitdescription_id, :requested_at,
+                    :official_applying_at, :nofficial_applying_at, :returning_at,
+                    :status, :quitreason_id, :quitstatus_id
+                  )';
+
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':student_id', $studentID);
+        $stmt->bindParam(':quitdescription_id', $quitDescriptionID);
+        $stmt->bindParam(':requested_at', $requestedAt);
+        $stmt->bindParam(':official_applying_at', $officialApplyingAt);
+        $stmt->bindParam(':nofficial_applying_at', $nofficialApplyingAt);
+        $stmt->bindParam(':returning_at', $returningAt);
+        $stmt->bindParam(':status', $status);
+        $stmt->bindParam(':quitreason_id', $quitReasonID);
+        $stmt->bindParam(':quitstatus_id', $quitStatusID);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            return true;
+        }
+
+        ErrorList::add("No se pudo registrar la baja para el estudiante ID: $studentID");
+        return false;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error al registrar baja: {$e->getMessage()}");
+    }
+}
+
+/**
+ * @return bool
+ */
+function updateQuittedField($quittedID, string $field, $value): bool
+{
+    try {
+        $db = getDatabaseConnection();
+
+        // Lista de campos permitidos
+        $allowedFields = [
+            'quitdescription_id',
+            'requested_at',
+            'official_applying_at',
+            'nofficial_applying_at',
+            'returning_at',
+            'status',
+            'quitreason_id',
+            'quitstatus_id',
+        ];
+
+        if (!in_array($field, $allowedFields)) {
+            throw new \RuntimeException("Campo no permitido: $field");
+        }
+
+        $query = "UPDATE quitted SET $field = :value WHERE id = :id";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':value', $value);
+        $stmt->bindParam(':id', $quittedID);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            return true;
+        }
+
+        ErrorList::add("No se actualizó ningún registro con ID: $quittedID");
+        return false;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException("Error al actualizar campo de baja: {$e->getMessage()}");
+    }
+}
+
+/**
+ * @return bool
+ */
+function insertQuittedComment($quittedID, $comment, $author): bool
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = 'INSERT INTO comments (comment, author, quitted_id) 
+                  VALUES (:comment, :author, :quittedID)';
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':comment', $comment);
+        $stmt->bindParam(':author', $author);
+        $stmt->bindParam(':quittedID', $quittedID, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException('Error al insertar comentario de baja: ' . $e->getMessage());
+    }
+}
+
+/**
+ * @return bool
+ */
+function insertQuittedEvidence($quittedID, $path): bool
+{
+    try {
+        $db = getDatabaseConnection();
+        $query = 'INSERT INTO evidence (directory_path, quitted_id) 
+                  VALUES (:directory_path, :quittedID)';
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':directory_path', $path);
+        $stmt->bindParam(':quittedID', $quittedID, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    } catch (\PDOException $e) {
+        throw new \RuntimeException('Error al insertar evidencia de baja: ' . $e->getMessage());
+    }
+}
+
+/**
+ * @return array
+ */
+function getQuittedCommentsAndEvidence($quittedID): array
+{
+    try {
+        $db = getDatabaseConnection();
+
+        // Obtener comentarios
+        $queryComments = 'SELECT comment, author
+                          FROM comments
+                          WHERE quitted_id = :quittedID';
+        $stmtComments = $db->prepare($queryComments);
+        $stmtComments->bindParam(':quittedID', $quittedID, PDO::PARAM_INT);
+        $stmtComments->execute();
+
+        $comments = [];
+        while ($row = $stmtComments->fetch(PDO::FETCH_ASSOC)) {
+            $comments[] = ['comment' => $row['comment'], 'author' => $row['author']];
+        }
+
+        // Obtener evidencias
+        $queryEvidence = 'SELECT directory_path AS path
+                          FROM evidence
+                          WHERE quitted_id = :quittedID';
+        $stmtEvidence = $db->prepare($queryEvidence);
+        $stmtEvidence->bindParam(':quittedID', $quittedID, PDO::PARAM_INT);
+        $stmtEvidence->execute();
+
+        $evidence = [];
+        while ($row = $stmtEvidence->fetch(PDO::FETCH_ASSOC)) {
+            $evidence[] = ['path' => $row['path'], 'name' => basename($row['path'])];
+        }
+
+        return ['comments' => $comments, 'evidence' => $evidence];
+    } catch (\PDOException $e) {
+        throw new \RuntimeException(
+            'Error al obtener comentarios y evidencias: ' . $e->getMessage(),
+        );
     }
 }
